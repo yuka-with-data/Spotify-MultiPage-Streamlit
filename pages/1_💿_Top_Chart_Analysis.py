@@ -27,7 +27,9 @@ playlists = {
     "Billboard Hot 100": "6UeSakyzhiEt4NB3UAd6NQ",
     "Top 50 Global (Daily)": "37i9dQZEVXbMDoHDwVN2tF",
     "Top Songs Global (Weekly)": "37i9dQZEVXbNG2KDcFcKOF",
-    "Big On Ineternet": "37i9dQZF1DX5Vy6DFOcx00"
+    "Big On Ineternet": "37i9dQZF1DX5Vy6DFOcx00",
+    "Viral 50 Global (Daily)": "37i9dQZEVXbLiRSasKsNU9"
+    
 }
 
 # Playlist ttl mapping
@@ -35,7 +37,8 @@ playlists_ttl = {
     "Billboard Hot 100": ("6UeSakyzhiEt4NB3UAd6NQ", 604800), # 1 week TTL
     "Top 50 Global (Daily)": ("37i9dQZEVXbMDoHDwVN2tF", 86400), # 1 day TTL
     "Top Songs Global (Weekly)": ("37i9dQZEVXbNG2KDcFcKOF", 604800), # 1 week TTL
-    "Big On Ineternet": ("37i9dQZF1DX5Vy6DFOcx00", 86400) # 1 day TTL
+    "Big On Ineternet": ("37i9dQZF1DX5Vy6DFOcx00", 86400), # 1 day TTL
+    "Viral 50 Global (Daily)": ("37i9dQZEVXbLiRSasKsNU9", 86400) # 1 day TTL
 }
 
 # Retrieve playlist data
