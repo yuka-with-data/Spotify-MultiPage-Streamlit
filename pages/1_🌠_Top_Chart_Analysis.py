@@ -227,6 +227,43 @@ class SpotifyAnalyzer:
 
         return fig
     
+    def duration_histogram(self) -> plt.Figure:
+        color_top_50 = cm.plasma(0.15)
+        color_average_duration = cm.plasma(0.55) 
+
+        # Convert duration from milliseconds to minutes for readability
+        self.df_top_50['duration_min'] = self.df_top_50['duration_ms'] / 60000
+
+        fig, ax = plt.subplots(figsize=(6, 4))
+        sns.histplot(self.df_top_50['duration_min'], 
+                    bins=50, 
+                    kde=True, 
+                    color=color_top_50, 
+                    edgecolor='black', 
+                    ax=ax)
+        mean_duration = self.df_top_50['duration_min'].mean()
+        ax.axvline(mean_duration, 
+                color=color_average_duration, 
+                linestyle='dashed', 
+                linewidth=2, 
+                label='Average Duration')
+        ax.set_xlabel('Duration (min)')
+        ax.set_ylabel('Frequency')
+        ax.legend()
+
+        max_count = int(max(ax.get_yticks())) # Find the current max y-tick and round up
+        ax.set_yticks(range(0, max_count))
+
+        ax.grid(False, axis='x')
+        ax.grid(True, axis='y', linestyle='--', alpha=0.6)
+
+        # Set background color
+        fig.patch.set_facecolor('lightgrey')
+        ax.set_facecolor('lightgrey')
+
+        return fig
+
+    
     def loudness_histogram(self) -> plt.Figure:
         color_top_50 = cm.plasma(0.15)
         color_average_loud = cm.plasma(0.55) 
@@ -375,6 +412,10 @@ class SpotifyAnalyzer:
             st.header('Tempo Histogram Chart')
             bpm_hist_chart = self.tempo_histogram()
             st.pyplot(bpm_hist_chart)
+
+            st.header('Duration Histogram Chart')
+            duration_dist = self.duration_histogram()
+            st.pyplot(duration_dist)
 
             # Create a Key Distribution
             st.header('Key Distribution Comparison:')
