@@ -745,17 +745,6 @@ def artist_track_search_func(sp, artist, query) -> List[str]:
 #################################
 #### application starts here ####
 #################################
-    
-# Page Configulation
-st.set_page_config(
-    page_title="Spotify Track Analysis & Comparison",
-    page_icon="🌌",
-    menu_items={
-        # 'Report a bug': "https://bsky.app/profile/datagalax.bsky.social/post/3kjbyonbwki2x",
-        'About': "This app lets you explore the music characteristics of Today's Hit Songs and compare them with your favorite track."
-    }
-)
-
 
 # Hot Chart playlist options
 playlists = {
