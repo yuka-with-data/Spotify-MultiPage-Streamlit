@@ -17,6 +17,10 @@ from wordcloud import WordCloud
 from streamlit_searchbox import st_searchbox
 from typing import Optional, Dict, Tuple, List, Union
 
+# Page Config
+st.set_page_config(page_title="Track-To-Chart Comparison", 
+                   page_icon="⚖️")
+
 # Playlist ttl mapping
 playlists_ttl = {
     "Billboard Hot 100": ("6UeSakyzhiEt4NB3UAd6NQ", 604800), # 1 week TTL
