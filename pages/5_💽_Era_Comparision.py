@@ -285,6 +285,72 @@ class EraComparison:
 
         return fig
     
+
+    def tempo_histogram(self, df1, df2, label1, label2):
+        """ 
+         Create histogram chart comparing track tempo between two eras.
+
+         Args:
+            df1: DataFrame containing tracks of the first playlist
+            df2: DataFrame containing tracks of the second playlist
+            label1: Label (name) of the first playlist
+            label2: Label (name) of the second playlist
+        
+         Returns:
+            plt.Figure
+         """
+        fig, axs = plt.subplots(2,1,figsize=(10,8), sharex=True)
+
+        tempo_1 = df1['tempo']
+        tempo_2 = df2['tempo']
+
+        mean1 = tempo_1.mean()
+        mean2 = tempo_2.mean()
+
+        # Define colors
+        color_1 = cm.plasma(0.15)
+        color_2 = cm.plasma(0.7)
+
+        # Plot first playlist
+        sns.histplot(tempo_1,
+                     bins=30,
+                     kde=True,
+                     alpha=0.7,
+                     color=color_1,
+                     edgecolor='black',
+                     label=label1,
+                     ax=axs[0])
+        axs[0].axvline(mean1, color='blue', linestyle='dashed', linewidth=2, label=f'Mean Tempo: {mean1:.2f} BPM')
+        axs[0].set_ylabel('Frequency')
+        axs[0].legend()
+        axs[0].grid(True, axis='y', linestyle='--',alpha=0.6)
+        axs[0].set_facecolor('whitesmoke')
+        
+        # Plot second playlist
+        sns.histplot(tempo_2,
+                     bins=30,
+                     kde=True,
+                     alpha=0.7,
+                     color=color_2,
+                     edgecolor='black',
+                     label=label2,
+                     ax=axs[1])
+        axs[1].axvline(mean2, color='blue', linestyle='dashed', linewidth=2, label=f'Mean Tempo: {mean2:.2f} BPM')
+        axs[1].set_xlabel('Tempo (BPM)')
+        axs[1].set_ylabel('Frequency')
+        axs[1].legend()
+        axs[1].grid(True, axis='y', linestyle='--', alpha=0.6)
+        axs[1].set_facecolor('whitesmoke')
+
+        # Ensure y-axis ticks are int
+        axs[0].yaxis.set_major_locator(MaxNLocator(integer=True))
+        axs[1].yaxis.set_major_locator(MaxNLocator(integer=True))
+
+        fig.patch.set_facecolor('lightgrey')
+        fig.tight_layout(pad=3.0)
+
+        return fig
+    
     
     def run_analysis(self, id1, id2):
         att1, df1, att2, df2 = self.compare_playlists(id1, id2)
@@ -300,6 +366,11 @@ class EraComparison:
         st.text("Music Era Comparison of Track Duration")
         durationhist = self.duration_histogram(df1, df2, label1, label2)
         st.pyplot(durationhist)
+
+        st.header('Tempo (BPM) Histogram Comparision:')
+        st.text("Music Era Comparision of Tempo")
+        tempohist = self.tempo_histogram(df1, df2, label1, label2)
+        st.pyplot(tempohist)
         
 
 # Initialize the Spotify client
