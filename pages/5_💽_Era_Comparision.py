@@ -228,6 +228,57 @@ class EraComparison:
         
         return fig
     
+    def duration_histogram(self, df1, df2, label1, label2):
+        fig, axs = plt.subplots(2,1,figsize=(10,10), sharex=True)
+
+        # Convert from milliseconds to seconds
+        duration_1 = df1['duration_ms']/1000
+        duration_2 = df2['duration_ms']/1000
+
+        # Define colors
+        color_1 = cm.plasma(0.15)
+        color_2 = cm.plasma(0.7)
+
+        # Plot first playlist
+        sns.histplot(duration_1,
+                     bins=30,
+                     kde=True,
+                     alpha=0.7,
+                     color=color_1,
+                     edgecolor='black',
+                     label=label1,
+                     ax=axs[0])
+        axs[0].set_ylabel('Frequency')
+        axs[0].legend()
+        axs[0].grid(True, axis='y', linestyle='--',alpha=0.6)
+        axs[0].set_facecolor('whitesmoke')
+        
+        # Plot second playlist
+        sns.histplot(duration_2,
+                     bins=30,
+                     kde=True,
+                     alpha=0.7,
+                     color=color_2,
+                     edgecolor='black',
+                     label=label2,
+                     ax=axs[1])
+        
+        axs[1].set_xlabel('Duration (in seconds)')
+        axs[1].set_ylabel('Frequency')
+        axs[1].legend()
+        axs[1].grid(True, axis='y', linestyle='--', alpha=0.6)
+        axs[1].set_facecolor('whitesmoke')
+
+        # Ensure y-axis ticks are int
+        axs[0].yaxis.set_major_locator(MaxNLocator(integer=True))
+        axs[1].yaxis.set_major_locator(MaxNLocator(integer=True))
+
+        fig.patch.set_facecolor('lightgrey')
+        fig.tight_layout(pad=3.0)
+
+        return fig
+    
+    
     def run_analysis(self, id1, id2):
         att1, df1, att2, df2 = self.compare_playlists(id1, id2)
         label1 = self.get_playlist_name(id1)  # Placeholder function
@@ -235,9 +286,14 @@ class EraComparison:
         
         st.header('Radar Chart Comparison:')
         st.text("Music Era Comparison of Attributes (Mean Values)")
-        fig = self.radar_chart(att1, att2, labels=[label1, label2])
-        st.plotly_chart(fig)
+        radarchart = self.radar_chart(att1, att2, labels=[label1, label2])
+        st.plotly_chart(radarchart)
 
+        st.header('Duration Histogram Comparison:')
+        st.text("Music Era Comparison of Track Duration")
+        durationhist = self.duration_histogram(df1, df2, label1, label2)
+        st.pyplot(durationhist)
+        
 
 # Initialize the Spotify client
 def init_spotify_client():
