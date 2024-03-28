@@ -242,6 +242,9 @@ class EraComparison:
         duration_1 = df1['duration_ms']/1000
         duration_2 = df2['duration_ms']/1000
 
+        mean_1 = duration_1.mean()
+        mean_2 = duration_2.mean()
+
         # Define colors
         color_1 = cm.plasma(0.15)
         color_2 = cm.plasma(0.7)
@@ -255,6 +258,7 @@ class EraComparison:
                      edgecolor='black',
                      label=label1,
                      ax=axs[0])
+        axs[0].axvline(mean_1, color='blue', linestyle='dashed', linewidth=2, label=f'Mean Duration: {mean_1:.2f}s')
         axs[0].set_ylabel('Frequency')
         axs[0].legend()
         axs[0].grid(True, axis='y', linestyle='--',alpha=0.6)
@@ -269,7 +273,7 @@ class EraComparison:
                      edgecolor='black',
                      label=label2,
                      ax=axs[1])
-        
+        axs[1].axvline(mean_2, color='blue', linestyle='dashed', linewidth=2, label=f'Mean Duration: {mean_2:.2f}s')
         axs[1].set_xlabel('Duration (in seconds)')
         axs[1].set_ylabel('Frequency')
         axs[1].legend()
