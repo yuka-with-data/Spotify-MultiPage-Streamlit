@@ -224,6 +224,18 @@ class EraComparison:
         return fig
     
     def duration_histogram(self, df1, df2, label1, label2):
+        """ 
+         Create histogram chart comparing track durations between two eras.
+
+         Args:
+            df1: DataFrame containing tracks of the first playlist
+            df2: DataFrame containing tracks of the second playlist
+            label1: Label (name) of the first playlist
+            label2: Label (name) of the second playlist
+        
+         Returns:
+            plt.Figure
+         """
         fig, axs = plt.subplots(2,1,figsize=(10,8), sharex=True)
 
         # Convert from milliseconds to seconds
