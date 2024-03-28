@@ -384,6 +384,7 @@ class EraComparison:
         axs[0].set_title(label1)
         axs[0].set_xlabel('Key')
         axs[0].set_ylabel('Count')
+        axs[0].set_facecolor('whitesmoke')
 
         # Color the bars using the plasma colormap
         # generates a sequence of colors using the "plasma" colormap
@@ -400,13 +401,15 @@ class EraComparison:
         bars2 = axs[1].bar(key_counts_2.index.map(lambda x: key_mapping[x]), key_counts_2.values)
         axs[1].set_title(label2)
         axs[1].set_xlabel('Key')
+        axs[1].set_facecolor('whitesmoke')
 
         # Color the bars using the plasma colormap
         for bar, color in zip(bars2, plt.cm.plasma(np.linspace(0, 1, num_bars))):
             rgba_color2 = (*color[:3], 0.8)
             bar.set_color(rgba_color2)
 
-        plt.tight_layout()
+        fig.patch.set_facecolor('lavender')
+        fig.tight_layout(pad=3.0)
         return fig
 
 
