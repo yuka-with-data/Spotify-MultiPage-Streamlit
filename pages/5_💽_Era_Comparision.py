@@ -368,42 +368,45 @@ class EraComparison:
         Returns:
             plt.Figure
         """
-        # Mapping of numeric key values to corresponding alphabetic keys
+        # Key mapping
         key_mapping = ('C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B')
-        
-        # Calculate key distributions for both DataFrames, ensuring all keys are included
+
+        # Calculating key distribution and sorting
         key_counts_1 = df1['key'].value_counts().reindex(range(12), fill_value=0).sort_index()
         key_counts_2 = df2['key'].value_counts().reindex(range(12), fill_value=0).sort_index()
-        
-        # Sort the key_counts by value in descending order
-        key_counts_1_sorted = key_counts_1.sort_values(ascending=False)
-        key_counts_2_sorted = key_counts_2.sort_values(ascending=False)
-        
-        fig, axs = plt.subplots(1, 2, figsize=(12, 6), sharey=True)
-        
-        # Plot sorted key distribution for the first playlist
-        sns.barplot(x=key_counts_1_sorted.index.map(lambda x: key_mapping[x]), 
-                    y=key_counts_1_sorted.values, 
-                    ax=axs[0], 
-                    alpha=0.8,
-                    palette='plasma')
-        axs[0].set_title(f'{label1}')
+
+        fig, axs = plt.subplots(1, 2, figsize=(14, 6), sharey=True)
+
+        # Plot for first DataFrame
+        # Specify x-axis value. 
+        # Apply the mapping to each index to convert each numeric to alphabetic key
+        bars1 = axs[0].bar(key_counts_1.index.map(lambda x: key_mapping[x]), key_counts_1.values)
+        axs[0].set_title(label1)
         axs[0].set_xlabel('Key')
         axs[0].set_ylabel('Count')
-        
-        # Plot sorted key distribution for the second playlist
-        sns.barplot(x=key_counts_2_sorted.index.map(lambda x: key_mapping[x]), 
-                    y=key_counts_2_sorted.values, 
-                    ax=axs[1], 
-                    alpha=0.8,
-                    palette='plasma')
-        axs[1].set_title(f'{label2}')
+
+        # Color the bars using the plasma colormap
+        # generates a sequence of colors using the "plasma" colormap
+        # creates a linear array of numbers from 0 to 1, inclusive
+        # Passing this array to generates colors from the plasma colormap
+        # pairs each bar in bars1 with a color from the generated sequence of colors
+        # zip creates tuples where the first element is a bar and the second element is a color
+        num_bars = len(key_counts_1)
+        for bar, color in zip(bars1, plt.cm.plasma(np.linspace(0, 1, num_bars))):
+            rgba_color1 = (*color[:3], 0.8)
+            bar.set_color(rgba_color1)
+
+        # Plot for second DataFrame
+        bars2 = axs[1].bar(key_counts_2.index.map(lambda x: key_mapping[x]), key_counts_2.values)
+        axs[1].set_title(label2)
         axs[1].set_xlabel('Key')
-        axs[1].set_ylabel('Count')
-        
-        fig.patch.set_facecolor('lavender')
-        fig.tight_layout()
-        
+
+        # Color the bars using the plasma colormap
+        for bar, color in zip(bars2, plt.cm.plasma(np.linspace(0, 1, num_bars))):
+            rgba_color2 = (*color[:3], 0.8)
+            bar.set_color(rgba_color2)
+
+        plt.tight_layout()
         return fig
 
 
