@@ -224,7 +224,7 @@ class EraComparison:
         return fig
     
     def duration_histogram(self, df1, df2, label1, label2):
-        fig, axs = plt.subplots(2,1,figsize=(10,10), sharex=True)
+        fig, axs = plt.subplots(2,1,figsize=(10,8), sharex=True)
 
         # Convert from milliseconds to seconds
         duration_1 = df1['duration_ms']/1000
