@@ -165,7 +165,7 @@ class EraComparison:
         return playlist_map.get(playlist_id, "Unknown Playlist")
 
 
-    def radar_chart(self, att1, att2, labels=None):
+    def radar_chart(self, att1, att2, label1, label2):
         """ 
         Create a radar chart comparing selected attributes of two eras.
         
@@ -177,10 +177,6 @@ class EraComparison:
         Returns:
             go.Figure: The radar chart comparing the two eras.
         """
-        if labels is None:
-            labels = ['Era 1', 'Era 2']
-        
-        # Assuming att1 and att2 are pandas Series with the same indices
         attributes = att1.index.tolist()
 
         # Convert attributes to percentages
@@ -199,7 +195,7 @@ class EraComparison:
             r=att1_values,
             theta=attributes,
             fill='toself',
-            name=labels[0],
+            name=label1,
             fillcolor=color_era1,
             line=dict(color=color_era1),
         ))
@@ -209,7 +205,7 @@ class EraComparison:
             r=att2_values,
             theta=attributes,
             fill='toself',
-            name=labels[1],
+            name=label2,
             fillcolor=color_era2,
             line=dict(color=color_era2, dash='dot'),
         ))
@@ -222,8 +218,7 @@ class EraComparison:
             paper_bgcolor='lightgrey',
             font={"color": "black"},
             height=450,
-            width=700,
-            #title="title"
+            width=700
         )
         
         return fig
@@ -286,7 +281,7 @@ class EraComparison:
         
         st.header('Radar Chart Comparison:')
         st.text("Music Era Comparison of Attributes (Mean Values)")
-        radarchart = self.radar_chart(att1, att2, labels=[label1, label2])
+        radarchart = self.radar_chart(att1, att2, label1, label2)
         st.plotly_chart(radarchart)
 
         st.header('Duration Histogram Comparison:')
