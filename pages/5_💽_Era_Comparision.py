@@ -215,7 +215,7 @@ class EraComparison:
             polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
             showlegend=True,
             legend=dict(x=1, y=1, traceorder='normal', orientation='v', font=dict(color='black')),
-            paper_bgcolor='lightgrey',
+            paper_bgcolor='lavender',
             font={"color": "black"},
             height=450,
             width=700
@@ -284,7 +284,7 @@ class EraComparison:
         axs[0].yaxis.set_major_locator(MaxNLocator(integer=True))
         axs[1].yaxis.set_major_locator(MaxNLocator(integer=True))
 
-        fig.patch.set_facecolor('lightgrey')
+        fig.patch.set_facecolor('lavender')
         fig.tight_layout(pad=3.0)
 
         return fig
@@ -350,12 +350,63 @@ class EraComparison:
         axs[0].yaxis.set_major_locator(MaxNLocator(integer=True))
         axs[1].yaxis.set_major_locator(MaxNLocator(integer=True))
 
-        fig.patch.set_facecolor('lightgrey')
+        fig.patch.set_facecolor('lavender')
         fig.tight_layout(pad=3.0)
 
         return fig
     
-    
+    def key_distribution(self, df1, df2, label1, label2):
+        """
+        Compare the key distribution between two playlists.
+        
+        Args:
+            df1: DataFrame for the first playlist.
+            df2: DataFrame for the second playlist.
+            label1: Label for the first playlist.
+            label2: Label for the second playlist.
+            
+        Returns:
+            plt.Figure
+        """
+        # Mapping of numeric key values to corresponding alphabetic keys
+        key_mapping = ('C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B')
+        
+        # Calculate key distributions for both DataFrames, ensuring all keys are included
+        key_counts_1 = df1['key'].value_counts().reindex(range(12), fill_value=0).sort_index()
+        key_counts_2 = df2['key'].value_counts().reindex(range(12), fill_value=0).sort_index()
+        
+        # Sort the key_counts by value in descending order
+        key_counts_1_sorted = key_counts_1.sort_values(ascending=False)
+        key_counts_2_sorted = key_counts_2.sort_values(ascending=False)
+        
+        fig, axs = plt.subplots(1, 2, figsize=(12, 6), sharey=True)
+        
+        # Plot sorted key distribution for the first playlist
+        sns.barplot(x=key_counts_1_sorted.index.map(lambda x: key_mapping[x]), 
+                    y=key_counts_1_sorted.values, 
+                    ax=axs[0], 
+                    alpha=0.8,
+                    palette='plasma')
+        axs[0].set_title(f'{label1}')
+        axs[0].set_xlabel('Key')
+        axs[0].set_ylabel('Count')
+        
+        # Plot sorted key distribution for the second playlist
+        sns.barplot(x=key_counts_2_sorted.index.map(lambda x: key_mapping[x]), 
+                    y=key_counts_2_sorted.values, 
+                    ax=axs[1], 
+                    alpha=0.8,
+                    palette='plasma')
+        axs[1].set_title(f'{label2}')
+        axs[1].set_xlabel('Key')
+        axs[1].set_ylabel('Count')
+        
+        fig.patch.set_facecolor('lavender')
+        fig.tight_layout()
+        
+        return fig
+
+
     def run_analysis(self, id1, id2):
         att1, df1, att2, df2 = self.compare_playlists(id1, id2)
         label1 = self.get_playlist_name(id1)  # Placeholder function
@@ -375,6 +426,11 @@ class EraComparison:
         st.text("Music Era Comparision of Tempo")
         tempohist = self.tempo_histogram(df1, df2, label1, label2)
         st.pyplot(tempohist)
+
+        st.header('Key Distribution Comparision:')
+        st.text("Music Era Comparision of Key")
+        keybar = self.key_distribution(df1, df2, label1, label2)
+        st.pyplot(keybar)
         
 
 # Initialize the Spotify client
