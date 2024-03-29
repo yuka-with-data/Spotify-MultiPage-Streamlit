@@ -506,8 +506,8 @@ class EraComparison:
 
         st.header('Loudness (dB) Histogram Comparison:')
         st.text("Music Era Comparision of Loudness")
-        louddist = self.loudness_histogram(df1, df2, label1, label2)
-        st.pyplot(louddist)
+        loudhist = self.loudness_histogram(df1, df2, label1, label2)
+        st.pyplot(loudhist)
         
 
 # Initialize the Spotify client
