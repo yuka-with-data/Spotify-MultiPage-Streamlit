@@ -413,6 +413,72 @@ class EraComparison:
         return fig
 
 
+    def loudness_histogram(self, df1, df2, label1, label2):
+            """ 
+            Create histogram chart comparing track loudness between two eras.
+
+            Args:
+                df1: DataFrame containing tracks of the first playlist
+                df2: DataFrame containing tracks of the second playlist
+                label1: Label (name) of the first playlist
+                label2: Label (name) of the second playlist
+            
+            Returns:
+                plt.Figure
+            """
+            fig, axs = plt.subplots(2,1,figsize=(10,8), sharex=True)
+
+            loudness_1 = df1['loudness']
+            loudness_2 = df2['loudness']
+
+            mean1 = loudness_1.mean()
+            mean2 = loudness_2.mean()
+
+            # Define colors
+            color_1 = cm.plasma(0.15)
+            color_2 = cm.plasma(0.7)
+
+            # Plot first playlist
+            sns.histplot(loudness_1,
+                        bins=30,
+                        kde=True,
+                        alpha=0.7,
+                        color=color_1,
+                        edgecolor='black',
+                        label=label1,
+                        ax=axs[0])
+            axs[0].axvline(mean1, color='blue', linestyle='dashed', linewidth=2, label=f'Mean loudness: {mean1:.2f} BPM')
+            axs[0].set_ylabel('Frequency')
+            axs[0].legend()
+            axs[0].grid(True, axis='y', linestyle='--',alpha=0.6)
+            axs[0].set_facecolor('whitesmoke')
+            
+            # Plot second playlist
+            sns.histplot(loudness_2,
+                        bins=30,
+                        kde=True,
+                        alpha=0.7,
+                        color=color_2,
+                        edgecolor='black',
+                        label=label2,
+                        ax=axs[1])
+            axs[1].axvline(mean2, color='blue', linestyle='dashed', linewidth=2, label=f'Mean loudness: {mean2:.2f} BPM')
+            axs[1].set_xlabel('Loudness (dB)')
+            axs[1].set_ylabel('Frequency')
+            axs[1].legend()
+            axs[1].grid(True, axis='y', linestyle='--', alpha=0.6)
+            axs[1].set_facecolor('whitesmoke')
+
+            # Ensure y-axis ticks are int
+            axs[0].yaxis.set_major_locator(MaxNLocator(integer=True))
+            axs[1].yaxis.set_major_locator(MaxNLocator(integer=True))
+
+            fig.patch.set_facecolor('lavender')
+            fig.tight_layout(pad=3.0)
+
+            return fig
+    
+
     def run_analysis(self, id1, id2):
         att1, df1, att2, df2 = self.compare_playlists(id1, id2)
         label1 = self.get_playlist_name(id1)  # Placeholder function
@@ -437,6 +503,11 @@ class EraComparison:
         st.text("Music Era Comparision of Key")
         keybar = self.key_distribution(df1, df2, label1, label2)
         st.pyplot(keybar)
+
+        st.header('Loudness (dB) Histogram Comparison:')
+        st.text("Music Era Comparision of Loudness")
+        louddist = self.loudness_histogram(df1, df2, label1, label2)
+        st.pyplot(louddist)
         
 
 # Initialize the Spotify client
