@@ -478,6 +478,60 @@ class EraComparison:
 
             return fig
     
+    def genre_wordcloud(self, df1, df2, label1, label2):
+        """
+        Create Word Clouds displaying the genre overview for two different playlists 
+        and display them side by side or top and bottom.
+        
+        Args:
+        df1: DataFrame for the first playlist.
+        df2: DataFrame for the second playlist.
+        title1: Title for the first playlist's word cloud.
+        title2: Title for the second playlist's word cloud.
+        
+        Returns:
+        A matplotlib figure containing the two word clouds.
+        """
+        def clean_genres(genres_str):
+            # inner function to clean the genre str
+            genres_list = genres_str.split(',')
+            cleaned_genres = ', '.join([genre.strip() for genre in genres_list if genre.strip() != ''])
+            return cleaned_genres
+        
+        all_genres_1 = ', '.join(df1['genres'].apply(clean_genres))
+        all_genres_2 = ', '.join(df2['genres'].apply(clean_genres))
+
+        regexp = r"\w(?:[-']?\w)+"
+        wc1 = WordCloud(width=700, 
+                        height=500, 
+                        background_color='whitesmoke', 
+                        colormap='plasma_r', 
+                        regexp=regexp, 
+                        scale=2, 
+                        max_words=200,
+                        min_font_size=10).generate(all_genres_1)
+        
+        wc2 = WordCloud(width=700, 
+                        height=500, 
+                        background_color='whitesmoke', 
+                        colormap='plasma_r', 
+                        regexp=regexp, 
+                        scale=2, 
+                        max_words=200,
+                        min_font_size=10).generate(all_genres_2)
+
+        fig, axs = plt.subplots(2, 1, figsize=(14,7))
+        axs[0].imshow(wc1, interpolation='bilinear')
+        axs[0].axis("off")
+        axs[0].set_title(label1)
+
+        axs[1].imshow(wc2, interpolation='bilinear')
+        axs[1].axis("off")
+        axs[1].set_title(label2)
+
+        plt.tight_layout(pad=0)
+        return fig
+    
 
     def run_analysis(self, id1, id2):
         att1, df1, att2, df2 = self.compare_playlists(id1, id2)
@@ -508,6 +562,14 @@ class EraComparison:
         st.text("Music Era Comparision of Loudness")
         loudhist = self.loudness_histogram(df1, df2, label1, label2)
         st.pyplot(loudhist)
+
+        st.header('Artist Genres Word Cloud Comparison:')
+        st.text("Music Era Comparison of Word Cloud")
+        wcfig = self.genre_wordcloud(df1, df2, label1, label2)
+        if wcfig is not None:
+            st.pyplot(wcfig)
+        else:
+            st.error("Word Cloud could not be generated due to the insufficient data.")
         
 
 # Initialize the Spotify client
