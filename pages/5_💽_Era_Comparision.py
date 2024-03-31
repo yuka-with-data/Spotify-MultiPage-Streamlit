@@ -29,7 +29,12 @@ class EraComparison:
         self.playlists_ttl = {
         "All Out 50s": ("37i9dQZF1DWSV3Tk4GO2fq", 604800), # 1 week TTL
         "All Out 60s": ("37i9dQZF1DXaKIA8E7WcJj", 604800), 
-        "All Out 70s": ("37i9dQZF1DWTJ7xPn4vNaz", 604800)
+        "All Out 70s": ("37i9dQZF1DWTJ7xPn4vNaz", 604800),
+        "All Out 80s": ("37i9dQZF1DX4UtSsGT1Sbe", 604800),
+        "All Out 90s": ("37i9dQZF1DXbTxeAdrVG2l", 604800),
+        "All Out 2000s": ("37i9dQZF1DX4o1oenSJRJd", 604800),
+        "All Out 2010s": ("37i9dQZF1DX5Ejj0EkURtP", 604800),
+        "All Out 2020s": ("37i9dQZF1DX2M1RktxUUHG", 604800)
         }
 
     def retrieve_latest_data(self, _sp, playlist_id: str)-> Tuple[pd.Series, pd.DataFrame]:
@@ -153,16 +158,12 @@ class EraComparison:
 
     def get_playlist_name(self, playlist_id:str):
         # Reverse the mappings in playlist1 and playlist2 so IDs are keys
-        reversed_playlist1 = {v: k for k, v in playlist1.items()}
-        reversed_playlist2 = {v: k for k, v in playlist2.items()}
+        reversed_playlists = {v: k for k, v in playlists.items()}
 
-        # Combine the reversed dictionaries
-        playlist_map = {**reversed_playlist1, **reversed_playlist2}
-
-        print("Playlist Map:", playlist_map) 
+        print("Playlist Map:", reversed_playlists) 
         print("Looking for ID:", playlist_id)
 
-        return playlist_map.get(playlist_id, "Unknown Playlist")
+        return reversed_playlists.get(playlist_id, "Unknown Playlist")
 
 
     def radar_chart(self, att1, att2, label1, label2):
@@ -633,30 +634,28 @@ sp = init_spotify_client()
 #### application starts here ####
 #################################
 
-playlist1 = {
+playlists = {
     "Select a Playlist": None, # Placeholder value
     "All Out 50s": "37i9dQZF1DWSV3Tk4GO2fq", 
     "All Out 60s": "37i9dQZF1DXaKIA8E7WcJj", 
-    "All Out 70s": "37i9dQZF1DWTJ7xPn4vNaz"
-}
-
-playlist2 = {
-    "Select a Playlist": None, # Placeholder value
-    "All Out 50s": "37i9dQZF1DWSV3Tk4GO2fq", 
-    "All Out 60s": "37i9dQZF1DXaKIA8E7WcJj", 
-    "All Out 70s": "37i9dQZF1DWTJ7xPn4vNaz"
+    "All Out 70s": "37i9dQZF1DWTJ7xPn4vNaz",
+    "All Out 80s": "37i9dQZF1DX4UtSsGT1Sbe",
+    "All Out 90s": "37i9dQZF1DXbTxeAdrVG2l",
+    "All Out 2000s": "37i9dQZF1DX4o1oenSJRJd",
+    "All Out 2010s": "37i9dQZF1DX5Ejj0EkURtP",
+    "All Out 2020s": "37i9dQZF1DX2M1RktxUUHG"
 }
 
 with st.sidebar:
     st.title("Select Playlist By Era")
 
     # Playlist selection
-    selected_playlist1 = st.selectbox("Select Era 1", options=list(playlist1.keys()), key='playlist1_selectbox')
-    selected_playlist2 = st.selectbox("Select Era 2", options=list(playlist2.keys()), key='playlist2_selectbox')
+    selected_playlist1 = st.selectbox("Select Era 1", options=list(playlists.keys()), key='playlist1_selectbox')
+    selected_playlist2 = st.selectbox("Select Era 2", options=list(playlists.keys()), key='playlist2_selectbox')
 
     # Obtain playlist id
-    playlist_id1 = playlist1[selected_playlist1]
-    playlist_id2 = playlist2[selected_playlist2]
+    playlist_id1 = playlists[selected_playlist1]
+    playlist_id2 = playlists[selected_playlist2]
 
     # Compare button
     compare_button = st.sidebar.button("Compare")
