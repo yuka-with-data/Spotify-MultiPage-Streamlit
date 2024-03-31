@@ -534,7 +534,19 @@ class EraComparison:
         return fig
     
     def explicit_pie_chart(self, df1, df2, pl1, pl2):
+        """ 
+         Creates side-by-side pie charts comparing the explicit content percentages 
+         between two playlists.
 
+         Args:
+          df1 : pandas.DataFrame
+          df2 : pandas.DataFrame
+          pl1 : str
+          pl2 : str
+
+         Returns:
+          matplotlib.figure.Figure
+           """
         def get_explicit_data(df):
             explicit_count = df['is_explicit'].sum()
             non_explicit_count = len(df) - explicit_count
@@ -545,7 +557,7 @@ class EraComparison:
         explicit_2 = get_explicit_data(df2)
 
         labels = ['Explicit', 'Non Explicit']
-        colors = [cm.plasma(0.10), cm.plasma(0.65)]
+        colors = [cm.plasma(0.10, alpha=0.75), cm.plasma(0.65, alpha=0.75)]
 
         # Initialize subplots for side-by-side pie charts
         fig, axs = plt.subplots(1,2,figsize=(12,6))
@@ -554,7 +566,7 @@ class EraComparison:
                    labels=labels,
                    colors=colors,
                    autopct='%1.1f%%',
-                   startangle=150,
+                   startangle=90,
                    textprops={'fontsize': 12}, 
                    radius=1.2)
         axs[0].set_title(pl1)
@@ -564,7 +576,7 @@ class EraComparison:
                    labels=labels,
                    colors=colors,
                    autopct='%1.1f%%',
-                   startangle=150,
+                   startangle=90,
                    textprops={'fontsize': 12}, 
                    radius=1.2)
         axs[1].set_title(pl2)
