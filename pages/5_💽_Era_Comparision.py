@@ -532,6 +532,48 @@ class EraComparison:
         plt.tight_layout(pad=0)
         return fig
     
+    def explicit_pie_chart(self, df1, df2, pl1, pl2):
+
+        def get_explicit_data(df):
+            explicit_count = df['is_explicit'].sum()
+            non_explicit_count = len(df) - explicit_count
+            return [explicit_count, non_explicit_count]
+        
+        # Get explicit data from each playlist (in the list)
+        explicit_1 = get_explicit_data(df1)
+        explicit_2 = get_explicit_data(df2)
+
+        labels = ['Explicit', 'Non Explicit']
+        colors = [cm.plasma(0.10), cm.plasma(0.65)]
+
+        # Initialize subplots for side-by-side pie charts
+        fig, axs = plt.subplots(1,2,figsize=(12,6))
+
+        axs[0].pie(explicit_1,
+                   labels=labels,
+                   colors=colors,
+                   autopct='%1.1f%%',
+                   startangle=150,
+                   textprops={'fontsize': 12}, 
+                   radius=1.2)
+        axs[0].set_title(pl1)
+        axs[0].axis('equal')
+        
+        axs[1].pie(explicit_2,
+                   labels=labels,
+                   colors=colors,
+                   autopct='%1.1f%%',
+                   startangle=150,
+                   textprops={'fontsize': 12}, 
+                   radius=1.2)
+        axs[1].set_title(pl2)
+        axs[1].axis('equal')
+
+        fig.patch.set_facecolor('lavender')
+        plt.tight_layout()
+
+        return fig
+
 
     def run_analysis(self, id1, id2):
         att1, df1, att2, df2 = self.compare_playlists(id1, id2)
@@ -570,6 +612,11 @@ class EraComparison:
             st.pyplot(wcfig)
         else:
             st.error("Word Cloud could not be generated due to the insufficient data.")
+
+        st.header('Explicitness Pie Chart Comparision:')
+        st.text("Music Era Comparision of Explicitness")
+        explicit = self.explicit_pie_chart(df1, df2, label1, label2)
+        st.pyplot(explicit)
         
 
 # Initialize the Spotify client
