@@ -38,3 +38,5 @@ st.markdown(
     - Jump into Streamlit [documentation](https://docs.streamlit.io)
 """
 )
+
+st.image('images/dataGalax.png', use_column_width=True, caption="Explore the rhythm of data.")
