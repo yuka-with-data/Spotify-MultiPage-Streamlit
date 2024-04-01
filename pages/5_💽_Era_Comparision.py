@@ -15,7 +15,7 @@ from matplotlib.ticker import MaxNLocator
 import seaborn as sns
 from wordcloud import WordCloud
 from streamlit_searchbox import st_searchbox
-from typing import Optional, Dict, Tuple, List, Union
+from typing import Optional, Dict, Tuple, List, Union, Any
 
 
 # Page Config
@@ -147,7 +147,7 @@ class EraComparison:
             return pd.Series(), pd.DataFrame()
 
 
-    def compare_playlists(self, playlist_id1:str, playlist_id2:str):
+    def compare_playlists(self, playlist_id1:str, playlist_id2:str) -> Tuple[Any, pd.DataFrame, Any, pd.DataFrame]:
         att1, df1 = self.retrieve_latest_data(self.sp, playlist_id1)
         att2, df2 = self.retrieve_latest_data(self.sp, playlist_id2)
         if df1.empty or df2.empty:
@@ -156,7 +156,7 @@ class EraComparison:
         return att1, df1, att2, df2
     
 
-    def get_playlist_name(self, playlist_id:str):
+    def get_playlist_name(self, playlist_id:str) -> str:
         # Reverse the mappings in playlist1 and playlist2 so IDs are keys
         reversed_playlists = {v: k for k, v in playlists.items()}
 
@@ -166,7 +166,7 @@ class EraComparison:
         return reversed_playlists.get(playlist_id, "Unknown Playlist")
 
 
-    def radar_chart(self, att1, att2, label1, label2):
+    def radar_chart(self, att1, att2, label1, label2) -> go.Figure:
         """ 
         Create a radar chart comparing selected attributes of two eras.
         
@@ -176,7 +176,7 @@ class EraComparison:
             labels (list, optional): Labels for the eras being compared. Defaults to None.
             
         Returns:
-            go.Figure: The radar chart comparing the two eras.
+            go.Figure
         """
         attributes = att1.index.tolist()
 
@@ -224,7 +224,7 @@ class EraComparison:
         
         return fig
     
-    def duration_histogram(self, df1, df2, label1, label2):
+    def duration_histogram(self, df1, df2, label1, label2) -> plt.Figure:
         """ 
          Create histogram chart comparing track durations between two eras.
 
@@ -291,7 +291,7 @@ class EraComparison:
         return fig
     
 
-    def tempo_histogram(self, df1, df2, label1, label2):
+    def tempo_histogram(self, df1, df2, label1, label2) -> plt.Figure:
         """ 
          Create histogram chart comparing track tempo between two eras.
 
@@ -356,7 +356,7 @@ class EraComparison:
 
         return fig
     
-    def key_distribution(self, df1, df2, label1, label2):
+    def key_distribution(self, df1, df2, label1, label2) -> plt.Figure:
         """
         Compare the key distribution between two playlists.
         
@@ -414,7 +414,7 @@ class EraComparison:
         return fig
 
 
-    def loudness_histogram(self, df1, df2, label1, label2):
+    def loudness_histogram(self, df1, df2, label1, label2) -> plt.Figure:
             """ 
             Create histogram chart comparing track loudness between two eras.
 
@@ -479,7 +479,7 @@ class EraComparison:
 
             return fig
     
-    def genre_wordcloud(self, df1, df2, label1, label2):
+    def genre_wordcloud(self, df1, df2, label1, label2) -> plt.Figure:
         """
         Create Word Clouds displaying the genre overview for two different playlists 
         and display them side by side or top and bottom.
@@ -491,9 +491,9 @@ class EraComparison:
         title2: Title for the second playlist's word cloud.
         
         Returns:
-        A matplotlib figure containing the two word clouds.
+            plt.Figure
         """
-        def clean_genres(genres_str):
+        def clean_genres(genres_str) -> plt.Figure:
             # inner function to clean the genre str
             genres_list = genres_str.split(',')
             cleaned_genres = ', '.join([genre.strip() for genre in genres_list if genre.strip() != ''])
@@ -533,7 +533,7 @@ class EraComparison:
         plt.tight_layout(pad=0)
         return fig
     
-    def explicit_pie_chart(self, df1, df2, pl1, pl2):
+    def explicit_pie_chart(self, df1, df2, pl1, pl2) -> plt.Figure:
         """ 
          Creates side-by-side pie charts comparing the explicit content percentages 
          between two playlists.
@@ -545,7 +545,7 @@ class EraComparison:
           pl2 : str
 
          Returns:
-          matplotlib.figure.Figure
+          plt.Figure
            """
         def get_explicit_data(df):
             explicit_count = df['is_explicit'].sum()
