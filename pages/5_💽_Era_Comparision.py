@@ -216,7 +216,7 @@ class EraComparison:
             polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
             showlegend=True,
             legend=dict(x=1, y=1, traceorder='normal', orientation='v', font=dict(color='black')),
-            paper_bgcolor='lavender',
+            paper_bgcolor='lightgrey',
             font={"color": "black"},
             height=450,
             width=700
@@ -285,7 +285,7 @@ class EraComparison:
         axs[0].yaxis.set_major_locator(MaxNLocator(integer=True))
         axs[1].yaxis.set_major_locator(MaxNLocator(integer=True))
 
-        fig.patch.set_facecolor('lavender')
+        fig.patch.set_facecolor('lightgrey')
         fig.tight_layout(pad=3.0)
 
         return fig
@@ -351,7 +351,7 @@ class EraComparison:
         axs[0].yaxis.set_major_locator(MaxNLocator(integer=True))
         axs[1].yaxis.set_major_locator(MaxNLocator(integer=True))
 
-        fig.patch.set_facecolor('lavender')
+        fig.patch.set_facecolor('lightgrey')
         fig.tight_layout(pad=3.0)
 
         return fig
@@ -409,7 +409,7 @@ class EraComparison:
             rgba_color2 = (*color[:3], 0.8)
             bar.set_color(rgba_color2)
 
-        fig.patch.set_facecolor('lavender')
+        fig.patch.set_facecolor('lightgrey')
         fig.tight_layout(pad=3.0)
         return fig
 
@@ -474,7 +474,7 @@ class EraComparison:
             axs[0].yaxis.set_major_locator(MaxNLocator(integer=True))
             axs[1].yaxis.set_major_locator(MaxNLocator(integer=True))
 
-            fig.patch.set_facecolor('lavender')
+            fig.patch.set_facecolor('lightgrey')
             fig.tight_layout(pad=3.0)
 
             return fig
@@ -582,7 +582,7 @@ class EraComparison:
         axs[1].set_title(pl2)
         axs[1].axis('equal')
 
-        fig.patch.set_facecolor('lavender')
+        fig.patch.set_facecolor('lightgrey')
         plt.tight_layout()
 
         return fig
@@ -681,7 +681,7 @@ if compare_button and playlist_id1 and playlist_id2:
     try:
         era_comparision = EraComparison(sp)
 
-        st.header('Compare 2 Different Era of Music')
+        st.header('Compare 2 Different Eras of Music')
         st.components.v1.iframe(f"https://open.spotify.com/embed/playlist/{playlist_id1}?utm_source=generator&theme=0",
                         width=500, height=160, scrolling=True)
         st.components.v1.iframe(f"https://open.spotify.com/embed/playlist/{playlist_id2}?utm_source=generator&theme=0",
