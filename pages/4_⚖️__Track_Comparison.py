@@ -758,7 +758,7 @@ playlists = {
 
 # Sidebar section starts
 with st.sidebar:
-    st.title("Enter Your Track Info")
+    st.title("Enter Your Track")
     # Artist input
     selected_artist = st_searchbox(label="Select Artist", 
                                    key="artist_input", 
