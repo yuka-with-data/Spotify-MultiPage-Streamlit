@@ -50,7 +50,7 @@ class TrackRecommendation:
            """
 
         # Get recommendations based on target track id
-        results = self.sp.recommendations(seed_tracks=[target_track_id], limit=5)
+        results = self.sp.recommendations(seed_tracks=[target_track_id], limit=10)
         #print(f'Recom Results: {results}')
 
         # Extract information from result
