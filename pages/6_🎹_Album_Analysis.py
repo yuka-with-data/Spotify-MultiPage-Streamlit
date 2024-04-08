@@ -194,13 +194,22 @@ with st.sidebar:
     if selected_album_name:
         selected_album_id = album_name_to_id[selected_album_name]
         print(f"Selected Album ID: {selected_album_id}")
-        analyze_button = st.button("Analyze")
+        analyze_button = st.sidebar.button("Analyze")
 
 
 #-------- Main ----------
 st.markdown("# Album Analysis")
 st.info("Select an artist and album name. You'll get a comprehensive analysis of your selected album.", icon="📀")
 
+try:
+    if analyze_button:
+        album_analyzer = AlbumAnalyzer(sp, selected_album_id)
+        print(album_analyzer)
+        st.components.v1.iframe(f"https://open.spotify.com/embed/album/{selected_album_id}?utm_source=generator&theme=0",
+                        width=500, height=160, scrolling=True)
+
+except Exception as e:
+    print(e)
 
             
 
