@@ -1,0 +1,9 @@
+pandas
+numpy
+spotipy
+plotly
+streamlit
+matplotlib
+seaborn
+wordcloud
+streamlit-searchbox
