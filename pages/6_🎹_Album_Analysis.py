@@ -45,6 +45,10 @@ def retrieve_album_data(_sp, album_id:str) -> Tuple[pd.Series, pd.DataFrame]:
                 if total_tracks == 0:
                     st.error('No tracks found in the album')
                     return pd.Series(), pd.DataFrame()
+                
+                # Fetch album's details 
+                album_details = _sp.album(album_id)
+                album_release = album_details['release_date']
 
                 # Initialize a progress bar in the app
                 progress_bar = st.progress(0)
@@ -56,13 +60,18 @@ def retrieve_album_data(_sp, album_id:str) -> Tuple[pd.Series, pd.DataFrame]:
 
                     artist_id = track['artists'][0]['id']
                     track_id = track['id']
+
+                    # Fetch detailed track information to get popularity
+                    detailed_track_info = _sp.track(track_id)
+                    popularity = detailed_track_info['popularity']
+
                     genres = _sp.artist(artist_id)['genres']
 
                     track_info = {
                         'artist_name': track['artists'][0]['name'],
                         'track_name': track['name'],
                         'is_explicit': track['explicit'],
-                        'album_release_date': track['album']['release_date'],
+                        'album_release_date': album_release,
                         'genres': ', '.join(genres)  # Join genres list into a string
                     }
 
@@ -71,7 +80,7 @@ def retrieve_album_data(_sp, album_id:str) -> Tuple[pd.Series, pd.DataFrame]:
                     track_info.update(audio_features)  # Add audio features directly
 
                     # Fetch popularity
-                    popularity = track['popularity']
+                    popularity = popularity
                     track_info['popularity'] = popularity
 
                     tracks_data.append(track_info)
@@ -194,8 +203,10 @@ with st.sidebar:
     if selected_album_name:
         selected_album_id = album_name_to_id[selected_album_name]
         print(f"Selected Album ID: {selected_album_id}")
-        analyze_button = st.sidebar.button("Analyze")
+    else:
+        selected_album_id = None
 
+analyze_button = st.sidebar.button("Analyze")
 
 #-------- Main ----------
 st.markdown("# Album Analysis")
@@ -207,9 +218,14 @@ try:
         print(album_analyzer)
         st.components.v1.iframe(f"https://open.spotify.com/embed/album/{selected_album_id}?utm_source=generator&theme=0",
                         width=500, height=160, scrolling=True)
+        st.divider()
+
+        # Run Analysis
+        album_analyzer.run_analysis()
 
 except Exception as e:
     print(e)
+    st.error(f'An error occurred: {str(e)}')
 
             
 
