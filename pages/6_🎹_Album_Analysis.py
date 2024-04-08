@@ -164,7 +164,7 @@ def artist_search_func(sp,query) -> List[str]:
     artists = [artist['name'] for artist in result['artists']['items']]
     return artists
 
-def album_search_func(sp, artist_name, query) -> List[str]:
+def album_search_func(sp, artist_name, query) -> List[Tuple[str, str]]:
     # Find the artist's Spotify ID based on their name.
     artist_result = sp.search(q=f"artist:{artist_name}", type='artist', limit=1)
     if not artist_result['artists']['items']:
@@ -178,27 +178,28 @@ def album_search_func(sp, artist_name, query) -> List[str]:
     for album in album_result['items']:
         # Check if the album name contains the query string (case insensitive).
         if query.lower() in album['name'].lower():
-            albums.append(album['name'])
+            albums.append((album['name'], album['id']))
     
-    return list(set(albums)) 
+    return albums
 
 
-# Sidebar Setup
 with st.sidebar:
     st.title("Select Album Name")
-    selected_artist = st_searchbox(label="Select Artist",
-                                   key="artist_input",
-                                   search_function=lambda query: artist_search_func(sp, query))
-    if selected_artist:
-        selected_album = st_searchbox(label="Select Album",
-                                      key="album_input",
-                                      search_function=lambda query: album_search_func(sp, selected_artist, query))
-    else:
-        selected_album = None
-    
-    analyze_button = st.sidebar.button("Analyze", disabled=selected_album is None)
+    selected_artist_name = st.text_input("Artist Name")
 
-    
+    album_options = album_search_func(sp, selected_artist_name, "")
+    album_name_to_id = {name: id for name, id in album_options}
+    selected_album_name = st.selectbox("Select Album", options=list(album_name_to_id.keys()))
+
+    if selected_album_name:
+        selected_album_id = album_name_to_id[selected_album_name]
+        print(f"Selected Album ID: {selected_album_id}")
+        analyze_button = st.button("Analyze")
+
+
+#-------- Main ----------
+st.markdown("# Album Analysis")
+st.info("Select an artist and album name. You'll get a comprehensive analysis of your selected album.", icon="📀")
 
 
             
