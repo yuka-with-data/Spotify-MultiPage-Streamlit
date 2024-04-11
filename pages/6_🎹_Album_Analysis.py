@@ -205,6 +205,39 @@ class AlbumAnalyzer:
 
         return fig
 
+    def duration_histogram(self) -> plt.Figure:
+        color_album = cm.plasma(0.15)
+        color_average_duration = cm.plasma(0.55)
+
+        self.df_album['duration_min'] = self.df_album['duration_ms'] / 60000 # Convert duration from milliseconds to minutes for readability
+
+        fig, ax = plt.subplots(figsize=(6, 4))
+        sns.histplot(self.df_album['duration_min'],
+                     bins=50,
+                     # kde=True,
+                     color=color_album,
+                     edgecolor='black',
+                     ax=ax)
+        mean_duration = self.df_album['duration_min'].mean()
+        ax.axvline(mean_duration,
+                   color=color_average_duration,
+                   linestyle='dashed',
+                   linewidth=2,
+                   label='Average Duration')
+        ax.set_xlabel('Duration (min)')
+        ax.set_ylabel('Frequency')
+        ax.legend()
+
+        max_count = int(max(ax.get_yticks())) # Find the current max y-tick and round up
+        ax.set_yticks(range(0, max_count))
+
+        ax.grid(False, axis='x')
+        ax.grid(True, axis='y', linestyle='--', alpha=0.6)
+
+        fig.patch.set_facecolor('lightgrey')
+        ax.set_facecolor('lightgrey')
+
+        return fig
     
     def run_analysis(self) -> None:
         try:
@@ -214,6 +247,10 @@ class AlbumAnalyzer:
 
             st.header('Tempo Histogram')
             fig = self.tempo_histogram()
+            st.pyplot(fig)
+
+            st.header('Duration Histogram')
+            fig = self.duration_histogram()
             st.pyplot(fig)
 
 
