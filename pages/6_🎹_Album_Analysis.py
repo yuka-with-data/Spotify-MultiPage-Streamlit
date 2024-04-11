@@ -16,6 +16,11 @@ import seaborn as sns
 from wordcloud import WordCloud
 from streamlit_searchbox import st_searchbox
 from typing import Optional, Dict, Tuple, List, Union
+import warnings
+
+# Suppress specific seaborn warning
+warnings.filterwarnings("ignore", message="Passing `palette` without assigning `hue` is deprecated")
+
 
 # Page Config
 st.set_page_config(page_title="Album Analysis", 
@@ -77,7 +82,21 @@ def retrieve_album_data(_sp, album_id:str) -> Tuple[pd.Series, pd.DataFrame]:
 
                     # Fetch audio features
                     audio_features = _sp.audio_features(track_id)[0]
-                    track_info.update(audio_features)  # Add audio features directly
+                    track_info.update({
+                        'danceability': audio_features['danceability'],
+                        'valence': audio_features['valence'],
+                        'energy': audio_features['energy'],
+                        'loudness': audio_features['loudness'],
+                        'acousticness': audio_features['acousticness'],
+                        'instrumentalness': audio_features['instrumentalness'],
+                        'liveness': audio_features['liveness'],
+                        'speechiness': audio_features['speechiness'],
+                        'key': audio_features['key'],
+                        'tempo': audio_features['tempo'],
+                        'mode': audio_features['mode'],
+                        'duration_ms': audio_features['duration_ms'],
+                        'time_signature': audio_features['time_signature']
+                    })
 
                     # Fetch popularity
                     popularity = popularity
@@ -91,8 +110,17 @@ def retrieve_album_data(_sp, album_id:str) -> Tuple[pd.Series, pd.DataFrame]:
 
                 # Save the tracks data to a DataFrame
                 df = pd.DataFrame(tracks_data)
+                print(df)
                 # Calculate mean values for each audio attribute
-                audio_features_keys = ['danceability', 'valence', 'energy', 'loudness', 'acousticness', 'instrumentalness', 'liveness', 'speechiness', 'tempo']
+                audio_features_keys = ['danceability', 
+                                       'valence', 
+                                       'energy', 
+                                       'loudness', 
+                                       'acousticness', 
+                                       'instrumentalness', 
+                                       'liveness', 
+                                       'speechiness', 
+                                       'tempo']
                 selected_atts = df[audio_features_keys].mean()
 
                 return selected_atts, df
@@ -144,11 +172,49 @@ class AlbumAnalyzer:
 
         return fig
     
+    def tempo_histogram(self) -> plt.Figure:
+        color_album = cm.plasma(0.15)
+        color_average_tempo = cm.plasma(0.55) 
+
+        fig, ax = plt.subplots(figsize=(6, 4))
+        sns.histplot(self.df_album['tempo'],
+                     bins=50,
+                     # kde=True,
+                     color=color_album,
+                     edgecolor='black',
+                     ax=ax)
+        mean_tempo = self.df_album['tempo'].mean()
+        ax.axvline(mean_tempo,
+                   color=color_average_tempo,
+                   linestyle='dashed',
+                   linewidth=2,
+                   label='Average Tempo')
+        ax.set_xlabel('Tempo')
+        ax.set_ylabel('Frequency')
+        ax.legend()
+
+        max_count = int(max(ax.get_yticks())) # Find the current max y-tick and round up
+        ax.set_yticks(range(0, max_count))
+        ax.yaxis.set_major_locator(MaxNLocator(integer=True)) # Set y-ticks to integers
+
+        ax.grid(False, axis='x')
+        ax.grid(True, axis='y', linestyle='--',alpha=0.6)
+
+        fig.patch.set_facecolor('lightgrey')
+        ax.set_facecolor('lightgrey')
+
+        return fig
+
+    
     def run_analysis(self) -> None:
         try:
             st.header('Attribute Radar Chart')
             fig = self.radar_chart()
             st.plotly_chart(fig)
+
+            st.header('Tempo Histogram')
+            fig = self.tempo_histogram()
+            st.pyplot(fig)
 
 
         
