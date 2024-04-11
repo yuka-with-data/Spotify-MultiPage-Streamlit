@@ -239,6 +239,75 @@ class AlbumAnalyzer:
 
         return fig
     
+    def loudness_histogram(self) -> plt.Figure:
+        color_album = cm.plasma(0.15)
+        color_average_loud = cm.plasma(0.55)
+
+        fig, ax = plt.subplots(figsize=(6, 4))
+        sns.histplot(self.df_album['loudness'],
+                     bins=50,
+                     # kde=True,
+                     color=color_album,
+                     edgecolor='black',
+                     ax=ax)
+        mean_loudness = self.df_album['loudness'].mean()
+        ax.axvline(mean_loudness,
+                   color=color_average_loud,
+                   linestyle='dashed',
+                   linewidth=2,
+                   label='Average Loudness')
+        ax.set_xlabel('Loudness')
+        ax.set_ylabel('Frequency')
+        ax.legend()
+
+        max_count = int(max(ax.get_yticks())) # Find the current max y-tick and round up
+        ax.set_yticks(range(0, max_count))
+
+        ax.grid(False, axis='x')
+        ax.grid(True, axis='y', linestyle='--', alpha=0.6)
+
+        fig.patch.set_facecolor('lightgrey')
+        ax.set_facecolor('lightgrey')
+
+        return fig
+    
+    
+    def key_histogram(self) -> plt.Figure:
+        color_album = cm.plasma(0.15)
+        color_average_key = cm.plasma(0.55)
+
+        # Mapping of numeric key values to corresponding alphabetic keys
+        key_mapping = ('C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B')
+
+        # Get key counts and ensure all keys are present
+        key_counts = self.df_album['key'].value_counts().reindex(range(12), fill_value=0)
+        
+        # Create a DataFrame for easier sorting and mapping
+        key_df = pd.DataFrame({
+            'Key': range(12),
+            'Count': key_counts.values,
+            'Alphabetical Key': key_mapping
+        })
+
+        # Sort the DataFrame by key count in descending order
+        key_df = key_df.sort_values(by='Count', ascending=False)
+
+        # Create a bar chart with the key counts
+        fig, ax = plt.subplots(figsize=(10, 6))
+        sns.set_theme(style="whitegrid")
+
+        sns.barplot(x='Alphabetical Key', y='Count', data=key_df, palette='plasma', ax=ax)
+        # Set y-axis ticks to integers
+        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+
+        ax.set_facecolor('lightgrey')
+        plt.xlabel('Key')
+        plt.ylabel('Count')
+        fig.patch.set_facecolor('lightgrey')
+
+        return fig
+    
+    
     def run_analysis(self) -> None:
         try:
             st.header('Attribute Radar Chart')
@@ -252,6 +321,15 @@ class AlbumAnalyzer:
             st.header('Duration Histogram')
             fig = self.duration_histogram()
             st.pyplot(fig)
+
+            st.header('Loudness Histogram')
+            fig = self.loudness_histogram()
+            st.pyplot(fig)
+
+            st.header('Key Histogram')
+            fig = self.key_histogram()
+            st.pyplot(fig)
+
 
 
         
