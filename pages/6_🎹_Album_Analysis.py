@@ -264,9 +264,16 @@ with st.sidebar:
 
     album_options = album_search_func(sp, selected_artist_name, "")
     album_name_to_id = {name: id for name, id in album_options}
-    selected_album_name = st.selectbox("Select Album", options=list(album_name_to_id.keys()))
 
-    if selected_album_name:
+    # Placeholder option
+    placeholder = "Select an album..."
+    # Prepare selectbox options with the placeholder
+    options = [placeholder] + list(album_name_to_id.keys())
+
+    selected_album_name = st.selectbox("Select Album", options=options, index=0)
+
+    # Check if a valid album is selected
+    if selected_album_name != placeholder:
         selected_album_id = album_name_to_id[selected_album_name]
         print(f"Selected Album ID: {selected_album_id}")
     else:
