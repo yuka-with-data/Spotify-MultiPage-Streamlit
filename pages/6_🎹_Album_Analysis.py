@@ -352,7 +352,7 @@ class AlbumAnalyzer:
             mode="gauge+number",
             value=mean_popularity,
             domain={'x': [0, 1], 'y': [0, 1]},
-            title={'text': "Album Popularity"},
+            title={'text': "The Current Popularity"},
             gauge={
                 'axis': {'range': [0, 100], 'tickwidth':1, 'tickcolor': "darkblue"},
                 'bar': {'color': 'rgba(89, 42, 154, 1)'},
@@ -378,31 +378,37 @@ class AlbumAnalyzer:
     def run_analysis(self) -> None:
         try:
             st.header('Attribute Radar Chart')
+            st.text("The radar chart displays various musical attributes of the album to compare their relative strengths.")
             fig = self.radar_chart()
             st.plotly_chart(fig)
 
             st.header('Tempo Histogram')
+            st.text("The tempo histogram shows the distribution of the tempo (beats per minute) across all tracks in the album.")
             fig = self.tempo_histogram()
             st.pyplot(fig)
 
             st.header('Duration Histogram')
+            st.text("The histogram illustrates the distribution of track durations within the album, highlighting variability in song lengths.")
             fig = self.duration_histogram()
             st.pyplot(fig)
 
             st.header('Loudness Histogram')
+            st.text("The loudness histogram plots the loudness levels (in decibels) of each track, showing the dynamic range of the album.")
             fig = self.loudness_histogram()
             st.pyplot(fig)
 
             st.header('Key Histogram')
+            st.text("The histogram displays the musical keys of the album's tracks, indicating the most common keys used.")
             fig = self.key_histogram()
             st.pyplot(fig)
 
             st.header('Explicitness Pie Chart')
+            st.text("The pie chart breaks down the proportion of explicit to non-explicit tracks, providing insight into the album's content.")
             fig = self.explicit_pie_chart()
             st.pyplot(fig)
 
             st.header('Album Popularity Gauge Chart')
-            st.text("ℹ️ The gauge chart displays the album's popularity score, "
+            st.text("The gauge chart displays the album's popularity score, "
                     "which is the average of the popularity scores of all tracks in the album.")
             fig = self.album_popularity_gauge_chart()
             st.plotly_chart(fig)
