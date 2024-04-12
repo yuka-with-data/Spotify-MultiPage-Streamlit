@@ -307,6 +307,33 @@ class AlbumAnalyzer:
 
         return fig
     
+    def explicit_pie_chart(self) -> plt.Figure:
+        # Count values for each category
+        explicit_counts = self.df_album['is_explicit'].sum()
+        non_explicit_count = len(self.df_album) - explicit_counts
+
+        explicit_counts = [explicit_counts,non_explicit_count]
+        labels = ['Explicit','Non-Explicit']
+        # Colors
+        color_explicit = cm.plasma(0.10)
+        color_non_explicit = cm.plasma(0.65)
+        colors_with_alpha = [(color_explicit[0], color_explicit[1], color_explicit[2], 0.7),  # 70% opacity for Explicit
+                             (color_non_explicit[0], color_non_explicit[1], color_non_explicit[2], 0.7)]  # 70% opacity for Non-Explicit
+        
+        fig, ax = plt.subplots(figsize=(6, 4))
+        patches, _,_= ax.pie(explicit_counts,
+                             labels=labels,
+                             colors=colors_with_alpha,
+                             autopct='%1.1f%%',
+                             startangle=90,
+                             textprops={'fontsize': 12},
+                             # shadow=True,
+                             radius=1.2)
+        ax.axis('equal')
+        ax.set_facecolor('lightgrey')
+
+        return fig
+    
     
     def run_analysis(self) -> None:
         try:
@@ -328,6 +355,10 @@ class AlbumAnalyzer:
 
             st.header('Key Histogram')
             fig = self.key_histogram()
+            st.pyplot(fig)
+
+            st.header('Explicitness Pie Chart')
+            fig = self.explicit_pie_chart()
             st.pyplot(fig)
 
 
