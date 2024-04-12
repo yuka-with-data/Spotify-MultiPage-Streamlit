@@ -334,6 +334,46 @@ class AlbumAnalyzer:
 
         return fig
     
+    def album_popularity_gauge_chart(self) -> go.Figure:
+        """ 
+         Create a gauge chart displaying the mean popularity score of an album
+         
+         Returns:
+         go.Figure: Gauge chart
+           """
+        def calculate_popularity():
+            return self.df_album['popularity'].mean()
+        
+        mean_popularity = calculate_popularity()
+
+        # Create a gauge chart
+        fig = go.Figure()
+        fig.add_trace(go.Indicator(
+            mode="gauge+number",
+            value=mean_popularity,
+            domain={'x': [0, 1], 'y': [0, 1]},
+            title={'text': "Album Popularity"},
+            gauge={
+                'axis': {'range': [0, 100], 'tickwidth':1, 'tickcolor': "darkblue"},
+                'bar': {'color': 'rgba(89, 42, 154, 1)'},
+                'bgcolor': "white",
+                'borderwidth': 2,
+                'bordercolor': "gray",
+                'steps': [
+                {'range': [0, 100], 'color': 'lightgrey'},
+                {'range': [0, mean_popularity], 'color': 'rgba(65, 105, 225, 0.5)'}
+                ],
+            }
+        ))
+        fig.update_layout(
+            paper_bgcolor='lightgrey',
+            font={'color':"black"},
+            height=450,
+            width=700
+        )
+
+        return fig
+
     
     def run_analysis(self) -> None:
         try:
@@ -360,6 +400,12 @@ class AlbumAnalyzer:
             st.header('Explicitness Pie Chart')
             fig = self.explicit_pie_chart()
             st.pyplot(fig)
+
+            st.header('Album Popularity Gauge Chart')
+            st.text("ℹ️ The gauge chart displays the album's popularity score, "
+                    "which is the average of the popularity scores of all tracks in the album.")
+            fig = self.album_popularity_gauge_chart()
+            st.plotly_chart(fig)
 
 
 
