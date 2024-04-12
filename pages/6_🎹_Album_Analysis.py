@@ -164,7 +164,7 @@ class AlbumAnalyzer:
         fig.update_layout(
             polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
             showlegend=True,
-            paper_bgcolor='lightgrey',
+            paper_bgcolor='white',
             font={"color": "black"},
             height=450,
             width=700
@@ -330,7 +330,9 @@ class AlbumAnalyzer:
                              # shadow=True,
                              radius=1.2)
         ax.axis('equal')
-        ax.set_facecolor('lightgrey')
+
+        fig.patch.set_alpha(0.0)
+        ax.set_facecolor('none')
 
         return fig
     
@@ -377,6 +379,9 @@ class AlbumAnalyzer:
     
     def run_analysis(self) -> None:
         try:
+            st.header('Album DataFrame')
+            st.dataframe(self.df_album)
+
             st.header('Attribute Radar Chart')
             st.text("The radar chart displays various musical attributes of the album to compare their relative strengths.")
             fig = self.radar_chart()

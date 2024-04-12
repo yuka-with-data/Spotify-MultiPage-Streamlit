@@ -403,6 +403,10 @@ class SpotifyAnalyzer:
     # Run Analysis & Render Visualizations
     def run_analysis(self) -> None:
         try:
+            # Create a DataFrame
+            st.header('Playlist DataFrame')
+            st.dataframe(self.df_top_50)
+
             # Create a Radar Chart
             st.header('Attributes Radar Chart')
             fig = self.radar_chart()
