@@ -82,21 +82,24 @@ def retrieve_album_data(_sp, album_id:str) -> Tuple[pd.Series, pd.DataFrame]:
 
                     # Fetch audio features
                     audio_features = _sp.audio_features(track_id)[0]
-                    track_info.update({
-                        'danceability': audio_features['danceability'],
-                        'valence': audio_features['valence'],
-                        'energy': audio_features['energy'],
-                        'loudness': audio_features['loudness'],
-                        'acousticness': audio_features['acousticness'],
-                        'instrumentalness': audio_features['instrumentalness'],
-                        'liveness': audio_features['liveness'],
-                        'speechiness': audio_features['speechiness'],
-                        'key': audio_features['key'],
-                        'tempo': audio_features['tempo'],
-                        'mode': audio_features['mode'],
-                        'duration_ms': audio_features['duration_ms'],
-                        'time_signature': audio_features['time_signature']
-                    })
+                    if audio_features:
+                        track_info.update({
+                            'danceability': audio_features.get('danceability', 0),
+                            'valence': audio_features.get('valence', 0),
+                            'energy': audio_features.get('energy', 0),
+                            'loudness': audio_features.get('loudness', 0),
+                            'acousticness': audio_features.get('acousticness', 0),
+                            'instrumentalness': audio_features.get('instrumentalness', 0),
+                            'liveness': audio_features.get('liveness', 0),
+                            'speechiness': audio_features.get('speechiness', 0),
+                            'key': audio_features.get('key', 0),
+                            'tempo': audio_features.get('tempo', 0),
+                            'mode': audio_features.get('mode', 0),
+                            'duration_ms': audio_features.get('duration_ms', 0),
+                            'time_signature': audio_features.get('time_signature', 0)
+                        })
+                    else:
+                        st.error(f"Failed to retrieve audio features for track {track_id}")
 
                     # Fetch popularity
                     popularity = popularity
@@ -110,7 +113,7 @@ def retrieve_album_data(_sp, album_id:str) -> Tuple[pd.Series, pd.DataFrame]:
 
                 # Save the tracks data to a DataFrame
                 df = pd.DataFrame(tracks_data)
-                print(df)
+                # print(df)
                 # Calculate mean values for each audio attribute
                 audio_features_keys = ['danceability', 
                                        'valence', 
@@ -145,8 +148,11 @@ class AlbumAnalyzer:
 
     def radar_chart(self) -> go.Figure:
         color_album = 'rgba(255, 99, 132, 0.9)'
-        mean_values_album_percent = self.mean_values_album * 100
         audio_features_keys = ['danceability', 'valence', 'energy', 'acousticness', 'instrumentalness', 'liveness', 'speechiness']
+
+        filtered_values_album_percent = self.mean_values_album[audio_features_keys]
+        mean_values_album_percent = filtered_values_album_percent.values * 100
+        print(f"mean value album: {mean_values_album_percent}")
 
         fig = go.Figure()
 
