@@ -592,6 +592,12 @@ class EraComparison:
         att1, df1, att2, df2 = self.compare_playlists(id1, id2)
         label1 = self.get_playlist_name(id1)  # Placeholder function
         label2 = self.get_playlist_name(id2) 
+
+        st.header('Era DataFrames')
+        st.text(f"{label1} DataFrame")
+        st.dataframe(df1)
+        st.text(f"{label2} DataFrame")
+        st.dataframe(df2)
         
         st.header('Radar Chart Comparison:')
         st.text("Music Era Comparison of Attributes (Mean Values)")
