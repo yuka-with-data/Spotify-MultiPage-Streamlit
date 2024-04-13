@@ -409,35 +409,42 @@ class SpotifyAnalyzer:
 
             # Create a Radar Chart
             st.header('Attributes Radar Chart')
+            st.text("The radar chart displays the distribution of various musical attributes for the selected tracks.")
             fig = self.radar_chart()
             st.plotly_chart(fig)
 
             # Create a BPM Histogram Chart
             st.header('Tempo Histogram Chart')
+            st.text("This histogram shows the distribution of tempo (beats per minute) across tracks.")
             bpm_hist_chart = self.tempo_histogram()
             st.pyplot(bpm_hist_chart)
 
             st.header('Duration Histogram Chart')
+            st.text("The histogram below represents the distribution of track durations in the playlist.")
             duration_dist = self.duration_histogram()
             st.pyplot(duration_dist)
 
             # Create a Key Distribution
             st.header('Key Distribution Comparison:')
+            st.text("This chart compares the key distribution of the tracks, showing which musical keys are most common.")
             key_dist = self.key_distribution_chart()
             st.pyplot(key_dist)
 
             # Create a Duration Histogram Chart
             st.header('Loudness Histogram Chart')
+            st.text("The loudness histogram visualizes the loudness levels of tracks in decibels.")
             loudness_hist_chart = self.loudness_histogram()
             st.pyplot(loudness_hist_chart)
 
             # Create an Explicit Pie Chart
             st.header('Explicitness Pie Chart')
+            st.text("This pie chart shows the proportion of explicit and non-explicit tracks in the playlist.")
             explicit_chart = self.explicit_pie_chart()
             st.pyplot(explicit_chart)
 
             # Create a Genre Word Cloud
             st.header('Genres Word Cloud')
+            st.text("The word cloud illustrates the prevalence of various genres in the playlist based on text data.")
             wc = self.genres_wordcloud()
             st.pyplot(wc)
 
