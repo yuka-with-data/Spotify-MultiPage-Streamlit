@@ -54,6 +54,7 @@ def retrieve_album_data(_sp, album_id:str) -> Tuple[pd.Series, pd.DataFrame]:
                 # Fetch album's details 
                 album_details = _sp.album(album_id)
                 album_release = album_details['release_date']
+                album_genres = ', '.join(album_details['genres'])
 
                 # Initialize a progress bar in the app
                 progress_bar = st.progress(0)
@@ -77,7 +78,8 @@ def retrieve_album_data(_sp, album_id:str) -> Tuple[pd.Series, pd.DataFrame]:
                         'track_name': track['name'],
                         'is_explicit': track['explicit'],
                         'album_release_date': album_release,
-                        'genres': ', '.join(genres)  # Join genres list into a string
+                        'artist_genres': ', '.join(genres),
+                        'album_genres': album_genres
                     }
 
                     # Fetch audio features
