@@ -56,6 +56,7 @@ with st.sidebar:
         tempo = st.select_slider("Tempo (BPM)", options=range(50, 201), value=120)
         loudness = st.select_slider("Loudness (dB)", options=range(-60, 1), value=-30)
         key = st.select_slider("Key", options=list(key_mapping.values()), value="C")
+        exclude_explicit = st.checkbox("Exclude Explicit Tracks", value=False)
         submit_button = st.form_submit_button("Get Recommendations")
 
 st.markdown("# Fine-Tuned Recommendation Tracks")
@@ -76,7 +77,8 @@ if submit_button:
                 'target_speechiness': speechiness,
                 'target_tempo': tempo,
                 'target_loudness': loudness,
-                'target_key': numeric_key}
+                'target_key': numeric_key,
+                'exclude_explicit': exclude_explicit}
         
         if selected_genres:
             recommendations = sp.recommendations(seed_genres=selected_genres, limit=10, **seeds)
