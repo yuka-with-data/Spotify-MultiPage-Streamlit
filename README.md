@@ -16,6 +16,8 @@ Music dataGalax comprises five key analysis pages, each offering a unique perspe
 
 - **Era Comparison**: Journey through different music eras. Compare and contrast the evolving characteristics of music across decades, from the rhythms of the '70s to the beats of today.
 
+- **Fine-Tuned Recommendation Tracks**: Experience personalized music discovery like never before. Set your own criteria or use pre-defined profiles to explore music that fits your exact taste profile. See your recommendations come to life with interactive charts and listen directly from our platform.
+
 ## Target Users
 
 1. Music Producers and Artists:
@@ -30,7 +32,7 @@ Music dataGalax comprises five key analysis pages, each offering a unique perspe
 - Researchers and enthusiasts exploring the dynamics behind popular music trends, with an interest in understanding what contributes to a song's success on a purely informational basis.
 - Individuals with a keen interest in music analysis, looking to satisfy their curiosity about the attributes of successful tracks without the expectation of professional guidance.
 
-## Getting Started
+## Usage
 
 To explore Musify Analytics, simply visit our app. Choose an analysis from the sidebar menu and let your musical data journey begin.
 
@@ -44,11 +46,11 @@ We are thrilled to announce our upcoming project — a Soothing Music Chatbot de
 
 ## About
 
-Music dataGalax is developed by yuka_with_data, a music data lover. Our goal is to make music data analysis accessible and engaging for everyone.
+Music dataGalax is developed by yuka_with_data, a music data lover. The goal is to make music data analysis accessible and engaging for everyone.
 
 ## Contact
 
-Have questions, feedback, or want to collaborate? Contact us at [your_email@example.com](mailto:your_email@example.com).
+Have questions, report bugs or want to collaborate? Send a message at [Bluesky](mailto:your_email@example.com).
 
 ## Acknowledgments
 
