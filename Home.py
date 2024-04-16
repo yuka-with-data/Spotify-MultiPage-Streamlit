@@ -41,7 +41,7 @@ st.markdown(
     Ready to uncover the secrets of the music industry through data?  
     **👈 Select an analysis from the sidebar** and let the journey begin!
 
-    ### Want to learn more about music data analysis?
+    ### Learn more about music data analysis app
     Whether you're new to the field or looking to expand your knowledge, check out these resources:
     - Delve into the [README doc](https://github.com/yuka-with-data/Spotify-Data-App-Public) for detailed guides on using the app.
     - Join the conversation in our community forum (Coming Soon)
