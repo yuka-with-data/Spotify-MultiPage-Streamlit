@@ -56,6 +56,7 @@ with st.sidebar:
         tempo = st.select_slider("Tempo (BPM)", options=range(50, 201), value=120)
         loudness = st.select_slider("Loudness (dB)", options=range(-60, 1), value=-30)
         key = st.select_slider("Key", options=list(key_mapping.values()), value="C")
+        mode = st.selectbox("Mode", options=["Choose a Mode", "Major", "Minor"], index=0)
         exclude_explicit = st.checkbox("Exclude Explicit Tracks", value=False)
         submit_button = st.form_submit_button("Get Recommendations")
 
@@ -67,6 +68,7 @@ if submit_button:
         # Find the numerical key for the given note name (reverse mapping)
         reverse_key_mapping = {v: k for k, v in key_mapping.items()}
         numeric_key = reverse_key_mapping[key]
+        mode_value = 1 if mode == "Major" else 0
 
         seeds = {'target_danceability': danceability,
                 'target_energy': energy,
@@ -78,6 +80,7 @@ if submit_button:
                 'target_tempo': tempo,
                 'target_loudness': loudness,
                 'target_key': numeric_key,
+                'target_mode': mode_value,
                 'exclude_explicit': exclude_explicit}
         
         if selected_genres:
@@ -98,7 +101,7 @@ if submit_button:
 
 st.divider()
 st.caption("""
-**🛑Note on Recommendations:** 
+**🛑Disclaimer on Recommendations:** 
 The recommendations provided here are generated based on target values and other parameters you set. These values guide the search but do not guarantee that every track will exactly match the specified attributes. The range and flexibility in the recommendations ensure a variety of music that generally aligns with preferences you set but might slightly differ. Please note, these recommendations are generated algorithmically and should not be considered professional or definitive musical advice.
 """)
             
