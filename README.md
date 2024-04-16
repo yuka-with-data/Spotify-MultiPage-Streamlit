@@ -1,10 +1,10 @@
-# Music dataGalax: A Spotify Data Exploration App
+# rhythmGalax: A Spotify Data Exploration App
 
-Welcome to Music dataGalax, a cutting-edge application designed to bring Spotify's music data to life through comprehensive analysis and insightful visualizations. Powered by Streamlit, this app caters to music enthusiasts, industry analysts, and data scientists by providing a dynamic platform to explore the musical qualities that define today's hits and trends.
+Welcome to rhythmGalax, a cutting-edge application designed to bring Spotify's music data to life through comprehensive analysis and insightful visualizations. Powered by Streamlit, this app caters to music enthusiasts, industry analysts, and data scientists by providing a dynamic platform to explore the musical qualities that define today's hits and trends.
 
 ## Features
 
-Music dataGalax comprises five key analysis pages, each offering a unique perspective on Spotify's vast musical landscape:
+rhythmGalax comprises five key analysis pages, each offering a unique perspective on Spotify's vast musical landscape:
 
 - **Top Chart Analysis**: Delve into Spotify's latest hit charts and uncover the attributes that contribute to the success of these tracks. Visualize trends and compare key metrics across genres and artists.
 
@@ -34,7 +34,7 @@ Music dataGalax comprises five key analysis pages, each offering a unique perspe
 
 ## Usage
 
-To explore Musify Analytics, simply visit our app. Choose an analysis from the sidebar menu and let your musical data journey begin.
+To explore rhythmGalax, simply visit the app. Choose an analysis from the sidebar menu and let your musical data journey begin.
 
 ## Note on Privacy
 
@@ -42,11 +42,11 @@ Our app does not log personal information or user activity. All analyses are con
 
 ## Work in Progress: Soothing Music Chatbot
 
-We are thrilled to announce our upcoming project — a Soothing Music Chatbot designed to elevate your music experience to a whole new level of relaxation and personalization. Here's what you can look forward to:
+We are thrilled to announce our upcoming project — a Soothing Music Chatbot designed to elevate your music experience to a whole new level of relaxation and personalization. 
 
 ## About
 
-Music dataGalax is developed by yuka_with_data, a music data lover. The goal is to make music data analysis accessible and engaging for everyone.
+rhythmGalax is developed by yuka_with_data, a music data lover. The goal is to make music data analysis accessible and engaging for everyone.
 
 ## Contact
 
@@ -56,5 +56,8 @@ Have questions, report bugs or want to collaborate? Send a message at [Bluesky](
 
 - Streamlit, for providing the framework that powers our app.
 - The Spotify Web API, for the rich dataset that fuels our analyses.
+
+## Disclaimer
+This application is designed for educational and entertainment purposes only. The data used in this app is sourced from public APIs and may not be entirely accurate or up-to-date. Embedded Spotify players are used under the terms of Spotify's embedding policies to enhance user experience by providing direct access to playlists and tracks. The analysis and visualizations provided should not be considered professional advice, and the creators of this app are not responsible for any decisions made based on the information provided. Please note that this app is not affiliated with Spotify or any other third-party services. Use this app responsibly and be aware of the terms and conditions of the Spotify API and the implications of embedded content. Enjoy exploring the data responsibly!
 
 ### Explore the rhythm of data!
