@@ -533,6 +533,62 @@ class EraComparison:
         plt.tight_layout(pad=0)
         return fig
     
+
+    def mode_pie_chart(self, df1, df2, pl1, pl2) -> plt.Figure:
+        """ 
+        Creates side-by-side pie charts comparing the mode (Major vs Minor) percentages 
+        between two playlists.
+
+        Args:
+        df1 : pandas.DataFrame
+        df2 : pandas.DataFrame
+        pl1 : str
+        pl2 : str
+
+        Returns:
+        plt.Figure
+        """
+        def get_mode_data(df):
+            major_count = (df['mode'] == 1).sum() 
+            minor_count = (df['mode'] == 0).sum()
+            return [major_count, minor_count]
+        
+        # Get mode data from each playlist
+        mode_1 = get_mode_data(df1)
+        mode_2 = get_mode_data(df2)
+
+        labels = ['Major', 'Minor']
+        colors = [cm.plasma(0.10, alpha=0.65), cm.plasma(0.65, alpha=0.75)]
+
+        # Initialize subplots for side-by-side pie charts
+        fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+
+        axs[0].pie(mode_1,
+                labels=labels,
+                colors=colors,
+                autopct='%1.1f%%',
+                startangle=90,
+                textprops={'fontsize': 12}, 
+                radius=1.2)
+        axs[0].set_title(pl1)
+        axs[0].axis('equal')
+        
+        axs[1].pie(mode_2,
+                labels=labels,
+                colors=colors,
+                autopct='%1.1f%%',
+                startangle=90,
+                textprops={'fontsize': 12}, 
+                radius=1.2)
+        axs[1].set_title(pl2)
+        axs[1].axis('equal')
+
+        fig.patch.set_facecolor('lightgrey')
+        plt.tight_layout()
+
+        return fig
+
+    
     def explicit_pie_chart(self, df1, df2, pl1, pl2) -> plt.Figure:
         """ 
          Creates side-by-side pie charts comparing the explicit content percentages 
@@ -557,7 +613,7 @@ class EraComparison:
         explicit_2 = get_explicit_data(df2)
 
         labels = ['Explicit', 'Non Explicit']
-        colors = [cm.plasma(0.10, alpha=0.75), cm.plasma(0.65, alpha=0.75)]
+        colors = [cm.plasma(0.10, alpha=0.65), cm.plasma(0.65, alpha=0.75)]
 
         # Initialize subplots for side-by-side pie charts
         fig, axs = plt.subplots(1,2,figsize=(12,6))
@@ -631,6 +687,11 @@ class EraComparison:
             st.pyplot(wcfig)
         else:
             st.error("Word Cloud could not be generated due to the insufficient data.")
+
+        st.header('Mode Pie Chart Comparison:')
+        st.text("Music Era Comparison of Mode (Major vs Minor)")
+        mode_chart = self.mode_pie_chart(df1, df2, label1, label2)
+        st.pyplot(mode_chart)
 
         st.header('Explicitness Pie Chart Comparision:')
         st.text("Music Era Comparision of Explicitness")
