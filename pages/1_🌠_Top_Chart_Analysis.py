@@ -329,6 +329,34 @@ class SpotifyAnalyzer:
 
         return fig
     
+    def mode_pie_chart(self) -> plt.Figure:
+        # Count values for each mode category
+        major_count = self.df_top_50['mode'].sum()  # mode 1 is major
+        minor_count = len(self.df_top_50) - major_count
+
+        mode_counts = [major_count, minor_count]
+        labels = ['Major', 'Minor']
+        # Colors
+        color_major = cm.plasma(0.10)
+        color_minor = cm.plasma(0.65)
+        colors_with_alpha = [(color_major[0], color_major[1], color_major[2], 0.7),  # 70% opacity for Major
+                            (color_minor[0], color_minor[1], color_minor[2], 0.7)]  # 70% opacity for Minor
+
+        fig, ax = plt.subplots(figsize=(6, 4))
+        patches, texts, autotexts = ax.pie(mode_counts,
+                                        labels=labels,
+                                        colors=colors_with_alpha,
+                                        autopct='%1.1f%%',
+                                        startangle=90,
+                                        textprops={'fontsize': 12},
+                                        radius=1.2)
+        
+        ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+        plt.tight_layout()
+
+        return fig
+
+    
     def explicit_pie_chart(self) -> plt.Figure:
         # Count values for each category
         explicit_counts = self.df_top_50['is_explicit'].sum()
@@ -436,6 +464,12 @@ class SpotifyAnalyzer:
             loudness_hist_chart = self.loudness_histogram()
             st.pyplot(loudness_hist_chart)
 
+            # Create a Mode Distribution
+            st.header('Mode Pie Chart')
+            st.text("Major modes are bright and uplifting, while minor modes are somber and serious.")
+            mode_dist = self.mode_pie_chart()
+            st.pyplot(mode_dist)
+
             # Create an Explicit Pie Chart
             st.header('Explicitness Pie Chart')
             st.text("This pie chart shows the proportion of explicit and non-explicit tracks in the playlist.")
@@ -450,6 +484,7 @@ class SpotifyAnalyzer:
 
 
         except Exception as e:
+            print(e)
             st.error("An error occurred during analysis. Please try again.")
 
 
