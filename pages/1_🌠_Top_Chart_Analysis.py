@@ -494,7 +494,3 @@ if compare_button:
     except Exception as e:
         print(e)
         st.error(f'An error occurred: {str(e)}')
-
-st.divider()
-st.caption("🛑Disclaimer: This application is designed for educational and entertainment purposes only. The data used in this app is sourced from public APIs and may not be entirely accurate or up-to-date. The analysis and visualizations provided should not be considered professional advice, and the creators of this app are not responsible for any decisions made based on the information provided. Please note that this app is not affiliated with Spotify or any other third-party services. Use this app responsibly and be aware of the terms and conditions of the Spotify API. Enjoy exploring the data responsibly!")
-
