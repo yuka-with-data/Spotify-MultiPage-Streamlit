@@ -14,12 +14,12 @@ with st.sidebar:
     st.text("Version 0.4 Beta")
     st.markdown("""
     🌟 **Now Live:**
-    - **Album Analysis:** 
-    - **Fine-Tuned Track Recommendations:**
+    - Album Analysis:
+    - Fine-Tuned Track Recommendations:
                 
     🚧 **In Development:**
-    - **Artist Analysis**
-    - **Soothing Music Chatbot**
+    - Artist Analysis
+    - Soothing Music Chatbot
         """)
 
 st.markdown(
