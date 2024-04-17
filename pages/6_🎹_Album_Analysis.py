@@ -111,8 +111,14 @@ def retrieve_album_data(_sp, album_id:str) -> Tuple[pd.Series, pd.DataFrame]:
 
                 # Progress bar and success message cleanup
                 progress_bar.progress(100)
-                st.success(f"Retrieved {total_tracks} tracks from the album!")
-
+                # Success msg with a placeholder
+                success_placeholder = st.empty()
+                success_placeholder.success(f"Retrieved {total_tracks} tracks from the album!")
+                # Display the msg for 2 seconds
+                time.sleep(2)
+                success_placeholder.empty()
+                progress_bar.empty()
+                
                 # Save the tracks data to a DataFrame
                 df = pd.DataFrame(tracks_data)
                 # print(df)
