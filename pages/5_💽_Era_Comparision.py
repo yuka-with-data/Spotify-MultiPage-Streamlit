@@ -742,7 +742,7 @@ with st.sidebar:
 # main
 st.write("# Music Era Comparison")
 # Header text
-st.info("You're comparing...", icon="👩🏽‍🎤")
+st.info("You are comparing different music eras to explore how musical attributes and popular trends have evolved over time.", icon="👩🏽‍🎤")
 
 if compare_button and playlist_id1 and playlist_id2:
     try:
