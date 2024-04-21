@@ -70,9 +70,12 @@ class PopularityScore():
                     ],
                 }
             ))
-
+            """ 
+             Background Color option: 
+             Snow, Honeydew, MintCream, LavenderBlush, GhostWhite, Seashell
+               """
             fig.update_layout(
-                paper_bgcolor="lightgrey",
+                paper_bgcolor="LavenderBlush",
                 font={"color": "black"},
                 height=450,
                 width=700
