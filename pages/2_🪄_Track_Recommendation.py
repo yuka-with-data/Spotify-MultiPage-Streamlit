@@ -118,8 +118,14 @@ try:
     if analyze_button:
         track_id = track_recommendation.get_track_id(selected_artist, selected_track)
         if track_id:
+            # Fetch track details
+            track_details = sp.track(track_id)
+            track_popularity = track_details['popularity']
+            track_name = track_details['name']
+
             # User's Track Player
-            st.header('Your Track')
+            st.header(f'{track_name}')
+            st.subheader(f'Popularity: {track_popularity}')
             st.components.v1.iframe(f"https://open.spotify.com/embed/track/{track_id}?utm_source=generator",
                                                 width=500, height=160, scrolling=True)
             st.divider()
