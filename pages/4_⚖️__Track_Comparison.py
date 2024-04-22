@@ -314,6 +314,7 @@ class SpotifyAnalyzer:
         ax.axvline(mean_tempo, color=color_average_tempo, linestyle='dashed', linewidth=2, label='Average Tempo')
         ax.set_xlabel('Tempo')
         ax.set_ylabel('Frequency')
+        ax.legend(prop={'size': 8})
         
         # Set y-axis ticks to integers
         # Determine max y-value (rounded up) and set y-ticks accordingly
