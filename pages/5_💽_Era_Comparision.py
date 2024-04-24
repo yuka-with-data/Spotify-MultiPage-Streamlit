@@ -74,8 +74,16 @@ class EraComparison:
                         progress_bar.progress(percent_complete, text="🛰️Fetching The Most Up-To-Date Chart Data. Please Wait.")
 
                         # Track
-                        track = item['track']
-                        artist_id = track['artists'][0]['id']
+                        track = item.get('track')
+                        if not track or not track.get('id'):
+                            continue # skip tracks with missing info
+
+                        # Artist
+                        artist = track['artists'][0] if track['artists'] else None
+                        if not artist:
+                            continue # skip tracks with missing artist info
+                        
+                        # Track info
                         track_id = track['id']
                         genres = _sp.artist(track['artists'][0]['id'])['genres']
 
@@ -89,6 +97,8 @@ class EraComparison:
 
                         # Fetch audio features
                         audio_features = _sp.audio_features(track_id)[0]
+                        if not audio_features:
+                            continue # skip tracks with missing audio features
                         track_info.update({
                             'danceability': audio_features['danceability'],
                             'valence': audio_features['valence'],
