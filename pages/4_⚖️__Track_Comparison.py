@@ -61,7 +61,6 @@ def retrieve_latest_data(_sp, playlist_id: str)-> Tuple[pd.Series, pd.DataFrame]
             try:
                 tracks_data = []
                 results = _sp.playlist_tracks(playlist_id)
-
                 # When no tracks found
                 total_tracks = len(results['items'])
                 if total_tracks == 0:
@@ -78,7 +77,14 @@ def retrieve_latest_data(_sp, playlist_id: str)-> Tuple[pd.Series, pd.DataFrame]
 
                     # Track
                     track = item['track']
-                    artist_id = track['artists'][0]['id']
+                    if not track or not track.get('id'):
+                        continue # skip tracks with missing info 
+
+                    # Artist
+                    artist = track['artists'][0] if track['artists'] else None
+                    if not artist:
+                        continue # skip tracks with missing artist info
+
                     track_id = track['id']
                     genres = _sp.artist(track['artists'][0]['id'])['genres']
 
@@ -92,6 +98,9 @@ def retrieve_latest_data(_sp, playlist_id: str)-> Tuple[pd.Series, pd.DataFrame]
 
                     # Fetch audio features
                     audio_features = _sp.audio_features(track_id)[0]
+                    if not audio_features:
+                        continue # skip tracks with missing audio features
+                    
                     track_info.update({
                         'danceability': audio_features['danceability'],
                         'valence': audio_features['valence'],
