@@ -45,33 +45,30 @@ def retrieve_album_data(_sp, album_id:str) -> Tuple[pd.Series, pd.DataFrame]:
             try:
                 tracks_data = []
                 results = _sp.album_tracks(album_id)
-                total_tracks = len(results['items'])
-
-                if total_tracks == 0:
+                if not results or 'items' not in results or len(results['items']) == 0:
                     st.error('No tracks found in the album')
                     return pd.Series(), pd.DataFrame()
                 
                 # Fetch album's details 
-                album_details = _sp.album(album_id)
-                album_release = album_details['release_date']
-                album_genres = ', '.join(album_details['genres'])
+                album_details = _sp.album(album_id) if album_id else None
+                album_release = album_details.get('release_date', 'Unknown')
+                album_genres = ', '.join(album_details.get('genres', []))
 
                 # Initialize a progress bar in the app
                 progress_bar = st.progress(0)
+                total_tracks = len(results['items'])
 
                 for index, track in enumerate(results['items']):
-                    # Update progress bar based on the number of tracks proceeded
-                    percent_complete = int((index + 1) / total_tracks * 100)
-                    progress_bar.progress(percent_complete)
-
-                    artist_id = track['artists'][0]['id']
-                    track_id = track['id']
-
+                    track_id = track.get('id')
+                    if not track_id:
+                        continue # skip tracks with missing info
+                    
                     # Fetch detailed track information to get popularity
                     detailed_track_info = _sp.track(track_id)
                     popularity = detailed_track_info['popularity']
 
-                    genres = _sp.artist(artist_id)['genres']
+                    artist_id = track['artists'][0]['id'] if track['artists'] else None
+                    genres = _sp.artist(artist_id)['genres'] if artist_id else None
 
                     track_info = {
                         'artist_name': track['artists'][0]['name'],
@@ -79,11 +76,11 @@ def retrieve_album_data(_sp, album_id:str) -> Tuple[pd.Series, pd.DataFrame]:
                         'is_explicit': track['explicit'],
                         'album_release_date': album_release,
                         'artist_genres': ', '.join(genres),
-                        'album_genres': album_genres
-                    }
+                        'album_genres': album_genres,
+                        'popularity': popularity                    }
 
                     # Fetch audio features
-                    audio_features = _sp.audio_features(track_id)[0]
+                    audio_features = _sp.audio_features(track_id)[0] if track_id else None
                     if audio_features:
                         track_info.update({
                             'danceability': audio_features.get('danceability', 0),
@@ -103,11 +100,10 @@ def retrieve_album_data(_sp, album_id:str) -> Tuple[pd.Series, pd.DataFrame]:
                     else:
                         st.error(f"Failed to retrieve audio features for track {track_id}")
 
-                    # Fetch popularity
-                    popularity = popularity
-                    track_info['popularity'] = popularity
-
                     tracks_data.append(track_info)
+                    # Update progress bar
+                    percent_complete = int((index + 1) / total_tracks * 100)
+                    progress_bar.progress(percent_complete)
 
                 # Progress bar and success message cleanup
                 progress_bar.progress(100)
