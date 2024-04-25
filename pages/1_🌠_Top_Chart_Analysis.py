@@ -66,11 +66,13 @@ def retrieve_latest_data(_sp, playlist_id: str)-> Tuple[pd.Series, pd.DataFrame]
         if ttl is None:
             st.error(f"Playlist ID '{playlist_id}' not found in the backend.")
             return pd.Series(), pd.DataFrame()
+        print(f"TTL for playlist {playlist_id}: {ttl} seconds")
 
         # Inner function starts
         @st.cache_data(ttl=ttl, show_spinner=False)
         def _fetch_playlist_data(playlist_id:str) -> Tuple[pd.Series, pd.DataFrame]:
             try:
+                print(f"Fetching data for playlist ID: {playlist_id}")
                 tracks_data = []
                 results = _sp.playlist_tracks(playlist_id)
 
@@ -175,6 +177,60 @@ class SpotifyAnalyzer:
         self.sp = sp
         self.mean_values_top_50, self.df_top_50 = retrieve_latest_data(self.sp, playlist_id)
 
+    def artist_bubble(self) -> go.Figure:
+        artist_counts = self.df_top_50['artist_name'].value_counts().reset_index()
+        artist_counts.columns = ['artist_name', 'frequency']
+
+        # Average Popularity
+        artist_popularity = self.df_top_50.groupby('artist_name')['popularity'].sum().reset_index()
+        # Merge the datasets
+        merged_df = artist_counts.merge(artist_popularity, on='artist_name')
+
+        total_popularity_max = merged_df['popularity'].max()
+        sizeref_value = 2. * total_popularity_max / (100.**2)
+
+        # Initialize visible text column
+        merged_df['visible_text'] = ''
+        # Set visible text only for top 3 frequent artists
+        merged_df.loc[0:2, 'visible_text'] = merged_df.loc[0:2, 'artist_name']
+        # Debugging: check which artists are set to display text
+        print(merged_df[['artist_name', 'frequency', 'visible_text']])
+
+        # Create bubble chart
+        fig = go.Figure(data=[go.Scatter(
+            x=merged_df['frequency'],
+            y=merged_df['popularity'],
+            text=merged_df['visible_text'],  # conditionally display text
+            hovertext=merged_df['artist_name'],  # display artist names on hover
+            mode='markers+text',  # show markers and text
+            # textposition='top center',
+            marker=dict(
+                size=merged_df['popularity'],
+                sizemode='area',
+                sizeref=sizeref_value,
+                sizemin=4,
+                color=merged_df['popularity'],
+                colorbar=dict(title='Score', thickness=10),
+                colorscale='Plasma_r'  # color scale for visual appeal
+            ),
+            hoverinfo='text+x+y',
+            hovertemplate='<b>%{hovertext}</b><br>Frequency: %{x}<br>Popularity: %{y}<extra></extra>'
+        )])
+
+        fig.update_layout(
+            title='Artist Presence and Popularity in the Top Chart',
+            xaxis_title='Frequency of Artist Appearance',
+            yaxis_title='Popularity Score',
+            font=dict(color="black"),  # Ensuring all chart text is black
+            xaxis=dict(tickmode='linear', tick0=1, dtick=1),
+            height=600,
+            width=700
+        )
+
+        return fig
+
+        
+    
     def radar_chart(self) -> go.Figure:
         color_top_50 = 'rgba(93, 58, 155, 0.9)' 
         means_values_top_50p = self.mean_values_top_50 * 100
@@ -444,6 +500,11 @@ class SpotifyAnalyzer:
             # Create a DataFrame
             st.header('Playlist DataFrame')
             st.dataframe(self.df_top_50)
+
+            st.header('Artist Presence in the Top Chart')
+            st.text("This bubble chart shows the presence of artists in the top 50 chart.")
+            artist_bubble = self.artist_bubble()
+            st.plotly_chart(artist_bubble)
 
             # Create a Radar Chart
             st.header('Attributes Radar Chart')
