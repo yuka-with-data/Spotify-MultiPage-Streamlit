@@ -125,9 +125,16 @@ class EraComparison:
         self.sp = sp
 
     def retrieve_latest_data(self, playlist_id: str)-> Tuple[pd.Series, pd.DataFrame]:
-        return _fetch_playlist_data(self.sp, playlist_id)
+        try:
+            data_series, data_frame = _fetch_playlist_data(self.sp, playlist_id)
+            if data_frame.empty:
+                st.warning("Data retrieval returned an empty DataFrame. There might be no data available or an error occurred.")
+                return pd.Series(), pd.DataFrame()
+            return data_series, data_frame
+        except Exception as e:
+            st.error(f"An error occurred while retrieving data: {str(e)}")
+            return pd.Series(), pd.DataFrame()
         
-
     def compare_playlists(self, playlist_id1:str, playlist_id2:str) -> Tuple[Any, pd.DataFrame, Any, pd.DataFrame]:
         att1, df1 = self.retrieve_latest_data(playlist_id1)
         att2, df2 = self.retrieve_latest_data(playlist_id2)
