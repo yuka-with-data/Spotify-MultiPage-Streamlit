@@ -32,116 +32,111 @@ playlists = {
     
 }
 
-# Inner function starts
-@st.cache_data(ttl=86400, show_spinner=False)
-def _fetch_playlist_data(_sp, playlist_id:str) -> Tuple[pd.Series, pd.DataFrame]:
-    try:
-        print(f"Fetching data for playlist ID: {playlist_id}")
-        tracks_data = []
-        results = _sp.playlist_tracks(playlist_id)
-
-        # When no tracks found
-        total_tracks = len(results['items'])
-        if total_tracks == 0:
-            st.error('No tracks found in the playlist')
-            return pd.Series(), pd.DataFrame()
-        
-        # Initialize a progress bar in the app
-        progress_bar = st.progress(0)
-
-        for index, item in enumerate(results['items']):
-            # Update progress bar based on the number of tracks proceeded
-            percent_complete = int((index + 1) / total_tracks * 100)
-            progress_bar.progress(percent_complete, text="🛰️Fetching The Most Up-To-Date Chart Data. Please Wait.")
-
-            # Track
-            track = item['track']
-            if not track or not track.get('id'):
-                continue # Skip tracks with missing info
-            
-            # Artist
-            artist = track['artists'][0] if track['artists'] else None
-            if not artist:
-                continue # Skip tracks with missing artist info
-            
-            # Track Info
-            track_id = track['id']
-            genres = _sp.artist(track['artists'][0]['id'])['genres']
-
-            track_info = {
-                'artist_name': track['artists'][0]['name'],
-                'track_name': track['name'],
-                'is_explicit': track['explicit'],
-                'album_release_date': track['album']['release_date'],
-                'genres': ', '.join(genres)  # Join genres list into a string
-            }
-
-            # Fetch audio features
-            audio_features = _sp.audio_features(track_id)[0]
-            if not audio_features:
-                continue # Skip tracks with missing audio features
-            track_info.update({
-                'danceability': audio_features['danceability'],
-                'valence': audio_features['valence'],
-                'energy': audio_features['energy'],
-                'loudness': audio_features['loudness'],
-                'acousticness': audio_features['acousticness'],
-                'instrumentalness': audio_features['instrumentalness'],
-                'liveness': audio_features['liveness'],
-                'speechiness': audio_features['speechiness'],
-                'key': audio_features['key'],
-                'tempo': audio_features['tempo'],
-                'mode': audio_features['mode'],
-                'duration_ms': audio_features['duration_ms'],
-                'time_signature': audio_features['time_signature']
-            })
-            # Fetch Popularity
-            search_query = f"{track['name']} {track['artists'][0]['name']}"
-            popularity_result = _sp.search(q=search_query, type='track', limit=1)
-            print(f"Popularity Result: {popularity_result}")
-            if popularity_result['tracks']['items']:
-                popularity = popularity_result['tracks']['items'][0]['popularity']
-            else:
-                popularity = None
-            track_info['popularity'] = popularity
-
-            tracks_data.append(track_info)
-        
-        # Progress bar complete
-        progress_bar.progress(100)
-        # Success msg with a placeholder
-        success_placeholder = st.empty()
-        success_placeholder.success(f"Retrieved {total_tracks} Top Tracks from the playlist!", icon="✅")
-        # Display the msg for 2 seconds
-        time.sleep(2)
-        
-        success_placeholder.empty()
-        progress_bar.empty()
-
-        # Save the tracks data to a DataFrame
-        df = pd.DataFrame(tracks_data)
-        # Calculate mean values for each attribute
-        att_list = ['danceability', 'valence', 'energy', 'acousticness', 'instrumentalness', 'liveness', 'speechiness']
-        selected_atts = df[att_list].mean()
-
-        return selected_atts, df
-
-    except Exception as e:
-        print(f"Error: {e}")
-        st.error("Failed to retrieve the latest Top 50 Tracks data. Please try again later.")
-        return pd.Series(), pd.DataFrame()
-
 # Retrieve playlist data
 def retrieve_latest_data(_sp, playlist_id: str)-> Tuple[pd.Series, pd.DataFrame]:
     try:
-        selected_atts, df = _fetch_playlist_data(_sp, playlist_id)
-        if df.empty:
-            st.error("Failed to retrieve the latest Tracks data. Please try again later.")
-            return pd.Series(), pd.DataFrame()
-        return selected_atts, df
+
+        @st.cache_data(ttl=86400, show_spinner=False)
+        def fetch_playlist_data(playlist_id:str) -> Tuple[pd.Series, pd.DataFrame]:
+            try:
+                print(f"Fetching data for playlist ID: {playlist_id}")
+                tracks_data = []
+                results = _sp.playlist_tracks(playlist_id)
+
+                # When no tracks found
+                total_tracks = len(results['items'])
+                if total_tracks == 0:
+                    st.error('No tracks found in the playlist')
+                    return pd.Series(), pd.DataFrame()
+                
+                # Initialize a progress bar in the app
+                progress_bar = st.progress(0)
+
+                for index, item in enumerate(results['items']):
+                    # Update progress bar based on the number of tracks proceeded
+                    percent_complete = int((index + 1) / total_tracks * 100)
+                    progress_bar.progress(percent_complete, text="🛰️Fetching The Most Up-To-Date Chart Data. Please Wait.")
+
+                    # Track
+                    track = item['track']
+                    if not track or not track.get('id'):
+                        continue # Skip tracks with missing info
+                    
+                    # Artist
+                    artist = track['artists'][0] if track['artists'] else None
+                    if not artist:
+                        continue # Skip tracks with missing artist info
+                    
+                    # Track Info
+                    track_id = track['id']
+                    genres = _sp.artist(artist['id'])['genres']
+
+                    track_info = {
+                        'artist_name': artist['name'],
+                        'track_name': track['name'],
+                        'is_explicit': track['explicit'],
+                        'album_release_date': track['album']['release_date'],
+                        'genres': ', '.join(genres)  # Join genres list into a string
+                    }
+
+                    # Fetch audio features
+                    audio_features = _sp.audio_features(track_id)[0]
+                    if not audio_features:
+                        continue # Skip tracks with missing audio features
+                    track_info.update({
+                        'danceability': audio_features['danceability'],
+                        'valence': audio_features['valence'],
+                        'energy': audio_features['energy'],
+                        'loudness': audio_features['loudness'],
+                        'acousticness': audio_features['acousticness'],
+                        'instrumentalness': audio_features['instrumentalness'],
+                        'liveness': audio_features['liveness'],
+                        'speechiness': audio_features['speechiness'],
+                        'key': audio_features['key'],
+                        'tempo': audio_features['tempo'],
+                        'mode': audio_features['mode'],
+                        'duration_ms': audio_features['duration_ms'],
+                        'time_signature': audio_features['time_signature']
+                    })
+                    # Fetch Popularity
+                    search_query = f"{track['name']} {artist['name']}"
+                    popularity_result = _sp.search(q=search_query, type='track', limit=1)
+                    print(f"Popularity Result: {popularity_result}")
+                    if popularity_result['tracks']['items']:
+                        popularity = popularity_result['tracks']['items'][0]['popularity']
+                    else:
+                        popularity = None
+                    track_info['popularity'] = popularity
+
+                    tracks_data.append(track_info)
+                
+                # Progress bar complete
+                progress_bar.progress(100)
+                # Success msg with a placeholder
+                success_placeholder = st.empty()
+                success_placeholder.success(f"Retrieved {total_tracks} Top Tracks from the playlist!", icon="✅")
+                # Display the msg for 2 seconds
+                time.sleep(2)
+                
+                success_placeholder.empty()
+                progress_bar.empty()
+
+                # Save the tracks data to a DataFrame
+                df = pd.DataFrame(tracks_data)
+                # Calculate mean values for each attribute
+                att_list = ['danceability', 'valence', 'energy', 'acousticness', 'instrumentalness', 'liveness', 'speechiness']
+                selected_atts = df[att_list].mean()
+
+                return selected_atts, df
+
+            except Exception as e:
+                print(f"Error: {e}")
+                st.error("Failed to retrieve the latest Top 50 Tracks data. Please try again later.")
+                return pd.Series(), pd.DataFrame()
+        return fetch_playlist_data(playlist_id)
+    
     except Exception as e:
-        print(f"Error: {e}")
-        st.error("Failed to retrieve the latest Tracks data. Please try again later.")
+        st.error(f"An error occured: {str(e)}")
         return pd.Series(), pd.DataFrame()
 
 class SpotifyAnalyzer:
