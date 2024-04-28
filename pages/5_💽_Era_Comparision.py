@@ -207,7 +207,8 @@ class EraComparison:
             paper_bgcolor='lightgrey',
             font={"color": "black"},
             height=450,
-            width=700
+            width=700,
+            autosize=True
         )
         
         return fig
@@ -646,7 +647,7 @@ class EraComparison:
         st.header('Radar Chart Comparison:')
         st.text("Music Era Comparison of Attributes (Mean Values)")
         radarchart = self.radar_chart(att1, att2, label1, label2)
-        st.plotly_chart(radarchart)
+        st.plotly_chart(radarchart, use_container_width=True)
 
         st.header('Duration Histogram Comparison:')
         st.text("Music Era Comparison of Track Duration")

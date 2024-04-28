@@ -170,7 +170,8 @@ class AlbumAnalyzer:
             paper_bgcolor='white',
             font={"color": "black"},
             height=450,
-            width=700
+            width=700,
+            autosize=True
         )
 
         return fig
@@ -401,7 +402,8 @@ class AlbumAnalyzer:
             paper_bgcolor='lightgrey',
             font={'color':"black"},
             height=450,
-            width=700
+            width=700,
+            autosize=True
         )
 
         return fig
@@ -415,7 +417,7 @@ class AlbumAnalyzer:
             st.header('Attribute Radar Chart')
             st.text("The radar chart displays various musical attributes of the album to compare their relative strengths.")
             fig = self.radar_chart()
-            st.plotly_chart(fig)
+            st.plotly_chart(fig, use_container_width=True)
 
             st.header('Tempo Histogram')
             st.text("The tempo histogram shows the distribution of the tempo (beats per minute) across all tracks in the album.")
@@ -451,7 +453,7 @@ class AlbumAnalyzer:
             st.text("The gauge chart displays the album's popularity score, "
                     "which is the average of the popularity scores of all tracks in the album.")
             fig = self.album_popularity_gauge_chart()
-            st.plotly_chart(fig)
+            st.plotly_chart(fig, use_container_width=True)
 
 
 

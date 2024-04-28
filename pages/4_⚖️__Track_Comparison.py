@@ -270,7 +270,8 @@ class SpotifyAnalyzer:
             paper_bgcolor = 'lightgrey',
             font = {"color": "black"},
             height=450,
-            width=700
+            width=700,
+            autosize=True
         )
 
         return fig
@@ -649,7 +650,8 @@ class SpotifyAnalyzer:
                 paper_bgcolor="lightgrey",
                 font={"color": "black"},
                 height=450,
-                width=700
+                width=700,
+                autosize=True
             )
 
         else:
@@ -683,7 +685,7 @@ class SpotifyAnalyzer:
                 st.header('Radar Chart Comparison:')
                 st.text(f'Comparison of Attributes in % {selected_playlist} vs. {track_name} by {artist_name}')
                 fig = self.create_radar_chart(audio_features, artist_name, track_name)
-                st.plotly_chart(fig)
+                st.plotly_chart(fig, use_container_width=True)
 
                 # Create a BPM Histogram Chart
                 st.header('Histogram Chart Comparison - Tempo:')
@@ -728,7 +730,7 @@ class SpotifyAnalyzer:
                 if user_genres:
                     st.write(f"<p style='font-size:24px'>{selected_artist}'s Genres: {user_genres}</p>", unsafe_allow_html=True)
                 else:
-                    st.error("No genres data available for the selected track/artist")
+                    st.warning("No genres data available for the selected track/artist")
                 fig = self.create_genres_wordcloud()
                 if fig is not None:
                     st.pyplot(fig)
@@ -740,7 +742,7 @@ class SpotifyAnalyzer:
                 st.header('Popularity Gauge Chart:')
                 st.text(f'Current Popularity Score for {track_name} by {artist_name}')
                 pop_chart = self.create_popularity_chart(audio_features)
-                st.plotly_chart(pop_chart)
+                st.plotly_chart(pop_chart, use_container_width=True)
                     
             else:
                 st.error("An error occurred during audio feature retrieval. Please try again.")

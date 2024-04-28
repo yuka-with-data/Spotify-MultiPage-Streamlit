@@ -193,7 +193,8 @@ class SpotifyAnalyzer:
             height=600,
             width=700,
             paper_bgcolor = 'Gainsboro',
-            plot_bgcolor='Gainsboro' 
+            plot_bgcolor='Gainsboro',
+            autosize=True
         )
 
         return fig
@@ -223,7 +224,8 @@ class SpotifyAnalyzer:
             paper_bgcolor = 'Gainsboro',
             font = {"color": "black"},
             height=450,
-            width=700
+            width=700,
+            autosize=True
         )
 
         return fig
@@ -472,13 +474,13 @@ class SpotifyAnalyzer:
             st.header('Artist Presence in the Top Chart')
             st.text("This bubble chart shows the Artist Presence and Popularity in the latest Top Chart")
             artist_bubble = self.artist_bubble()
-            st.plotly_chart(artist_bubble)
+            st.plotly_chart(artist_bubble, use_container_width=True)
 
             # Create a Radar Chart
             st.header('Attributes Radar Chart')
             st.text("The radar chart displays the distribution of various musical attributes for the selected tracks.")
             fig = self.radar_chart()
-            st.plotly_chart(fig)
+            st.plotly_chart(fig, use_container_width=True)
 
             # Create a BPM Histogram Chart
             st.header('Tempo Histogram Chart')

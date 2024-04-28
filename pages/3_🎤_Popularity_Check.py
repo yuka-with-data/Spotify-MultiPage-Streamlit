@@ -77,7 +77,8 @@ class PopularityScore():
                 paper_bgcolor="LavenderBlush",
                 font={"color": "black"},
                 height=450,
-                width=700
+                width=700,
+                autosize=True
             )
         else:
             st.warning("Popularity data not available for this track.")
@@ -137,7 +138,7 @@ try:
 
             st.subheader(f"Current Popularity Score for {selected_track} by {selected_artist}")
             pop_chart = popularity_score.create_popularity_chart(track_id)
-            st.plotly_chart(pop_chart)
+            st.plotly_chart(pop_chart, use_container_width=True)
 except Exception as e:
     print(e)
     st.error("An error occurred during analysis. Please try again.")
