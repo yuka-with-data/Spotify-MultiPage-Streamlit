@@ -1,3 +1,4 @@
 .streamlit/secrets.toml
 .cache
 audio_features.json
+__pycache__/
