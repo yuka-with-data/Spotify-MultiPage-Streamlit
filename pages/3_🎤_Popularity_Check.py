@@ -8,10 +8,12 @@ import streamlit as st
 from streamlit_searchbox import st_searchbox
 from typing import Optional, Dict, Tuple, List, Union
 
-
 # Page Config
 st.set_page_config(page_title="Popularity Check", 
                    page_icon="🎙️")
+
+# Import data_galaxy after Page Config
+from data_galaxy import init_spotify_client
 
 class PopularityScore():
     def __init__(self, sp) -> None:
@@ -87,12 +89,6 @@ class PopularityScore():
 
 
 # Initialize Spotify Client
-def init_spotify_client():
-    client_id = st.secrets["SPOTIFY_CLIENT_ID"]  #config('SPOTIFY_CLIENT_ID')
-    client_secret = st.secrets["SPOTIFY_CLIENT_SECRET"] # config('SPOTIFY_CLIENT_SECRET')
-    credential_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
-    sp = spotipy.Spotify(auth_manager=credential_manager)
-    return sp
 sp = init_spotify_client()
 # Instantiate class
 popularity_score = PopularityScore(sp)
