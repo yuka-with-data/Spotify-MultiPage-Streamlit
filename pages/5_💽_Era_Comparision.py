@@ -459,7 +459,7 @@ class EraComparison:
         fig, axs = plt.subplots(1, 2, figsize=(12, 6))
 
         axs[0].pie(mode_1,
-                labels=labels,
+                #labels=labels,
                 colors=colors,
                 autopct='%1.1f%%',
                 startangle=90,
@@ -468,8 +468,8 @@ class EraComparison:
         axs[0].set_title(pl1)
         axs[0].axis('equal')
         
-        axs[1].pie(mode_2,
-                labels=labels,
+        wedges2, _, _ = axs[1].pie(mode_2,
+                #labels=labels,
                 colors=colors,
                 autopct='%1.1f%%',
                 startangle=90,
@@ -478,6 +478,12 @@ class EraComparison:
         axs[1].set_title(pl2)
         axs[1].axis('equal')
 
+        fig.legend(wedges2, 
+                   labels, 
+                   title="Mode", 
+                   loc="center right", 
+                   fontsize='small'
+                   )
         fig.patch.set_facecolor('lightgrey')
         plt.tight_layout()
 
@@ -514,7 +520,7 @@ class EraComparison:
         fig, axs = plt.subplots(1,2,figsize=(12,6))
 
         axs[0].pie(explicit_1,
-                   labels=labels,
+                   # labels=labels,
                    colors=colors,
                    autopct='%1.1f%%',
                    startangle=90,
@@ -523,8 +529,8 @@ class EraComparison:
         axs[0].set_title(pl1)
         axs[0].axis('equal')
         
-        axs[1].pie(explicit_2,
-                   labels=labels,
+        wedges2, _, _ = axs[1].pie(explicit_2,
+                   # labels=labels,
                    colors=colors,
                    autopct='%1.1f%%',
                    startangle=90,
@@ -533,6 +539,12 @@ class EraComparison:
         axs[1].set_title(pl2)
         axs[1].axis('equal')
 
+        fig.legend(wedges2, 
+                   labels, 
+                   title="Mode", 
+                   loc="center right", 
+                   fontsize='small'
+                   )
         fig.patch.set_facecolor('lightgrey')
         plt.tight_layout()
 
@@ -596,11 +608,6 @@ class EraComparison:
 
 # Initialize the Spotify client
 sp = init_spotify_client()
-
-
-#################################
-#### application starts here ####
-#################################
 
 playlists = {
     "Select a Playlist": None, # Placeholder value
