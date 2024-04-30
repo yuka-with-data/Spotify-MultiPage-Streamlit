@@ -8,11 +8,13 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from typing import Optional, Dict, Tuple, List, Union
 
-
 st.set_page_config(
     page_title="Track Recommendation",
     page_icon="💁‍♀️",
 )
+
+# Import data_galaxy after Page Config
+from data_galaxy import init_spotify_client
 
 class TrackRecommendation:
     def __init__(self, sp) -> None:
@@ -74,14 +76,7 @@ class TrackRecommendation:
 
         return similar_tracks
 
-
-# Initialize Spotify Client
-def init_spotify_client():
-    client_id = st.secrets["SPOTIFY_CLIENT_ID"]  #config('SPOTIFY_CLIENT_ID')
-    client_secret = st.secrets["SPOTIFY_CLIENT_SECRET"] # config('SPOTIFY_CLIENT_SECRET')
-    credential_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
-    sp = spotipy.Spotify(auth_manager=credential_manager)
-    return sp
+# Spotify Client Outh Initialization & Instantiation
 sp = init_spotify_client()
 track_recommendation = TrackRecommendation(sp)
 
