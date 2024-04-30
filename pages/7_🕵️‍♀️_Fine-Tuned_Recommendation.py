@@ -7,13 +7,10 @@ from typing import List
 st.set_page_config(page_title="Fine-Tuned Recommendation", 
                    page_icon="🔬")
 
+# Import data_galaxy after Page Config
+from data_galaxy import init_spotify_client
+
 # Initialize Spotify Client
-def init_spotify_client():
-    client_id = st.secrets["SPOTIFY_CLIENT_ID"]
-    client_secret = st.secrets["SPOTIFY_CLIENT_SECRET"]
-    credential_manager = SpotifyClientCredentials(client_id=client_id, client_secret=client_secret)
-    sp = spotipy.Spotify(auth_manager=credential_manager)
-    return sp
 sp = init_spotify_client()
 
 # Fetch available genres
