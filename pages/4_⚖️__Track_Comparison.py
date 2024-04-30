@@ -374,13 +374,12 @@ class SpotifyAnalyzer:
 
         fig, ax = plt.subplots(figsize=(6, 4))
         patches, _,_= ax.pie(explicit_counts, 
-                            labels=labels,
+                            #labels=labels,
                             colors=colors, 
                             autopct='%1.1f%%', 
                             startangle=90, 
                             explode=explode, 
                             textprops={'fontsize': 12}, 
-                            # shadow=True, 
                             radius=1.2)
         
         if is_explicit:
@@ -394,6 +393,7 @@ class SpotifyAnalyzer:
         explicit_status = "Explicit" if is_explicit else "Non-Explicit"
         st.write(f"<p style='font-size:24px'>Explicitness Status for '{selected_track}': {explicit_status}</p>", unsafe_allow_html=True)
         ax.axis('equal')
+        ax.legend(patches, labels, loc='best', fontsize='small', title="Track Type")
         plt.tight_layout()
 
         return fig
@@ -419,7 +419,7 @@ class SpotifyAnalyzer:
 
         fig, ax = plt.subplots(figsize=(6, 4))
         patches, _, _ = ax.pie(mode_counts,
-                            labels=labels,
+                            #labels=labels,
                             colors=colors,
                             autopct='%1.1f%%',
                             startangle=90,
@@ -438,6 +438,7 @@ class SpotifyAnalyzer:
         mode_status = "Major" if is_major else "Minor"
         st.write(f"<p style='font-size:24px'>Mode Status for '{selected_track}': {mode_status}</p>", unsafe_allow_html=True)
         ax.axis('equal')
+        ax.legend(patches, labels, loc='best', fontsize='small', title="Track Type")
         plt.tight_layout()
 
         return fig
