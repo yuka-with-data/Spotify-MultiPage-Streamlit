@@ -265,7 +265,7 @@ class SpotifyAnalyzer:
 
         fig, ax = plt.subplots(figsize=(6, 4))
         patches, texts, autotexts = ax.pie(mode_counts,
-                                        labels=labels,
+                                        #labels=labels,
                                         colors=colors_with_alpha,
                                         autopct='%1.1f%%',
                                         startangle=90,
@@ -273,6 +273,7 @@ class SpotifyAnalyzer:
                                         radius=1.2)
         
         ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+        ax.legend(patches, labels, loc='best', fontsize='small', title="Track Type")
         plt.tight_layout()
 
         return fig
@@ -293,7 +294,7 @@ class SpotifyAnalyzer:
 
         fig, ax = plt.subplots(figsize=(6, 4))
         patches, _,_= ax.pie(explicit_counts, 
-                            labels=labels,
+                            #labels=labels,
                             colors=colors_with_alpha, 
                             autopct='%1.1f%%', 
                             startangle=90, 
@@ -302,6 +303,7 @@ class SpotifyAnalyzer:
                             radius=1.2)
         
         ax.axis('equal')
+        ax.legend(patches, labels, loc='best', fontsize='small', title="Track Type")
         plt.tight_layout()
 
         return fig
