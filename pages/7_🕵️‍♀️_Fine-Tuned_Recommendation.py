@@ -61,40 +61,43 @@ st.markdown("# Fine-Tuned Recommendation Tracks")
 st.info("Select your target values and click the 'Get Recommendations' button to get personalized recommendations.", icon="🔬")
 
 if submit_button:
-    try:
-        # Find the numerical key for the given note name (reverse mapping)
-        reverse_key_mapping = {v: k for k, v in key_mapping.items()}
-        numeric_key = reverse_key_mapping[key]
-        mode_value = 1 if mode == "Major" else 0
+    if not selected_genres:
+        st.error("Please select at least one genre.")
+    else:
+        try:
+            # Find the numerical key for the given note name (reverse mapping)
+            reverse_key_mapping = {v: k for k, v in key_mapping.items()}
+            numeric_key = reverse_key_mapping[key]
+            mode_value = 1 if mode == "Major" else 0
 
-        seeds = {'target_danceability': danceability,
-                'target_energy': energy,
-                'target_valence': valence,
-                'target_acousticness': acousticness,
-                'target_instrumentalness': instrumentalness,
-                'target_liveness': liveness,
-                'target_speechiness': speechiness,
-                'target_tempo': tempo,
-                'target_loudness': loudness,
-                'target_key': numeric_key,
-                'target_mode': mode_value,
-                'exclude_explicit': exclude_explicit}
+            seeds = {'target_danceability': danceability,
+                    'target_energy': energy,
+                    'target_valence': valence,
+                    'target_acousticness': acousticness,
+                    'target_instrumentalness': instrumentalness,
+                    'target_liveness': liveness,
+                    'target_speechiness': speechiness,
+                    'target_tempo': tempo,
+                    'target_loudness': loudness,
+                    'target_key': numeric_key,
+                    'target_mode': mode_value,
+                    'exclude_explicit': exclude_explicit}
+            
+            if selected_genres:
+                recommendations = sp.recommendations(seed_genres=selected_genres, limit=10, **seeds)
+            else:
+                recommendations = sp.recommendations(limit=10, **seeds)
+            
+            if recommendations['tracks']:
+                for idx, track in enumerate(recommendations['tracks'], start=1):
+                    track_info = f"{idx}. **{track['name']}** by **{', '.join([artist['name'] for artist in track['artists']])}** | Popularity: **{track['popularity']}**"
+                    st.write(track_info)
+                    st.components.v1.iframe(f"https://open.spotify.com/embed/track/{track['id']}?utm_source=generator", width=500, height=160, scrolling=True)
+            else:
+                st.write("No Recommendation found. Adjust the sliders and try again.")
         
-        if selected_genres:
-            recommendations = sp.recommendations(seed_genres=selected_genres, limit=10, **seeds)
-        else:
-            recommendations = sp.recommendations(limit=10, **seeds)
-        
-        if recommendations['tracks']:
-            for idx, track in enumerate(recommendations['tracks'], start=1):
-                track_info = f"{idx}. **{track['name']}** by **{', '.join([artist['name'] for artist in track['artists']])}** | Popularity: **{track['popularity']}**"
-                st.write(track_info)
-                st.components.v1.iframe(f"https://open.spotify.com/embed/track/{track['id']}?utm_source=generator", width=500, height=160, scrolling=True)
-        else:
-            st.write("No Recommendation found. Adjust the sliders and try again.")
-    
-    except Exception as e:
-        st.error(f"Error fetching recommendations: {str(e)}")
+        except Exception as e:
+            st.error(f"Error fetching recommendations: {str(e)}")
 
 st.divider()
 st.caption("""
