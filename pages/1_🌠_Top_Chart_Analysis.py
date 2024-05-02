@@ -99,6 +99,68 @@ class SpotifyAnalyzer:
         )
 
         return fig
+    
+    def artist_sankey(self) -> go.Figure:
+
+        def prepare_sankey_data():
+            # Aggregate popularity scores by artist
+            artist_popularity = self.df_top_50.groupby('artist_name')['popularity'].sum().reset_index()
+            artist_popularity['popularity_category'] = pd.qcut(artist_popularity['popularity'], 3, labels=["Low", "Medium", "High"])
+            print(artist_popularity)
+            return artist_popularity
+        
+        artist_popularity = prepare_sankey_data()
+
+        # Create lists of unique nodes
+        artists = artist_popularity['artist_name'].tolist()
+        categories = ['High', 'Medium', 'Low']
+
+        # Map to indices for Sankey diagram
+        artist_indices = {artist: i for i, artist in enumerate(artists)}
+        category_indices = {category: i + len(artists) for i, category in enumerate(categories)}
+        print(category_indices)
+
+        # Define nodes
+        nodes = [{'label': artist} for artist in artists] + [{'label': category} for category in categories]
+
+        # Define links
+        links = [{
+            'source': artist_indices[row['artist_name']],
+            'target': category_indices[row['popularity_category']],
+            'value': row['popularity']
+        } for index, row in artist_popularity.iterrows()]
+
+        # Create the Sankey diagram
+        fig = go.Figure(data=[go.Sankey(
+            node=dict(
+                pad=15,
+                thickness=20,
+                line=dict(color="black", width=0.5),
+                label=[node['label'] for node in nodes],
+                color='rgba(69, 27, 140, 0.9)', #purple
+                hoverinfo="all",
+                hovertemplate='<b>%{label}</b>',
+                #font=dict(color='white', size=10) 
+            ),
+            link=dict(
+                source=[link['source'] for link in links],
+                target=[link['target'] for link in links],
+                value=[link['value'] for link in links],
+                color='rgba(255, 127, 80, 0.7)', # orange
+                hoverinfo="skip"
+            )
+        )])
+
+        fig.update_layout(# title_text="Sankey Diagram:",
+                          height=600,
+                          width=700,
+                        font_size=10,
+                        margin=dict(l=20, r=20, t=20, b=20),
+                        autosize=True,
+                        paper_bgcolor='Gainsboro',
+                        
+                        )
+        return fig
 
     
     def radar_chart(self) -> go.Figure:
@@ -504,9 +566,13 @@ class SpotifyAnalyzer:
             st.dataframe(self.df_top_50)
 
             st.header('Artist Presence in the Top Chart')
-            st.text("This bubble chart shows the Artist Presence and Popularity in the latest Top Chart")
+            st.text("This bubble chart shows the Artist Presence and Aggregated Popularity Score in the latest Top Chart")
             artist_bubble = self.artist_bubble()
             st.plotly_chart(artist_bubble, use_container_width=True)
+            
+            st.text("This Sankey Diagram shows the Artist Presence and Aggregated Popularity Score in the latest Top Chart")
+            artist_sankey = self.artist_sankey()
+            st.plotly_chart(artist_sankey, use_container_width=True)
 
             # Create a Radar Chart
             st.header('Attributes Radar Chart')
