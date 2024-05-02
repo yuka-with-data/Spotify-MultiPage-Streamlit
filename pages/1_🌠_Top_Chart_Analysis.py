@@ -562,7 +562,7 @@ class SpotifyAnalyzer:
     def run_analysis(self) -> None:
         try:
             # Create a DataFrame
-            st.header('Playlist Table')
+            st.header('Top Chart Table')
             st.dataframe(self.df_top_50)
 
             st.header('Artist Presence in the Top Chart')
