@@ -7,6 +7,7 @@ import json
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import plotly.graph_objects as go
+import plotly.express as px
 import streamlit as st
 # from decouple import config
 import matplotlib.pyplot as plt
@@ -45,8 +46,23 @@ class SpotifyAnalyzer:
         merged_df['visible_text'] = ''
         # Set visible text only for top 3 frequent artists
         merged_df.loc[0:2, 'visible_text'] = merged_df.loc[0:2, 'artist_name']
-        # Debugging: check which artists are set to display text
+        # Debugging
         print(merged_df[['artist_name', 'frequency', 'visible_text']])
+
+        colorscale=[  # Custom colorscale
+            [0.0, "rgba(232, 148, 88, 0.9)"],   # Lighter orange
+            [0.12, "rgba(213, 120, 98, 0.9)"],  # Dark orange
+            [0.24, "rgba(190, 97, 111, 0.9)"],  # Reddish-pink
+            [0.36, "rgba(164, 77, 126, 0.9)"],  # Lighter magenta
+            [0.48, "rgba(136, 60, 137, 0.9)"],  # Deep magenta
+            [0.58, "rgba(125, 50, 140, 0.9)"],  # Mid purple
+            [0.68, "rgba(106, 44, 141, 0.9)"],  # Purple-pink
+            [0.78, "rgba(87, 35, 142, 0.9)"],   # Deep purple
+            [0.88, "rgba(69, 27, 140, 0.9)"],   # Rich purple
+            [0.94, "rgba(40, 16, 137, 0.9)"],   # Darker purple
+            [0.97, "rgba(26, 12, 135, 0.9)"],   # New shade between darker purple and dark blue
+            [1.0, "rgba(12, 7, 134, 0.9)"]      # Dark blue
+        ]
 
         # Create bubble chart
         fig = go.Figure(data=[go.Scatter(
@@ -63,7 +79,7 @@ class SpotifyAnalyzer:
                 sizemin=4,
                 color=merged_df['popularity'],
                 colorbar=dict(title='Score', thickness=10),
-                colorscale='Plasma_r'  # color scale for visual appeal
+                colorscale=colorscale 
             ),
             hoverinfo='text+x+y',
             hovertemplate='<b>%{hovertext}</b><br>Frequency: %{x}<br>Popularity: %{y}<extra></extra>'
@@ -115,36 +131,68 @@ class SpotifyAnalyzer:
 
         return fig
         
-    def tempo_histogram(self) -> plt.Figure:
-        color_top_50 = cm.plasma(0.15)
-        color_average_tempo = cm.plasma(0.55) 
+    def tempo_histogram(self) -> go.Figure:
+        color_top_50 = px.colors.sequential.Plasma[2]  
+        color_average_tempo = px.colors.sequential.Plasma[6]  
 
-        fig, ax = plt.subplots(figsize=(6, 4))
-        sns.histplot(self.df_top_50['tempo'], 
-                     bins=50, 
-                     kde=True, 
-                     color=color_top_50, 
-                     edgecolor='black', 
-                     ax=ax)
+        # Calculate histogram data manually to determine the max frequency
+        counts, bins = np.histogram(self.df_top_50['tempo'], bins=50)
+        bins = np.round(bins).astype(int)  # Round the bin edges to integer
+        max_y = counts.max()  # Increase max_y slightly for visual appeal
+
+        # Group data into bins
+        bin_labels = [f"{bins[i]} - {bins[i+1]}" for i in range(len(bins)-1)]
+        self.df_top_50['bin'] = pd.cut(self.df_top_50['tempo'], bins=bins, labels=bin_labels, include_lowest=True)
+
+        # Prepare data for the tooltips
+        grouped = self.df_top_50.groupby('bin')
+        tooltip_data = grouped['track_name'].agg(lambda x: ', '.join(x)).reset_index()
+
+        # Create the figure and add bars manually
+        fig = go.Figure()
+        for label, group in grouped:
+            fig.add_trace(go.Bar(
+                x=[label], 
+                y=[group['tempo'].count()],
+                text=[tooltip_data[tooltip_data['bin'] == label]['track_name'].values[0]],
+                hoverinfo="text+x+y",
+                marker=dict(color=color_top_50, line=dict(width=1, color='black')),
+                name=label,
+                showlegend=False  # Hide legend for bars
+            ))
+
+        # Calculate mean tempo
         mean_tempo = self.df_top_50['tempo'].mean()
-        ax.axvline(mean_tempo, 
-                   color=color_average_tempo, 
-                   linestyle='dashed', 
-                   linewidth=2, 
-                   label='Average Tempo')
-        ax.set_xlabel('Tempo')
-        ax.set_ylabel('Frequency')
-        ax.legend()
+        # Find the bin label for the mean tempo
+        mean_tempo_bin = pd.cut([mean_tempo], bins=bins, labels=bin_labels, include_lowest=True)[0]
 
-        max_count = int(max(ax.get_yticks())) # Find the current max y-tick and round up
-        ax.set_yticks(range(0, max_count))
+        # Add a line for the average tempo
+        fig.add_trace(go.Scatter(
+            x=[mean_tempo_bin, mean_tempo_bin],
+            y=[0, max_y],
+            mode='lines',
+            line=dict(color=color_average_tempo, width=2, dash='dash'),
+            name='Avg Tempo',
+            hoverinfo='text',
+            text=f"Mean Tempo: {mean_tempo:.2f} BPM" 
+        ))
 
-        ax.grid(False, axis='x')
-        ax.grid(True, axis='y', linestyle='--',alpha=0.6)
-
-        # Set background color
-        fig.patch.set_facecolor('Gainsboro')
-        ax.set_facecolor('Gainsboro')
+        # Update layout with additional options
+        fig.update_layout(
+            xaxis_title='Tempo (BPM)',
+            yaxis_title='Frequency',
+            template='plotly_white',
+            plot_bgcolor='Gainsboro',
+            paper_bgcolor='Gainsboro',
+            # legend_title_text='Legend',
+            legend=dict(
+                orientation='h',
+                y=1.1
+                
+            ),
+            margin=dict(l=20, r=20, t=20, b=20),
+            autosize=True
+        )
 
         return fig
     
@@ -218,7 +266,7 @@ class SpotifyAnalyzer:
 
         return fig
     
-    def key_distribution_chart(self) -> plt.Figure:
+    def key_distribution_chart(self) -> go.Figure:
         # Mapping of numeric key values to corresponding alphabetic keys
         key_mapping = ('C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B')
 
@@ -237,16 +285,43 @@ class SpotifyAnalyzer:
         # Map numeric keys to their names
         key_df_sorted['Key Name'] = key_df_sorted['Key'].apply(lambda x: key_mapping[x])
 
-        fig, ax = plt.subplots(figsize=(10, 6))
-        sns.set_theme(style="whitegrid")
+        fig = go.Figure()
 
-        # Plot using the sorted DataFrame
-        sns.barplot(x='Key Name', y='Count', data=key_df_sorted, palette='plasma', ax=ax)
+        # Custom Plasma colorscale with 0.8 alpha
+        colorscale = [
+        [0.0, "rgba(232, 148, 88, 0.8)"],   # Lighter orange
+        [0.12, "rgba(213, 120, 98, 0.8)"],  # Dark orange
+        [0.24, "rgba(190, 97, 111, 0.8)"],  # Reddish-pink
+        [0.36, "rgba(164, 77, 126, 0.8)"],  # Lighter magenta
+        [0.48, "rgba(136, 60, 137, 0.8)"],  # Deep magenta
+        [0.58, "rgba(125, 50, 140, 0.8)"],  # Mid purple
+        [0.68, "rgba(106, 44, 141, 0.8)"],  # Purple-pink
+        [0.78, "rgba(87, 35, 142, 0.8)"],   # Deep purple
+        [0.88, "rgba(69, 27, 140, 0.8)"],   # Rich purple
+        [0.94, "rgba(40, 16, 137, 0.8)"],   # Darker purple
+        [0.97, "rgba(26, 12, 135, 0.8)"],   # between darker purple and dark blue
+        [1.0, "rgba(12, 7, 134, 0.8)"]      # Dark blue
+    ]
 
-        ax.set_facecolor('Gainsboro')
-        plt.xlabel('Key')
-        plt.ylabel('Count')
-        fig.patch.set_facecolor('Gainsboro')
+        # Add the bar trace
+        fig.add_trace(go.Bar(
+            x=key_df_sorted['Key Name'],
+            y=key_df_sorted['Count'],
+            marker=dict(color=key_df_sorted['Count'], colorscale=colorscale),  
+            hoverinfo='y+x'
+        ))
+
+        # Update layout
+        fig.update_layout(
+            # title='Key Distribution',
+            xaxis_title='Key',
+            yaxis_title='Count',
+            template='plotly_white',
+            plot_bgcolor='Gainsboro',
+            paper_bgcolor='Gainsboro',
+            autosize=True,
+            margin=dict(l=20, r=20, t=30, b=20)
+        )
 
         return fig
     
@@ -373,7 +448,7 @@ class SpotifyAnalyzer:
             st.header('Tempo Histogram Chart')
             st.text("This histogram shows the distribution of tempo (beats per minute) across tracks.")
             bpm_hist_chart = self.tempo_histogram()
-            st.pyplot(bpm_hist_chart)
+            st.plotly_chart(bpm_hist_chart)
 
             st.header('Duration Histogram Chart')
             st.text("The histogram below represents the distribution of track durations in the playlist.")
@@ -384,7 +459,7 @@ class SpotifyAnalyzer:
             st.header('Key Distribution Comparison:')
             st.text("This chart compares the key distribution of the tracks, showing which musical keys are most common.")
             key_dist = self.key_distribution_chart()
-            st.pyplot(key_dist)
+            st.plotly_chart(key_dist)
 
             # Create a Duration Histogram Chart
             st.header('Loudness Histogram Chart')
