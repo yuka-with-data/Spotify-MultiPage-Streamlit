@@ -112,7 +112,7 @@ class SpotifyAnalyzer:
             r=means_values_top_50p,
             theta=att_list,
             fill='toself',
-            name='Playlist (mean)',
+            name='Chart (mean)',
             fillcolor=color_top_50,
             line=dict(color=color_top_50),
         ))
@@ -136,9 +136,11 @@ class SpotifyAnalyzer:
         color_average_tempo = px.colors.sequential.Plasma[6]  
 
         # Calculate histogram data manually to determine the max frequency
-        counts, bins = np.histogram(self.df_top_50['tempo'], bins=50)
-        bins = np.round(bins).astype(int)  # Round the bin edges to integer
-        max_y = counts.max()  # Increase max_y slightly for visual appeal
+        data_min = self.df_top_50['tempo'].min()
+        data_max = self.df_top_50['tempo'].max()
+        bins = np.linspace(data_min - 0.1, data_max + 0.1, num=50)
+        counts, bins = np.histogram(self.df_top_50['tempo'], bins=bins)
+        bins = np.round(bins, 2)  # Round bins to two decimal places
 
         # Group data into bins
         bin_labels = [f"{bins[i]} - {bins[i+1]}" for i in range(len(bins)-1)]
@@ -169,7 +171,7 @@ class SpotifyAnalyzer:
         # Add a line for the average tempo
         fig.add_trace(go.Scatter(
             x=[mean_tempo_bin, mean_tempo_bin],
-            y=[0, max_y],
+            y=[0, counts.max()],  # Use the maximum count as the top of the line
             mode='lines',
             line=dict(color=color_average_tempo, width=2, dash='dash'),
             name='Average Tempo',
@@ -205,15 +207,21 @@ class SpotifyAnalyzer:
         self.df_top_50['duration_min'] = self.df_top_50['duration_ms'] / 60000
 
         # Calculate histogram data
-        counts, bins = np.histogram(self.df_top_50['duration_min'], bins=50)
+        data_min = self.df_top_50['duration_min'].min()
+        data_max = self.df_top_50['duration_min'].max()
+        bins = np.linspace(data_min - 0.1, data_max + 0.1, num=50)
+        counts, bins = np.histogram(self.df_top_50['duration_min'], bins=bins)
+        print(counts)
+        print(bins)
         bins = np.round(bins, 2)  # Round bins to two decimal places
 
         # Create bin labels for grouping
         bin_labels = [f"{bins[i]} - {bins[i+1]}" for i in range(len(bins)-1)]
-        self.df_top_50['bin'] = pd.cut(self.df_top_50['duration_min'], bins=bins, labels=bin_labels, include_lowest=True)
 
-        # Prepare data for the tooltips
+        # Group by bins
+        self.df_top_50['bin'] = pd.cut(self.df_top_50['duration_min'], bins=bins, labels=bin_labels, include_lowest=True)
         grouped = self.df_top_50.groupby('bin')
+
         tooltip_data = grouped['track_name'].agg(lambda x: ', '.join(x)).reset_index()
 
         # Create the figure and add histogram bars manually
@@ -268,7 +276,10 @@ class SpotifyAnalyzer:
         color_average_loudness = px.colors.sequential.Plasma[6]  
 
         # Calculate histogram data
-        counts, bins = np.histogram(self.df_top_50['loudness'], bins=50)
+        data_min = self.df_top_50['loudness'].min()
+        data_max = self.df_top_50['loudness'].max()
+        bins = np.linspace(data_min - 0.1, data_max + 0.1, num=50)
+        counts, bins = np.histogram(self.df_top_50['loudness'], bins=bins)
         bins = np.round(bins, 2)  # Round bins to two decimal places
 
         # Create bin labels for grouping
