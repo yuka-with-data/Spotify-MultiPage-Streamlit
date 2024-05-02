@@ -172,7 +172,7 @@ class SpotifyAnalyzer:
             y=[0, max_y],
             mode='lines',
             line=dict(color=color_average_tempo, width=2, dash='dash'),
-            name='Avg Tempo',
+            name='Average Tempo',
             hoverinfo='text',
             text=f"Mean Tempo: {mean_tempo:.2f} BPM" 
         ))
@@ -197,72 +197,131 @@ class SpotifyAnalyzer:
         return fig
     
     def duration_histogram(self) -> plt.Figure:
-        color_top_50 = cm.plasma(0.15)
-        color_average_duration = cm.plasma(0.55) 
+
+        color_top_50 = px.colors.sequential.Plasma[2]  
+        color_average_duration = px.colors.sequential.Plasma[6]  
 
         # Convert duration from milliseconds to minutes for readability
         self.df_top_50['duration_min'] = self.df_top_50['duration_ms'] / 60000
 
-        fig, ax = plt.subplots(figsize=(6, 4))
-        sns.histplot(self.df_top_50['duration_min'], 
-                    bins=50, 
-                    kde=True, 
-                    color=color_top_50, 
-                    edgecolor='black', 
-                    ax=ax)
+        # Calculate histogram data
+        counts, bins = np.histogram(self.df_top_50['duration_min'], bins=50)
+        bins = np.round(bins, 2)  # Round bins to two decimal places
+
+        # Create bin labels for grouping
+        bin_labels = [f"{bins[i]} - {bins[i+1]}" for i in range(len(bins)-1)]
+        self.df_top_50['bin'] = pd.cut(self.df_top_50['duration_min'], bins=bins, labels=bin_labels, include_lowest=True)
+
+        # Prepare data for the tooltips
+        grouped = self.df_top_50.groupby('bin')
+        tooltip_data = grouped['track_name'].agg(lambda x: ', '.join(x)).reset_index()
+
+        # Create the figure and add histogram bars manually
+        fig = go.Figure()
+        for label, group in grouped:
+            fig.add_trace(go.Bar(
+                x=[label], 
+                y=[group['duration_min'].count()],
+                text=[tooltip_data[tooltip_data['bin'] == label]['track_name'].values[0]],
+                hoverinfo="text+x+y",
+                marker=dict(color=color_top_50, line=dict(width=1, color='black')),
+                name=label,
+                showlegend=False  # Hide legend for bars
+            ))
+
+        # Calculate mean duration
         mean_duration = self.df_top_50['duration_min'].mean()
-        ax.axvline(mean_duration, 
-                color=color_average_duration, 
-                linestyle='dashed', 
-                linewidth=2, 
-                label='Average Duration')
-        ax.set_xlabel('Duration (min)')
-        ax.set_ylabel('Frequency')
-        ax.legend()
+        # Find the bin label for the mean duration
+        mean_duration_bin = pd.cut([mean_duration], bins=bins, labels=bin_labels, include_lowest=True)[0]
 
-        max_count = int(max(ax.get_yticks())) # Find the current max y-tick and round up
-        ax.set_yticks(range(0, max_count))
+        # Add a line for the average duration
+        fig.add_trace(go.Scatter(
+            x=[mean_duration_bin, mean_duration_bin],
+            y=[0, counts.max()],  # Use the maximum count as the top of the line
+            mode='lines',
+            line=dict(color=color_average_duration, width=2, dash='dash'),
+            name='Average Duration',
+            hoverinfo='text',
+            text=f"Mean Duration: {mean_duration:.2f} min" 
+        ))
 
-        ax.grid(False, axis='x')
-        ax.grid(True, axis='y', linestyle='--', alpha=0.6)
-
-        # Set background color
-        fig.patch.set_facecolor('Gainsboro')
-        ax.set_facecolor('Gainsboro')
+        # Update layout with additional options
+        fig.update_layout(
+            xaxis_title='Duration (min)',
+            yaxis_title='Frequency',
+            template='plotly_white',
+            plot_bgcolor='Gainsboro',
+            paper_bgcolor='Gainsboro',
+            legend=dict(
+                orientation='h',
+                y=1.1  # Adjust position of the legend
+            ),
+            margin=dict(l=20, r=20, t=20, b=20),
+            autosize=True
+        )
 
         return fig
 
     
     def loudness_histogram(self) -> plt.Figure:
-        color_top_50 = cm.plasma(0.15)
-        color_average_loud = cm.plasma(0.55) 
+        color_top_50 = px.colors.sequential.Plasma[2]  
+        color_average_loudness = px.colors.sequential.Plasma[6]  
 
-        fig, ax = plt.subplots(figsize=(6, 4))
-        sns.histplot(self.df_top_50['loudness'], 
-                     bins=50, 
-                     kde=True, 
-                     color=color_top_50, 
-                     edgecolor='black', 
-                     ax=ax)
-        mean_tempo = self.df_top_50['loudness'].mean()
-        ax.axvline(mean_tempo, 
-                   color=color_average_loud, 
-                   linestyle='dashed', 
-                   linewidth=2, 
-                   label='Average Loudness')
-        ax.set_xlabel('Loudness')
-        ax.set_ylabel('Frequency')
-        ax.legend()
+        # Calculate histogram data
+        counts, bins = np.histogram(self.df_top_50['loudness'], bins=50)
+        bins = np.round(bins, 2)  # Round bins to two decimal places
 
-        max_count = int(max(ax.get_yticks())) # Find the current max y-tick and round up
-        ax.set_yticks(range(0, max_count))
+        # Create bin labels for grouping
+        bin_labels = [f"{bins[i]} - {bins[i+1]}" for i in range(len(bins)-1)]
+        self.df_top_50['bin'] = pd.cut(self.df_top_50['loudness'], bins=bins, labels=bin_labels, include_lowest=True)
 
-        ax.grid(False, axis='x')
-        ax.grid(True, axis='y', linestyle='--',alpha=0.6)
+        # Prepare data for the tooltips
+        grouped = self.df_top_50.groupby('bin')
+        tooltip_data = grouped['track_name'].agg(lambda x: ', '.join(x)).reset_index()
 
-        # Set background color
-        fig.patch.set_facecolor('Gainsboro')
-        ax.set_facecolor('Gainsboro')
+        # Create the figure and add histogram bars manually
+        fig = go.Figure()
+        for label, group in grouped:
+            fig.add_trace(go.Bar(
+                x=[label], 
+                y=[group['loudness'].count()],
+                text=[tooltip_data[tooltip_data['bin'] == label]['track_name'].values[0]],
+                hoverinfo="text+x+y",
+                marker=dict(color=color_top_50, line=dict(width=1, color='black')),
+                name=label,
+                showlegend=False  # Hide legend for bars
+            ))
+
+        # Calculate mean loudness
+        mean_loudness = self.df_top_50['loudness'].mean()
+        # Find the bin label for the mean loudness
+        mean_loudness_bin = pd.cut([mean_loudness], bins=bins, labels=bin_labels, include_lowest=True)[0]
+
+        # Add a line for the average loudness
+        fig.add_trace(go.Scatter(
+            x=[mean_loudness_bin, mean_loudness_bin],
+            y=[0, counts.max()],  # Use the maximum count as the top of the line
+            mode='lines',
+            line=dict(color=color_average_loudness, width=2, dash='dash'),
+            name='Average Loudness',
+            hoverinfo='text',
+            text=f"Mean Loudness: {mean_loudness:.2f} dB" 
+        ))
+
+        # Update layout with additional options
+        fig.update_layout(
+            xaxis_title='Loudness (dB)',
+            yaxis_title='Frequency',
+            template='plotly_white',
+            plot_bgcolor='Gainsboro',
+            paper_bgcolor='Gainsboro',
+            legend=dict(
+                orientation='h',
+                y=1.1  # Adjust position of the legend
+            ),
+            margin=dict(l=20, r=20, t=20, b=20),
+            autosize=True
+        )
 
         return fig
     
@@ -430,7 +489,7 @@ class SpotifyAnalyzer:
     def run_analysis(self) -> None:
         try:
             # Create a DataFrame
-            st.header('Playlist DataFrame')
+            st.header('Playlist Table')
             st.dataframe(self.df_top_50)
 
             st.header('Artist Presence in the Top Chart')
@@ -444,28 +503,34 @@ class SpotifyAnalyzer:
             fig = self.radar_chart()
             st.plotly_chart(fig, use_container_width=True)
 
+            # Create a Genre Word Cloud
+            st.header('Genres Word Cloud')
+            st.text("The word cloud illustrates the prevalence of various genres in the playlist based on text data.")
+            wc = self.genres_wordcloud()
+            st.pyplot(wc)
+
             # Create a BPM Histogram Chart
             st.header('Tempo Histogram Chart')
             st.text("This histogram shows the distribution of tempo (beats per minute) across tracks.")
             bpm_hist_chart = self.tempo_histogram()
-            st.plotly_chart(bpm_hist_chart)
+            st.plotly_chart(bpm_hist_chart, use_container_width=True)
 
             st.header('Duration Histogram Chart')
             st.text("The histogram below represents the distribution of track durations in the playlist.")
             duration_dist = self.duration_histogram()
-            st.pyplot(duration_dist)
+            st.plotly_chart(duration_dist, use_container_width=True)
 
             # Create a Key Distribution
             st.header('Key Distribution Comparison:')
             st.text("This chart compares the key distribution of the tracks, showing which musical keys are most common.")
             key_dist = self.key_distribution_chart()
-            st.plotly_chart(key_dist)
+            st.plotly_chart(key_dist, use_container_width=True)
 
             # Create a Duration Histogram Chart
             st.header('Loudness Histogram Chart')
             st.text("The loudness histogram visualizes the loudness levels of tracks in decibels.")
             loudness_hist_chart = self.loudness_histogram()
-            st.pyplot(loudness_hist_chart)
+            st.plotly_chart(loudness_hist_chart, use_container_width=True)
 
             # Create a Mode Distribution
             st.header('Mode Pie Chart')
@@ -478,13 +543,6 @@ class SpotifyAnalyzer:
             st.text("This pie chart shows the proportion of explicit and non-explicit tracks in the playlist.")
             explicit_chart = self.explicit_pie_chart()
             st.pyplot(explicit_chart)
-
-            # Create a Genre Word Cloud
-            st.header('Genres Word Cloud')
-            st.text("The word cloud illustrates the prevalence of various genres in the playlist based on text data.")
-            wc = self.genres_wordcloud()
-            st.pyplot(wc)
-
 
         except Exception as e:
             print(e)
