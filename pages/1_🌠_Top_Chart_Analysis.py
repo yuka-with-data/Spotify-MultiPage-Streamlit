@@ -1,10 +1,6 @@
 # Load Libraries
-import os
 import pandas as pd
 import numpy as np
-import time
-import json
-import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import plotly.graph_objects as go
 import plotly.express as px
