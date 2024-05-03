@@ -45,7 +45,7 @@ class SpotifyAnalyzer:
         # Initialize visible text column
         merged_df['visible_text'] = ''
         # Set visible text only for top 3 frequent artists
-        merged_df.loc[0:2, 'visible_text'] = merged_df.loc[0:2, 'artist_name']
+        merged_df.loc[0, 'visible_text'] = merged_df.loc[0, 'artist_name']
         # Debugging
         print(merged_df[['artist_name', 'frequency', 'visible_text']])
 
