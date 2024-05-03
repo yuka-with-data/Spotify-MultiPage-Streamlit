@@ -398,20 +398,30 @@ class SpotifyAnalyzer:
         # Mapping of numeric key values to corresponding alphabetic keys
         key_mapping = ('C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B')
 
+        grouped = self.df_top_50.groupby('key')['track_name'].apply(list).reindex(range(12), fill_value=[])
+
         # Get key counts and ensure all keys are present
         key_counts = self.df_top_50['key'].value_counts().reindex(range(12), fill_value=0)
         
         # Create a DataFrame for easier sorting and mapping
         key_df = pd.DataFrame({
             'Key': range(12),
-            'Count': key_counts.values
+            'Count': key_counts.values,
+            'Track Names': grouped.values
         })
+
+        # Format track names into a single string per key
+        key_df['Formatted Tracks'] = key_df['Track Names'].apply(lambda x: '<br>'.join(x))
+
+        # Map numeric keys to their names
+        key_df['Key Name'] = key_df['Key'].apply(lambda x: key_mapping[x])
 
         # Sort the DataFrame by 'Count'
         key_df_sorted = key_df.sort_values(by='Count', ascending=False)
+        print(key_df_sorted)
 
         # Map numeric keys to their names
-        key_df_sorted['Key Name'] = key_df_sorted['Key'].apply(lambda x: key_mapping[x])
+        # key_df_sorted['Key Name'] = key_df_sorted['Key'].apply(lambda x: key_mapping[x])
 
         fig = go.Figure()
 
@@ -431,12 +441,13 @@ class SpotifyAnalyzer:
         [1.0, "rgba(12, 7, 134, 0.8)"]      # Dark blue
     ]
 
-        # Add the bar trace
+        # Add the bar trace with custom tooltips
         fig.add_trace(go.Bar(
             x=key_df_sorted['Key Name'],
             y=key_df_sorted['Count'],
-            marker=dict(color=key_df_sorted['Count'], colorscale=colorscale),  
-            hoverinfo='y+x'
+            text=key_df_sorted['Formatted Tracks'],
+            hovertemplate='%{text}<extra></extra>',
+            marker=dict(color=key_df_sorted['Count'], colorscale=colorscale)
         ))
 
         # Update layout
