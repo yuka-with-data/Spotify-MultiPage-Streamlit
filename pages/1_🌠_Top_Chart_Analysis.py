@@ -42,8 +42,6 @@ class SpotifyAnalyzer:
         merged_df['visible_text'] = ''
         # Set visible text only for top 3 frequent artists
         merged_df.loc[0, 'visible_text'] = merged_df.loc[0, 'artist_name']
-        # Debugging
-        print(merged_df[['artist_name', 'frequency', 'visible_text']])
 
         colorscale=[  # Custom colorscale
             [0.0, "rgba(232, 148, 88, 0.9)"],   # Lighter orange
@@ -269,8 +267,6 @@ class SpotifyAnalyzer:
         data_max = self.df_top_50['duration_min'].max()
         bins = np.linspace(data_min - 0.1, data_max + 0.1, num=50)
         counts, bins = np.histogram(self.df_top_50['duration_min'], bins=bins)
-        print(counts)
-        print(bins)
         bins = np.round(bins, 2)  # Round bins to two decimal places
 
         # Create bin labels for grouping
@@ -418,7 +414,7 @@ class SpotifyAnalyzer:
 
         # Sort the DataFrame by 'Count'
         key_df_sorted = key_df.sort_values(by='Count', ascending=False)
-        print(key_df_sorted)
+        # print(key_df_sorted)
 
         # Map numeric keys to their names
         # key_df_sorted['Key Name'] = key_df_sorted['Key'].apply(lambda x: key_mapping[x])
@@ -465,27 +461,32 @@ class SpotifyAnalyzer:
         return fig
     
     def mode_pie_chart(self):
-        # Count values for each mode category
+        # Prepare data for Major vs. Minor mode
         mode_data = self.df_top_50[['mode', 'track_name']].copy()
-        mode_data['mode'] = mode_data['mode'].replace({1: 'Major', 0: 'Minor'})
+        mode_data['mode'] = mode_data['mode'].map({1: 'Major', 0: 'Minor'})
 
-        # Aggregate titles into a single string per mode
-        mode_data['titles'] = mode_data.groupby('mode')['track_name'].transform(lambda x: ', '.join(x[:5]) + ('...' if len(x) > 5 else ''))
+        # Aggregate track names for each category
+        title_summary = mode_data.groupby('mode')['track_name'].apply(lambda x: '\n'.join(x[:5]) + ('...' if len(x) > 5 else '')).reset_index()
+        title_summary.columns = ['mode', 'titles']  # Correctly rename columns
 
-        # Drop duplicates to avoid repeated modes in pie chart
-        mode_data = mode_data.drop_duplicates('mode')
+        # Calculate counts for each category
+        count_summary = mode_data['mode'].value_counts().reset_index()
+        count_summary.columns = ['mode', 'count']  # Directly assigning new column names
+
+        # Merge titles and counts data
+        final_data = pd.merge(title_summary, count_summary, on='mode')
 
         # Create the pie chart
         fig = px.pie(
-            mode_data,
+            final_data,
             names='mode',
-            # title="Distribution of Track Types (Major vs Minor)",
-            color_discrete_sequence=[px.colors.sequential.Plasma[2], px.colors.sequential.Plasma[7]],  # Custom colors
-            hole=0.2, 
+            values='count',
+            color_discrete_sequence=[px.colors.sequential.Plasma[2], px.colors.sequential.Plasma[7]],
+            hole=0.2,
             custom_data=['titles']
         )
 
-        # Setting tooltip to display track titles
+        # Setting tooltip to display track titles, each on a new line
         fig.update_traces(
             textposition='inside',
             textinfo='percent+label',
@@ -507,25 +508,30 @@ class SpotifyAnalyzer:
     def explicit_pie_chart(self) -> plt.Figure:
         # Prepare data for Explicit vs. Non-Explicit
         explicit_data = self.df_top_50[['is_explicit', 'track_name']].copy()
-        print(explicit_data)
-        explicit_data['explicit'] = explicit_data['is_explicit'].map({True: 'Explicit', False: 'Non-Explicit'})
-        print(explicit_data)
-        # Aggregate titles into a single string per category
-        explicit_data['titles'] = explicit_data.groupby('explicit')['track_name'].transform(lambda x: '\n'.join(x[:5]) + ('...' if len(x) > 10 else ''))
+        explicit_data['is_explicit'] = explicit_data['is_explicit'].map({True: 'Explicit', False: 'Non-Explicit'})
 
-        # Drop duplicates to avoid repeated categories in pie chart
-        explicit_data = explicit_data.drop_duplicates('explicit')
+        # Aggregate track names for each category
+        title_summary = explicit_data.groupby('is_explicit')['track_name'].apply(lambda x: '\n'.join(x[:5]) + ('...' if len(x) > 5 else '')).reset_index()
+        title_summary.columns = ['is_explicit', 'titles']
+
+        # Calculate counts for each category
+        count_summary = explicit_data['is_explicit'].value_counts().reset_index()
+        count_summary.columns = ['is_explicit', 'count'] 
+
+        # Merge titles and counts data
+        final_data = pd.merge(title_summary, count_summary, on='is_explicit')
 
         # Create the pie chart
         fig = px.pie(
-            explicit_data,
-            names='explicit',
-            color_discrete_sequence=[px.colors.sequential.Plasma[2], px.colors.sequential.Plasma[7]],  # Custom colors
+            final_data,
+            names='is_explicit',
+            values='count',
+            color_discrete_sequence=[px.colors.sequential.Plasma[2], px.colors.sequential.Plasma[7]],
             hole=0.2,
             custom_data=['titles']
         )
 
-        # Setting tooltip to display track titles
+        # Setting tooltip to display track titles, each on a new line
         fig.update_traces(
             textposition='inside',
             textinfo='percent+label',
