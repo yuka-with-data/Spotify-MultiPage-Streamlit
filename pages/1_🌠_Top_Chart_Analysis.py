@@ -213,7 +213,7 @@ class SpotifyAnalyzer:
                 x=[label], 
                 y=[group['tempo'].count()],
                 text=[tooltip_data[tooltip_data['bin'] == label]['track_name'].values[0]],
-                hoverinfo="text+x+y",
+                hoverinfo="text",
                 marker=dict(color=color_top_50, line=dict(width=1, color='black')),
                 name=label,
                 showlegend=False  # Hide legend for bars
@@ -246,7 +246,6 @@ class SpotifyAnalyzer:
             legend=dict(
                 orientation='h',
                 y=1.1
-                
             ),
             margin=dict(l=20, r=20, t=20, b=20),
             autosize=True
@@ -285,7 +284,7 @@ class SpotifyAnalyzer:
                 x=[label], 
                 y=[group['duration_min'].count()],
                 text=[tooltip_data[tooltip_data['bin'] == label]['track_name'].values[0]],
-                hoverinfo="text+x+y",
+                hoverinfo="text",
                 marker=dict(color=color_top_50, line=dict(width=1, color='black')),
                 name=label,
                 showlegend=False  # Hide legend for bars
@@ -351,7 +350,7 @@ class SpotifyAnalyzer:
                 x=[label], 
                 y=[group['loudness'].count()],
                 text=[tooltip_data[tooltip_data['bin'] == label]['track_name'].values[0]],
-                hoverinfo="text+x+y",
+                hoverinfo="text",
                 marker=dict(color=color_top_50, line=dict(width=1, color='black')),
                 name=label,
                 showlegend=False  # Hide legend for bars
