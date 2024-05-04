@@ -508,7 +508,7 @@ class SpotifyAnalyzer:
         # Prepare data for Explicit vs. Non-Explicit
         explicit_data = self.df_top_50[['is_explicit', 'track_name']].copy()
         print(explicit_data)
-        explicit_data['explicit'] = explicit_data['is_explicit'].replace({1: 'Explicit', 0: 'Non-Explicit'})
+        explicit_data['explicit'] = explicit_data['is_explicit'].map({True: 'Explicit', False: 'Non-Explicit'})
         print(explicit_data)
         # Aggregate titles into a single string per category
         explicit_data['titles'] = explicit_data.groupby('explicit')['track_name'].transform(lambda x: '\n'.join(x[:5]) + ('...' if len(x) > 10 else ''))
