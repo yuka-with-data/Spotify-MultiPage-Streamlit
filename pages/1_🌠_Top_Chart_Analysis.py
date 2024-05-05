@@ -85,7 +85,7 @@ class SpotifyAnalyzer:
             yaxis_title='Popularity Score',
             font=dict(color="black"),  # Ensuring all chart text is black
             xaxis=dict(tickmode='linear', tick0=1, dtick=1),
-            height=600,
+            height=550,
             width=700,
             paper_bgcolor = 'Gainsboro',
             plot_bgcolor='Gainsboro',
