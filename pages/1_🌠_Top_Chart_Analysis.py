@@ -692,16 +692,19 @@ st.markdown("# Top Chart Analysis")
 # Header Text
 st.info("Get the Latest Top Chart on Spotify, updated daily/weekly, and experience the data of top-performing tracks.", icon="👩🏽‍🎤")
 
-if compare_button:
+if not selected_playlist:
+    st.warning("Please select a playlist from the sidebar.", icon='⚠️')
+elif compare_button:
     try:
-        spotify_analyzer = SpotifyAnalyzer(sp, playlist_id)
-        st.components.v1.iframe(f"https://open.spotify.com/embed/playlist/{playlist_id}?utm_source=generator&theme=0",
-                        width=500, height=160, scrolling=True)
-        st.divider()
+        if playlist_id:
+            spotify_analyzer = SpotifyAnalyzer(sp, playlist_id)
+            st.components.v1.iframe(f"https://open.spotify.com/embed/playlist/{playlist_id}?utm_source=generator&theme=0",
+                            width=500, height=160, scrolling=True)
+            st.divider()
 
-        # Run Analysis
-        spotify_analyzer.run_analysis()
-        st.balloons()
+            # Run Analysis
+            spotify_analyzer.run_analysis()
+            st.balloons()
     
     except Exception as e:
         print(e)
