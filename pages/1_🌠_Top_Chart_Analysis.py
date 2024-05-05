@@ -100,7 +100,7 @@ class SpotifyAnalyzer:
             # Aggregate popularity scores by artist
             artist_popularity = self.df_top_50.groupby('artist_name')['popularity'].sum().reset_index()
             artist_popularity['popularity_category'] = pd.qcut(artist_popularity['popularity'], 3, labels=["Low", "Medium", "High"])
-            print(artist_popularity)
+            #print(artist_popularity)
             return artist_popularity
         
         artist_popularity = prepare_sankey_data()
@@ -112,7 +112,7 @@ class SpotifyAnalyzer:
         # Map to indices for Sankey diagram
         artist_indices = {artist: i for i, artist in enumerate(artists)}
         category_indices = {category: i + len(artists) for i, category in enumerate(categories)}
-        print(category_indices)
+        #print(category_indices)
 
         # Define nodes
         nodes = [{'label': artist} for artist in artists] + [{'label': category} for category in categories]
@@ -401,7 +401,7 @@ class SpotifyAnalyzer:
         # Create a DataFrame for easier sorting and mapping
         key_df = pd.DataFrame({
             'Key': range(12),
-            'Count': key_counts.values,
+            'Count': key_counts.values,             
             'Track Names': grouped.values
         })
 
@@ -498,6 +498,7 @@ class SpotifyAnalyzer:
             plot_bgcolor='Gainsboro',
             paper_bgcolor='Gainsboro',
             autosize=True,
+            showlegend=False,
             margin=dict(l=20, r=20, t=30, b=20)
         )
 
@@ -543,6 +544,7 @@ class SpotifyAnalyzer:
             plot_bgcolor='Gainsboro',
             paper_bgcolor='Gainsboro',
             autosize=True,
+            showlegend=False,
             margin=dict(l=20, r=20, t=30, b=20)
         )
 
