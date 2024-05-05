@@ -31,7 +31,7 @@ class SpotifyAnalyzer:
         artist_counts.columns = ['artist_name', 'frequency']
 
         # Average Popularity
-        artist_popularity = self.df_top_50.groupby('artist_name')['popularity'].sum().reset_index()
+        artist_popularity = self.df_top_50.groupby('artist_name', observed=False)['popularity'].sum().reset_index()
         # Merge the datasets
         merged_df = artist_counts.merge(artist_popularity, on='artist_name')
 
@@ -98,7 +98,7 @@ class SpotifyAnalyzer:
 
         def prepare_sankey_data():
             # Aggregate popularity scores by artist
-            artist_popularity = self.df_top_50.groupby('artist_name')['popularity'].sum().reset_index()
+            artist_popularity = self.df_top_50.groupby('artist_name', observed=False)['popularity'].sum().reset_index()
             artist_popularity['popularity_category'] = pd.qcut(artist_popularity['popularity'], 3, labels=["Low", "Medium", "High"])
             #print(artist_popularity)
             return artist_popularity
@@ -203,7 +203,7 @@ class SpotifyAnalyzer:
         self.df_top_50['bin'] = pd.cut(self.df_top_50['tempo'], bins=bins, labels=bin_labels, include_lowest=True)
 
         # Prepare data for the tooltips
-        grouped = self.df_top_50.groupby('bin')
+        grouped = self.df_top_50.groupby('bin', observed=False)
         tooltip_data = grouped['track_name'].agg(lambda x: ', '.join(x)).reset_index()
 
         # Create the figure and add bars manually
@@ -273,7 +273,7 @@ class SpotifyAnalyzer:
 
         # Group by bins
         self.df_top_50['bin'] = pd.cut(self.df_top_50['duration_min'], bins=bins, labels=bin_labels, include_lowest=True)
-        grouped = self.df_top_50.groupby('bin')
+        grouped = self.df_top_50.groupby('bin', observed=False)
 
         tooltip_data = grouped['track_name'].agg(lambda x: ', '.join(x)).reset_index()
 
@@ -340,7 +340,7 @@ class SpotifyAnalyzer:
         self.df_top_50['bin'] = pd.cut(self.df_top_50['loudness'], bins=bins, labels=bin_labels, include_lowest=True)
 
         # Prepare data for the tooltips
-        grouped = self.df_top_50.groupby('bin')
+        grouped = self.df_top_50.groupby('bin', observed=False)
         tooltip_data = grouped['track_name'].agg(lambda x: ', '.join(x)).reset_index()
 
         # Create the figure and add histogram bars manually
@@ -393,7 +393,7 @@ class SpotifyAnalyzer:
         # Mapping of numeric key values to corresponding alphabetic keys
         key_mapping = ('C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B')
 
-        grouped = self.df_top_50.groupby('key')['track_name'].apply(list).reindex(range(12), fill_value=[])
+        grouped = self.df_top_50.groupby('key', observed=False)['track_name'].apply(list).reindex(range(12), fill_value=[])
 
         # Get key counts and ensure all keys are present
         key_counts = self.df_top_50['key'].value_counts().reindex(range(12), fill_value=0)
@@ -465,7 +465,7 @@ class SpotifyAnalyzer:
         mode_data['mode'] = mode_data['mode'].map({1: 'Major', 0: 'Minor'})
 
         # Aggregate track names for each category
-        title_summary = mode_data.groupby('mode')['track_name'].apply(lambda x: '\n'.join(x[:5]) + ('...' if len(x) > 5 else '')).reset_index()
+        title_summary = mode_data.groupby('mode', observed=False)['track_name'].apply(lambda x: '\n'.join(x[:5]) + ('...' if len(x) > 5 else '')).reset_index()
         title_summary.columns = ['mode', 'titles']  # Correctly rename columns
 
         # Calculate counts for each category
@@ -511,7 +511,7 @@ class SpotifyAnalyzer:
         explicit_data['is_explicit'] = explicit_data['is_explicit'].map({True: 'Explicit', False: 'Non-Explicit'})
 
         # Aggregate track names for each category
-        title_summary = explicit_data.groupby('is_explicit')['track_name'].apply(lambda x: '\n'.join(x[:5]) + ('...' if len(x) > 5 else '')).reset_index()
+        title_summary = explicit_data.groupby('is_explicit', observed=False)['track_name'].apply(lambda x: '\n'.join(x[:5]) + ('...' if len(x) > 5 else '')).reset_index()
         title_summary.columns = ['is_explicit', 'titles']
 
         # Calculate counts for each category
