@@ -465,7 +465,7 @@ class SpotifyAnalyzer:
         mode_data['mode'] = mode_data['mode'].map({1: 'Major', 0: 'Minor'})
 
         # Aggregate track names for each category
-        title_summary = mode_data.groupby('mode', observed=False)['track_name'].apply(lambda x: '\n'.join(x[:5]) + ('...' if len(x) > 5 else '')).reset_index()
+        title_summary = mode_data.groupby('mode', observed=False)['track_name'].apply(lambda x: '<br>'.join(x[:5]) + ('...' if len(x) > 5 else '')).reset_index()
         title_summary.columns = ['mode', 'titles']  # Correctly rename columns
 
         # Calculate counts for each category
@@ -511,7 +511,7 @@ class SpotifyAnalyzer:
         explicit_data['is_explicit'] = explicit_data['is_explicit'].map({True: 'Explicit', False: 'Non-Explicit'})
 
         # Aggregate track names for each category
-        title_summary = explicit_data.groupby('is_explicit', observed=False)['track_name'].apply(lambda x: '\n'.join(x[:5]) + ('...' if len(x) > 5 else '')).reset_index()
+        title_summary = explicit_data.groupby('is_explicit', observed=False)['track_name'].apply(lambda x: '<br>'.join(x[:5]) + ('...' if len(x) > 5 else '')).reset_index()
         title_summary.columns = ['is_explicit', 'titles']
 
         # Calculate counts for each category
