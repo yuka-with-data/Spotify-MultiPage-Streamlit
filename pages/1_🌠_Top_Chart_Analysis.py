@@ -441,7 +441,7 @@ class SpotifyAnalyzer:
             x=key_df_sorted['Key Name'],
             y=key_df_sorted['Count'],
             text=key_df_sorted['Formatted Tracks'],
-            hovertemplate='%{text}<extra></extra>',
+            hovertemplate='<br><b>Tracks:</b><br>%{text}<extra></extra>',
             marker=dict(color=key_df_sorted['Count'], colorscale=colorscale)
         ))
 
