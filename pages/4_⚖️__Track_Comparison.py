@@ -6,11 +6,12 @@ import time
 import json
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
-import plotly.graph_objects as go
 import streamlit as st
 # from decouple import config
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
+import plotly.graph_objects as go
+import plotly.express as px
 from matplotlib.ticker import MaxNLocator
 import seaborn as sns
 from wordcloud import WordCloud
@@ -170,7 +171,7 @@ class SpotifyAnalyzer:
 
         return fig
     
-    def create_bpm_histogram(self, audio_features: Dict[str, float]) -> plt.Figure:
+    def create_bpm_histogram(self, audio_features: Dict[str, float]) -> go.Figure:
         """ 
          Create a histogram chart comparing BPM(tempo) of a track with the top 100
          Args:
@@ -179,33 +180,81 @@ class SpotifyAnalyzer:
            histogram chart
            """
         # Use Plasma colormap colors
-        color_top_50 = cm.plasma(0.15)
-        color_your_track = cm.plasma(0.65)
-        color_average_tempo = cm.plasma(0.55) 
+        color_top_50 = px.colors.sequential.Plasma[2]  
+        color_your_track = px.colors.sequential.Plasma[4]  
+        color_average_tempo = px.colors.sequential.Plasma[6]   
 
-        fig, ax = plt.subplots(figsize=(6, 4))
-        sns.histplot(self.df_top_50['tempo'], bins=50, kde=True, color=color_top_50, edgecolor='black', label=f"{selected_playlist}", ax=ax)
-        ax.axvline(audio_features['tempo'], color=color_your_track, linewidth=2, label='Your Track')
+        # Calculate histogram data
+        data_min = self.df_top_50['tempo'].min()
+        data_max = self.df_top_50['tempo'].max()
+        bins = np.linspace(data_min - 0.1, data_max + 0.1, num=50)
+        counts, bins = np.histogram(self.df_top_50['tempo'], bins=bins)
+        bins = np.round(bins, 2)
+
+        # Group data into bins
+        bin_labels = [f"{bins[i]} - {bins[i+1]}" for i in range(len(bins)-1)]
+        self.df_top_50['bin'] = pd.cut(self.df_top_50['tempo'], bins=bins, labels=bin_labels, include_lowest=True)
         
+        # Prepare data for the tooltips
+        grouped = self.df_top_50.groupby('bin', observed=False)
+        tooltip_data = grouped['track_name'].agg(lambda x: ', '.join(x)).reset_index()
+
+        fig = go.Figure()
+        for label, group in grouped:
+            fig.add_trace(go.Bar(
+                x=[label],
+                y=[group['tempo'].count()],
+                text=[tooltip_data[tooltip_data['bin'] == label]['track_name'].values[0]],
+                hoverinfo="text",
+                marker=dict(color=color_top_50, line=dict(width=1, color='black')),
+                name=label,
+                showlegend=False
+            ))
+
+        # Calculate mean tempo and find the bin for the mean
         mean_tempo = self.df_top_50['tempo'].mean()
-        ax.axvline(mean_tempo, color=color_average_tempo, linestyle='dashed', linewidth=2, label='Average Tempo')
-        ax.set_xlabel('Tempo')
-        ax.set_ylabel('Frequency')
-        ax.legend(prop={'size': 8})
-        
-        # Set y-axis ticks to integers
-        # Determine max y-value (rounded up) and set y-ticks accordingly
-        max_count = int(max(ax.get_yticks())) # Find the current max y-tick and round up
-        ax.set_yticks(range(0, max_count))
+        mean_tempo_bin = pd.cut([mean_tempo], bins=bins, labels=bin_labels, include_lowest=True)[0]
 
-        ax.grid(False, axis='x')
-        ax.grid(True, axis='y', linestyle='--',alpha=0.6)
+        # Add line for the average tempo
+        fig.add_trace(go.Scatter(
+            x=[mean_tempo_bin, mean_tempo_bin],
+            y=[0, counts.max()],
+            mode='lines',
+            line=dict(color=color_average_tempo, width=2, dash='dash'),
+            name='Average Tempo',
+            hoverinfo='text',
+            text=f"Mean Tempo: {mean_tempo:.2f} BPM" 
+        ))
 
-        # Set background color
-        fig.patch.set_facecolor('lightgrey')
-        ax.set_facecolor('lightgrey')
+        # Find the bin for user's track tempo and add a vertical line
+        user_tempo = audio_features['tempo'] 
+        user_tempo_bin = pd.cut([user_tempo], bins=bins, labels=bin_labels, include_lowest=True)[0]
+        fig.add_trace(go.Scatter(
+            x=[user_tempo_bin, user_tempo_bin],
+            y=[0, counts.max()],
+            mode='lines',
+            line=dict(color=color_your_track, width=2),
+            name="User's Track",
+            hoverinfo='text',
+            text=f"User's Track Tempo: {user_tempo:.2f} BPM"
+        ))
 
-        return plt
+        # Update layout
+        fig.update_layout(
+            xaxis_title='Tempo (BPM)',
+            yaxis_title='Frequency',
+            template='plotly_white',
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
+            legend=dict(
+                orientation='h',
+                y=1.1
+            ),
+            margin=dict(l=20, r=20, t=20, b=20),
+            autosize=True
+        )
+
+        return fig
 
     def create_key_distribution_chart(self, audio_features:Dict[str,float], track_name: str) -> plt.Figure:
         """ 
@@ -586,7 +635,7 @@ class SpotifyAnalyzer:
                 st.header('Histogram Chart Comparison - Tempo:')
                 st.text(f'Comparison of Tempo in % {selected_playlist} vs. {track_name} by {artist_name}')
                 bmp_hist_chart = self.create_bpm_histogram(audio_features)
-                st.pyplot(bmp_hist_chart)
+                st.plotly_chart(bmp_hist_chart, use_container_width=True)
 
                 # Show Key Distribution
                 st.header('Key Distribution Comparison:')
