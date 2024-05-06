@@ -152,7 +152,7 @@ class SpotifyAnalyzer:
             r=audio_feat_values,
             theta=att_list,
             fill='toself',
-            name=f'Your Track',
+            name=f'{track_name}',
             fillcolor=color_your_track,
             line=dict(color=color_your_track, dash='dot'),
         ))
@@ -171,7 +171,7 @@ class SpotifyAnalyzer:
 
         return fig
     
-    def create_bpm_histogram(self, audio_features: Dict[str, float]) -> go.Figure:
+    def create_bpm_histogram(self, audio_features: Dict[str, float], user_track_name: str) -> go.Figure:
         """ 
          Create a histogram chart comparing BPM(tempo) of a track with the top 100
          Args:
@@ -234,10 +234,11 @@ class SpotifyAnalyzer:
             y=[0, counts.max()],
             mode='lines',
             line=dict(color=color_your_track, width=2),
-            name="User's Track",
+            name=f"{user_track_name}",
             hoverinfo='text',
-            text=f"User's Track Tempo: {user_tempo:.2f} BPM"
+            text=f"{user_track_name}: {user_tempo:.2f} BPM"
         ))
+
 
         # Update layout
         fig.update_layout(
@@ -636,7 +637,7 @@ class SpotifyAnalyzer:
                 # Create a BPM Histogram Chart
                 st.header('Histogram Chart Comparison - Tempo:')
                 st.text(f'Comparison of Tempo in % {selected_playlist} vs. {track_name} by {artist_name}')
-                bmp_hist_chart = self.create_bpm_histogram(audio_features)
+                bmp_hist_chart = self.create_bpm_histogram(audio_features, track_name)
                 st.plotly_chart(bmp_hist_chart, use_container_width=True)
 
                 # Show Key Distribution
