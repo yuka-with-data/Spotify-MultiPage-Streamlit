@@ -334,7 +334,7 @@ class SpotifyAnalyzer:
         return fig
 
     
-    def create_duration_histogram(self, audio_features: Dict[str, float]) -> plt.Figure:
+    def create_duration_histogram(self, audio_features: Dict[str, float], user_track_name:str) -> go.Figure:
         """ 
         Create a histogram chart comparing BPM(tempo) of a track with the top 100
         Args:
@@ -342,34 +342,90 @@ class SpotifyAnalyzer:
         Returns:
         histogram chart
         """
-        fig, ax = plt.subplots(figsize=(6, 4))
-
-        # Convert duration from miliseconds to seconds
-        duration_sec = self.df_top_50['duration_ms'] / 1000
-        audio_duration_sec = audio_features['duration_ms'] / 1000
-        mean_duration_sec = self.df_top_50['duration_ms'].mean() / 1000
-
-        color_top_50 = cm.plasma(0.15)
-        color_your_track = cm.plasma(0.7)
-        color_average_duration = cm.plasma(0.55)
-
-        sns.histplot(duration_sec, bins=50, kde=True, alpha = 0.7, color=color_top_50, edgecolor='black', label=f"{selected_playlist}", ax=ax)
-        ax.axvline(audio_duration_sec, color=color_your_track, linewidth=2, label='Your Track')
-        ax.axvline(mean_duration_sec, color=color_average_duration, linestyle='dashed', linewidth=2, label='Average Track Duration')
-
-        ax.set_xlabel('Duration (in seconds)')
-        ax.set_ylabel('Frequency')
-        ax.legend(prop={'size': 8})
-        ax.grid(False, axis='x')
-        ax.grid(True, axis='y', linestyle='--',alpha=0.6)
-
-        # Ensure y-axis ticks are integers
-        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+        def format_min_to_minsec(minutes):
+            # Convert decimal minutes to minutes and seconds format
+            full_minutes = int(minutes)
+            seconds = int((minutes - full_minutes) * 60)
+            return f"{full_minutes}m {seconds}s"
         
-        fig.patch.set_facecolor('lightgrey')
-        ax.set_facecolor('lightgrey')
+        # Set colors
+        color_top_50 = px.colors.sequential.Plasma[2]  
+        color_your_track = px.colors.sequential.Plasma[4]  
+        color_average_duration = px.colors.sequential.Plasma[6] 
 
-        return plt
+        # Convert duration from milliseconds to seconds
+        self.df_top_50['duration_min'] = self.df_top_50['duration_ms'] / 60000
+        audio_duration_min = audio_features['duration_ms'] / 60000
+
+        # Calculate histogram data
+        data_min = self.df_top_50['duration_min'].min()
+        data_max = self.df_top_50['duration_min'].max()
+        bins = np.linspace(data_min - 0.1, data_max + 0.1, num=50)
+        counts, bins = np.histogram(self.df_top_50['duration_min'], bins=bins)
+        bins = np.round(bins, 2)
+
+        # Group data into bins
+        bin_labels = [f"{format_min_to_minsec(bins[i])} - {format_min_to_minsec(bins[i+1])}" for i in range(len(bins)-1)]
+        self.df_top_50['bin'] = pd.cut(self.df_top_50['duration_min'], bins=bins, labels=bin_labels, include_lowest=True)
+        tooltip_data = self.df_top_50.groupby('bin')['track_name'].agg(lambda x: ', '.join(x)).reset_index()
+
+        fig = go.Figure()
+        for label, group in self.df_top_50.groupby('bin'):
+            fig.add_trace(go.Bar(
+                x=[label],
+                y=[group['duration_min'].count()],
+                text=[tooltip_data[tooltip_data['bin'] == label]['track_name'].values[0]],
+                hoverinfo="text",
+                marker=dict(color=color_top_50, line=dict(width=1, color='black')),
+                name=label,
+                showlegend=False
+            ))
+
+        # Calculate mean duration and find the bin for the mean
+        mean_duration_min = self.df_top_50['duration_min'].mean()
+        mean_bin_index = np.digitize([mean_duration_min], bins)[0] - 1
+        mean_bin_label = bin_labels[mean_bin_index] if mean_bin_index < len(bin_labels) else bin_labels[-1]
+        
+        fig.add_trace(go.Scatter(
+            x=[mean_bin_label, mean_bin_label],
+            y=[0, counts.max()],
+            mode='lines',
+            line=dict(color=color_average_duration, width=2, dash='dash'),
+            name='Average Duration',
+            hoverinfo='text',
+            text=f"Mean Duration: {format_min_to_minsec(mean_duration_min)}"
+        ))
+
+        # Find the bin for user's track duration and add a vertical line
+        user_bin_index = np.digitize([audio_duration_min], bins)[0] - 1
+        user_bin_label = bin_labels[user_bin_index] if user_bin_index < len(bin_labels) else bin_labels[-1]
+        fig.add_trace(go.Scatter(
+            x=[user_bin_label, user_bin_label],
+            y=[0, counts.max()],
+            mode='lines',
+            line=dict(color=color_your_track, width=2),
+            name=f"{user_track_name}",
+            hoverinfo='text',
+            text=f"{user_track_name}: {format_min_to_minsec(audio_duration_min)}"
+        ))
+
+        # Update layout
+        fig.update_layout(
+            xaxis_title='Duration (minutes)',
+            yaxis_title='Frequency',
+            template='plotly_white',
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
+            legend=dict(
+                orientation='h',
+                y=1.1
+            ),
+            margin=dict(l=20, r=20, t=20, b=20),
+            autosize=True
+        )
+
+        return fig
+
 
     def create_loudness_histogram(self, audio_features: Dict[str, float]) -> plt.Figure:
         """ 
@@ -505,7 +561,6 @@ class SpotifyAnalyzer:
         # Inner function to clean the genres str
         def clean_genres(genres_str):
             genres_list = genres_str.split(',')
-            print(f"genres list {genres_list}")
             # cleand_genres = [genre.strip() for genre in genres_list if genre.strip() != '']
             cleaned_genres = []
             for genre in genres_list:
@@ -513,7 +568,6 @@ class SpotifyAnalyzer:
                 if stripped != '':
                     cleaned_genres.append(stripped)
             cleaned_genres = ', '.join(cleaned_genres)
-            print(f"cleaned genres list {cleaned_genres}")
             return cleaned_genres
         # Check the dataframe
         if self.df_top_50.empty:
@@ -649,8 +703,8 @@ class SpotifyAnalyzer:
                 # Create a Duration Histogram Chart
                 st.header('Histogram Chart Comparison - Duration:')
                 st.text(f'Comparison of Duration {selected_playlist} vs. {track_name} by {artist_name}')
-                duration_chart = self.create_duration_histogram(audio_features)
-                st.pyplot(duration_chart)
+                duration_chart = self.create_duration_histogram(audio_features, track_name)
+                st.plotly_chart(duration_chart, use_container_width=True)
 
                 # Create a Loudness Histogram Chart
                 st.header('Histogram Chart Comparison - Loudness:')
