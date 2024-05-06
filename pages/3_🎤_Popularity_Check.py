@@ -67,16 +67,17 @@ class PopularityScore():
                     'borderwidth': 2,
                     'bordercolor': "gray",
                     'steps': [
-                        {'range': [0, 100], 'color': 'lightgrey'},
+                        {'range': [0, 100], 'color': 'GhostWhite'},
                         {'range': [0, popularity], 'color': 'rgba(65, 105, 225, 0.5)'}
                     ],
                 }
             ))
 
             # Background Color option: 
-            # Snow, Honeydew, MintCream, LavenderBlush, GhostWhite, Seashell
+            # Snow, Honeydew, MintCream, LavenderBlush, GhostWhite, Seashell, WhiteSmoke
             fig.update_layout(
-                paper_bgcolor="LavenderBlush",
+                paper_bgcolor="WhiteSmoke",
+                template='plotly_white',
                 font={"color": "black"},
                 height=450,
                 width=700,
