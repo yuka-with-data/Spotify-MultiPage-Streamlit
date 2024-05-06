@@ -87,8 +87,8 @@ class SpotifyAnalyzer:
             xaxis=dict(tickmode='linear', tick0=1, dtick=1),
             height=550,
             width=700,
-            paper_bgcolor = 'Gainsboro',
-            plot_bgcolor='Gainsboro',
+            paper_bgcolor = 'WhiteSmoke',
+            plot_bgcolor='WhiteSmoke',
             autosize=True
         )
 
@@ -151,7 +151,7 @@ class SpotifyAnalyzer:
                         font_size=10,
                         margin=dict(l=20, r=20, t=20, b=20),
                         autosize=True,
-                        paper_bgcolor='Gainsboro',
+                        paper_bgcolor='WhiteSmoke',
                         
                         )
         return fig
@@ -178,7 +178,7 @@ class SpotifyAnalyzer:
             polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
             showlegend=True,
             legend=dict(x=1, y=1, traceorder='normal',orientation='v', font=dict(color='black')),
-            paper_bgcolor = 'Gainsboro',
+            paper_bgcolor = 'WhiteSmoke',
             font = {"color": "black"},
             height=450,
             width=700,
@@ -240,8 +240,8 @@ class SpotifyAnalyzer:
             xaxis_title='Tempo (BPM)',
             yaxis_title='Frequency',
             template='plotly_white',
-            plot_bgcolor='Gainsboro',
-            paper_bgcolor='Gainsboro',
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
             # legend_title_text='Legend',
             legend=dict(
                 orientation='h',
@@ -311,8 +311,8 @@ class SpotifyAnalyzer:
             xaxis_title='Duration (min)',
             yaxis_title='Frequency',
             template='plotly_white',
-            plot_bgcolor='Gainsboro',
-            paper_bgcolor='Gainsboro',
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
             legend=dict(
                 orientation='h',
                 y=1.1  # Adjust position of the legend
@@ -377,8 +377,8 @@ class SpotifyAnalyzer:
             xaxis_title='Loudness (dB)',
             yaxis_title='Frequency',
             template='plotly_white',
-            plot_bgcolor='Gainsboro',
-            paper_bgcolor='Gainsboro',
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
             legend=dict(
                 orientation='h',
                 y=1.1  # Adjust position of the legend
@@ -451,8 +451,8 @@ class SpotifyAnalyzer:
             xaxis_title='Key',
             yaxis_title='Count',
             template='plotly_white',
-            plot_bgcolor='Gainsboro',
-            paper_bgcolor='Gainsboro',
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
             autosize=True,
             margin=dict(l=20, r=20, t=30, b=20)
         )
@@ -495,8 +495,8 @@ class SpotifyAnalyzer:
         # Update layout
         fig.update_layout(
             template='plotly_white',
-            plot_bgcolor='Gainsboro',
-            paper_bgcolor='Gainsboro',
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
             autosize=True,
             showlegend=False,
             margin=dict(l=20, r=20, t=30, b=20)
@@ -541,8 +541,8 @@ class SpotifyAnalyzer:
         # Update layout
         fig.update_layout(
             template='plotly_white',
-            plot_bgcolor='Gainsboro',
-            paper_bgcolor='Gainsboro',
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
             autosize=True,
             showlegend=False,
             margin=dict(l=20, r=20, t=30, b=20)
@@ -576,7 +576,7 @@ class SpotifyAnalyzer:
         regexp = r"\w(?:[-']?\w)+"
         wc = WordCloud(width=700, 
                               height=500,
-                              background_color='white',
+                              background_color='#F5F5F5',  # Gainsboro
                               stopwords=None,
                               colormap='plasma_r',
                               collocations=True,
