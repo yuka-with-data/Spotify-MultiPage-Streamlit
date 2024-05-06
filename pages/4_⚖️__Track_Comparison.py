@@ -256,7 +256,7 @@ class SpotifyAnalyzer:
 
         return fig
 
-    def create_key_distribution_chart(self, audio_features:Dict[str,float], track_name: str) -> plt.Figure:
+    def create_key_distribution_chart(self, audio_features:Dict[str,float], track_name: str) -> go.Figure:
         """ 
             Retrive the key for selected artist and track.
             Args:
@@ -268,68 +268,70 @@ class SpotifyAnalyzer:
         # Mapping of numeric key values to corresponding alphabetic keys
         key_mapping = ('C','C#','D','D#','E','F','F#','G','G#','A','A#','B')
 
+        # Custom Plasma colorscale 
+        colorscale = [
+            [0.0, "rgba(12, 7, 134, 1.0)"],       # Dark blue
+            [0.12, "rgba(26, 12, 135, 1.0)"],     # Between darker purple and dark blue
+            [0.24, "rgba(40, 16, 137, 1.0)"],     # Darker purple
+            [0.36, "rgba(69, 27, 140, 1.0)"],     # Rich purple
+            [0.48, "rgba(87, 35, 142, 1.0)"],     # Deep purple
+            [0.58, "rgba(106, 44, 141, 1.0)"],    # Purple-pink
+            [0.68, "rgba(125, 50, 140, 1.0)"],    # Mid purple
+            [0.78, "rgba(136, 60, 137, 1.0)"],    # Deep magenta
+            [0.88, "rgba(164, 77, 126, 1.0)"],    # Lighter magenta
+            [0.94, "rgba(190, 97, 111, 1.0)"],    # Reddish-pink
+            [0.97, "rgba(213, 120, 98, 1.0)"],    # Dark orange
+            [1.0, "rgba(232, 148, 88, 1.0)"]      # Lighter orange
+        ]
+
         # Get the key distribution for the top 50 tracks
         # Sort the key counts in descending order by count values
-        key_counts = self.df_top_50['key'].value_counts().sort_values(ascending=False).reindex(range(12), fill_value=0)
+        key_counts = self.df_top_50['key'].value_counts().reindex(range(12), fill_value=0).sort_values(ascending=False)
         print(f"Key Counts Ordered: {key_counts}")
 
-        # re-sort the key counts series after the 'reindex' operation
-        key_counts = key_counts.sort_values(ascending=False)
-        print(f"Key Counts Re-Ordered: {key_counts}")
+        # User's selected key
+        user_key_index = audio_features['key']
 
-        # Initialize figure and axes objects
-        fig, ax = plt.subplots(figsize=(6,4))
+        fig = go.Figure()
 
-        # Use seaborn to set the plotting style
-        sns.set_theme(style="whitegrid")
+        # Add bars to the figure
+        for i, count in enumerate(key_counts):
+            # check if current bar is the user's selected key
+            opacity = 1.0 if i == user_key_index else 0.3
+            # Set hovertemplate only for the selected key
+            if i == user_key_index:
+                hovertemplate=f'{track_name}</b><extra></extra>',
+                hoverinfo='y+name'
+            else:
+                hovertemplate=''
+                hoverinfo='skip'
 
-        # FutureWarning: sns
-        if isinstance(key_counts.index.dtype, pd.CategoricalDtype):
-            ax = sns.barplot(x=key_counts.index.codes,# Use codes for categorical data
-                             y=key_counts.values,
-                             palette='plasma',
-                             order=key_counts.index)
-        else:
-            ax = sns.barplot(x=key_counts.index,
-                             y=key_counts.values,
-                             palette='plasma',
-                             order=key_counts.index)
-
-        # Map numeric key values to corresponding alphabetic keys for x-axis tick lables
-        alpha_keys = [key_mapping[num] for num in key_counts.index if num != -1]
-        ax.set_xticklabels(alpha_keys)
-
-        # Adjust y-axis to increment by 1
-        max_key_count = key_counts.max()
-        ax.set_yticklabels(np.arange(0,max_key_count + 1, 1)) # +1 to ensure the max value is included
-
-        # Numeric Key from Target Track
-        key_index = audio_features['key']
-        if 0 <= key_index <= len(key_mapping):
-            selected_key = key_mapping[key_index]
-            print(f'Selected Key from User Input: {selected_key}')
-            # Get reordered index of the selected key in the dataset
-            selected_key_index = key_counts.index.get_loc(key_index)
-            print(f'Selected Key Index in Reordered Distribution: {selected_key_index}')
-
-            for i, patch in enumerate(ax.patches):
-                if i != selected_key_index:
-                    # fade the rest of the bars
-                    patch.set_alpha(0.2)
-
-            st.write(f"<p style='font-size:24px'>Key for '{track_name}': {selected_key}</p>", unsafe_allow_html=True)
-        else:
-            print(f"Key '{key_index}' not found in key distribution")
-
-        ax.set_facecolor('lightgrey')
-
-        # plt.title('Distribution of Songs by Key: 2023 Top 50')
-        plt.xlabel('Key')
-        plt.ylabel('Count')
-
-        fig.patch.set_facecolor('lightgrey')
+            fig.add_trace(go.Bar(
+                x=[key_mapping[i]],
+                y=[count],
+                marker=dict(
+                    # if there are more bars than colors, the color selection starts again from beginning
+                    color=colorscale[i % len(colorscale)][1], # access the second element of each tuple in colorscale
+                    opacity=opacity
+                ),
+                hoverinfo=hoverinfo,
+                hovertemplate=hovertemplate
+            ))
         
-        return plt
+        # Update layout
+        fig.update_layout(
+            xaxis_title="Key",
+            yaxis_title="Frequency",
+            template='plotly_white',
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
+            margin=dict(l=20, r=20, t=30, b=20),
+            showlegend=False,
+            autosize=True
+        )
+
+        return fig
+
     
     def create_duration_histogram(self, audio_features: Dict[str, float]) -> plt.Figure:
         """ 
@@ -641,7 +643,7 @@ class SpotifyAnalyzer:
                 st.header('Key Distribution Comparison:')
                 st.text(f'Distribution of Songs by Key: {selected_playlist} vs. {track_name} by {artist_name}')
                 key_dist = self.create_key_distribution_chart(audio_features, track_name)
-                st.pyplot(key_dist)
+                st.plotly_chart(key_dist, use_container_width=True)
 
                 # Create a Duration Histogram Chart
                 st.header('Histogram Chart Comparison - Duration:')
