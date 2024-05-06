@@ -162,7 +162,7 @@ class SpotifyAnalyzer:
             polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
             showlegend=True,
             legend=dict(x=1, y=1, traceorder='normal',orientation='v', font=dict(color='black')),
-            paper_bgcolor = 'lightgrey',
+            paper_bgcolor = 'WhiteSmoke',
             font = {"color": "black"},
             height=450,
             width=700,
