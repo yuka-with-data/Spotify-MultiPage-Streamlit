@@ -402,34 +402,48 @@ class AlbumAnalyzer:
 
         return fig
     
-    def explicit_pie_chart(self) -> plt.Figure:
-        # Count values for each category
-        explicit_counts = self.df_album['is_explicit'].sum()
-        non_explicit_count = len(self.df_album) - explicit_counts
+    def explicit_pie_chart(self) -> go.Figure:
+        # Prepare data for Explicit vs. Non-Explicit
+        explicit_data = self.df_album[['is_explicit', 'track_name']].copy()
+        explicit_data['is_explicit'] = explicit_data['is_explicit'].map({True: 'Explicit', False: 'Non-Explicit'})
 
-        explicit_counts = [explicit_counts,non_explicit_count]
-        labels = ['Explicit','Non-Explicit']
-        # Colors
-        color_explicit = cm.plasma(0.10)
-        color_non_explicit = cm.plasma(0.65)
-        colors_with_alpha = [(color_explicit[0], color_explicit[1], color_explicit[2], 0.7),  # 70% opacity for Explicit
-                             (color_non_explicit[0], color_non_explicit[1], color_non_explicit[2], 0.7)]  # 70% opacity for Non-Explicit
-        
-        fig, ax = plt.subplots(figsize=(6, 4))
-        patches, _,_= ax.pie(explicit_counts,
-                             # labels=labels,
-                             colors=colors_with_alpha,
-                             autopct='%1.1f%%',
-                             startangle=90,
-                             textprops={'fontsize': 12},
-                             # shadow=True,
-                             radius=1.2)
-        ax.axis('equal')
-        ax.legend(patches, labels, loc='best', fontsize='small', title="Track Type")
-        plt.tight_layout()
+        # Aggregate track names for each category
+        title_summary = explicit_data.groupby('is_explicit', observed=False)['track_name'].apply(lambda x: '<br>'.join(x[:5]) + ('...' if len(x) > 5 else '')).reset_index()
+        title_summary.columns = ['is_explicit', 'titles']
 
-        fig.patch.set_alpha(0.0)
-        ax.set_facecolor('none')
+        # Calculate counts for each category
+        count_summary = explicit_data['is_explicit'].value_counts().reset_index()
+        count_summary.columns = ['is_explicit', 'count'] 
+
+        # Merge titles and counts data
+        final_data = pd.merge(title_summary, count_summary, on='is_explicit')
+
+        # Create the pie chart
+        fig = px.pie(
+            final_data,
+            names='is_explicit',
+            values='count',
+            color_discrete_sequence=[px.colors.sequential.Plasma[2], px.colors.sequential.Plasma[7]],
+            hole=0.2,
+            custom_data=['titles']
+        )
+
+        # Setting tooltip to display track titles, each on a new line
+        fig.update_traces(
+            textposition='inside',
+            textinfo='percent+label',
+            hovertemplate="<br><b>Tracks:</b><br>%{customdata[0]}<extra></extra>"
+        )
+
+        # Update layout
+        fig.update_layout(
+            template='plotly_white',
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
+            autosize=True,
+            showlegend=False,
+            margin=dict(l=20, r=20, t=30, b=20)
+        )
 
         return fig
     
@@ -514,7 +528,7 @@ class AlbumAnalyzer:
             st.header('Explicitness Pie Chart')
             st.text("The pie chart breaks down the proportion of explicit to non-explicit tracks, providing insight into the album's content.")
             fig = self.explicit_pie_chart()
-            st.pyplot(fig)
+            st.plotly_chart(fig, use_container_width=True)
 
             st.header('Album Popularity Gauge Chart')
             st.text("The gauge chart displays the album's popularity score, "
@@ -522,9 +536,6 @@ class AlbumAnalyzer:
             fig = self.album_popularity_gauge_chart()
             st.plotly_chart(fig, use_container_width=True)
 
-
-
-        
         except Exception as e:
             print(f" Run Analysis Error {e}")
             st.error("An error occurred during analysis. Please try again.")
