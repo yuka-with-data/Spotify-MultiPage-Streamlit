@@ -109,9 +109,14 @@ class EraComparison:
         fig.update_layout(
             polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
             showlegend=True,
-            legend=dict(x=1, y=1, traceorder='normal', orientation='v', font=dict(color='black')),
-            paper_bgcolor='lightgrey',
+            legend=dict(
+                orientation='h',
+                x=0.7,
+                y=1.1,
+            ),
+            paper_bgcolor='WhiteSmoke',
             font={"color": "black"},
+            margin=dict(l=40, r=40, t=40, b=40),
             height=450,
             width=700,
             autosize=True
