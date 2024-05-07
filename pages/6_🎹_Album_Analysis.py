@@ -7,6 +7,7 @@ import json
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import plotly.graph_objects as go
+import plotly.express as px
 import streamlit as st
 # from decouple import config
 import matplotlib.pyplot as plt
@@ -74,38 +75,73 @@ class AlbumAnalyzer:
 
         return fig
     
-    def tempo_histogram(self) -> plt.Figure:
-        color_album = cm.plasma(0.15)
-        color_average_tempo = cm.plasma(0.55) 
+    def tempo_histogram(self) -> go.Figure:
+        color_album = px.colors.sequential.Plasma[2]  
+        color_average_tempo = px.colors.sequential.Plasma[6]
 
-        fig, ax = plt.subplots(figsize=(6, 4))
-        sns.histplot(self.df_album['tempo'],
-                     bins=50,
-                     # kde=True,
-                     color=color_album,
-                     edgecolor='black',
-                     ax=ax)
+        # Calculate histogram data
+        data_min = self.df_album['tempo'].min()
+        data_max = self.df_album['tempo'].max()
+        bins = np.linspace(data_min - 0.1, data_max + 0.1, num=50)
+        counts, bins = np.histogram(self.df_album['tempo'], bins=bins)
+        bins = np.round(bins, 2)
+
+        # Group data into bins
+        bin_labels = [f"{bins[i]} - {bins[i+1]}" for i in range(len(bins)-1)]
+        self.df_album['bin'] = pd.cut(self.df_album['tempo'], bins=bins, labels=bin_labels, include_lowest=True)
+
+        # Prepare data for tooltips
+        grouped = self.df_album.groupby('bin', observed=False)
+        print(grouped)
+        tooltip_data = grouped['track_name'].agg(lambda x: ', '.join(x)).reset_index()
+
+        # Create the figure and add bars
+        fig = go.Figure()
+        for label, group in grouped:
+            fig.add_trace(go.Bar(
+                x=[label],
+                y=[group['tempo'].count()],
+                text=[tooltip_data[tooltip_data['bin'] == label]['track_name'].values[0]],
+                hoverinfo="text",
+                marker=dict(color=color_album, line=dict(width=1, color='black')),
+                name=label,
+                showlegend=False 
+            ))
+
+        # Calculate mean tempo and find the bin
         mean_tempo = self.df_album['tempo'].mean()
-        ax.axvline(mean_tempo,
-                   color=color_average_tempo,
-                   linestyle='dashed',
-                   linewidth=2,
-                   label='Average Tempo')
-        ax.set_xlabel('Tempo')
-        ax.set_ylabel('Frequency')
-        ax.legend()
+        mean_tempo_bin = pd.cut([mean_tempo], bins=bins, labels=bin_labels, include_lowest=True)[0]
 
-        max_count = int(max(ax.get_yticks())) # Find the current max y-tick and round up
-        ax.set_yticks(range(0, max_count))
-        ax.yaxis.set_major_locator(MaxNLocator(integer=True)) # Set y-ticks to integers
+        # Add a line for average tempo
+        fig.add_trace(go.Scatter(
+            x=[mean_tempo_bin, mean_tempo_bin],
+            y=[0, counts.max()], 
+            mode='lines',
+            line=dict(color=color_average_tempo, width=2, dash='dash'),
+            name='Average Tempo',
+            hoverinfo='text',
+            text=f"Mean Tempo: {mean_tempo:.2f} BPM"
+        ))
 
-        ax.grid(False, axis='x')
-        ax.grid(True, axis='y', linestyle='--',alpha=0.6)
-
-        fig.patch.set_facecolor('lightgrey')
-        ax.set_facecolor('lightgrey')
+        # Update layout with additional options
+        fig.update_layout(
+            xaxis_title='Tempo (BPM)',
+            yaxis_title='Frequency',
+            template='plotly_white',
+            showlegend=True,
+            legend=dict(
+                orientation='h',
+                x=0.8,
+                y=1.1,
+            ),
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
+            margin=dict(l=20, r=20, t=20, b=20),
+            autosize=True
+        )
 
         return fig
+
 
     def duration_histogram(self) -> plt.Figure:
         color_album = cm.plasma(0.15)
@@ -323,7 +359,7 @@ class AlbumAnalyzer:
             st.header('Tempo Histogram')
             st.text("The tempo histogram shows the distribution of the tempo (beats per minute) across all tracks in the album.")
             fig = self.tempo_histogram()
-            st.pyplot(fig)
+            st.plotly_chart(fig, use_container_width=True)
 
             st.header('Duration Histogram')
             st.text("The histogram illustrates the distribution of track durations within the album, highlighting variability in song lengths.")
