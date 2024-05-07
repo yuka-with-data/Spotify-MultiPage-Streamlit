@@ -367,10 +367,10 @@ class SpotifyAnalyzer:
         # Group data into bins
         bin_labels = [f"{format_min_to_minsec(bins[i])} - {format_min_to_minsec(bins[i+1])}" for i in range(len(bins)-1)]
         self.df_top_50['bin'] = pd.cut(self.df_top_50['duration_min'], bins=bins, labels=bin_labels, include_lowest=True)
-        tooltip_data = self.df_top_50.groupby('bin')['track_name'].agg(lambda x: ', '.join(x)).reset_index()
+        tooltip_data = self.df_top_50.groupby('bin', observed=False)['track_name'].agg(lambda x: ', '.join(x)).reset_index()
 
         fig = go.Figure()
-        for label, group in self.df_top_50.groupby('bin'):
+        for label, group in self.df_top_50.groupby('bin', observed=False):
             fig.add_trace(go.Bar(
                 x=[label],
                 y=[group['duration_min'].count()],
@@ -427,7 +427,7 @@ class SpotifyAnalyzer:
         return fig
 
 
-    def create_loudness_histogram(self, audio_features: Dict[str, float]) -> plt.Figure:
+    def create_loudness_histogram(self, audio_features: Dict[str, float], user_track_name:str) -> plt.Figure:
         """ 
         Create a histogram chart comparing loudness of a track with the top 50
         Args:
@@ -435,31 +435,82 @@ class SpotifyAnalyzer:
         Returns:
         histogram chart
         """
-        fig, ax = plt.subplots(figsize=(6, 4))
+        # Define colors using Plotly's Plasma colormap
+        color_top_50 = px.colors.sequential.Plasma[2]
+        color_your_track = px.colors.sequential.Plasma[4]
+        color_average_loudness = px.colors.sequential.Plasma[6]
 
-        color_top_50 = cm.plasma(0.15)
-        color_your_track = cm.plasma(0.7)
-        color_average_duration = cm.plasma(0.55)
+        # Calculate Histogram data
+        data_min = self.df_top_50['loudness'].min()
+        data_max = self.df_top_50['loudness'].max()
+        bins = np.linspace(data_min - 0.1, data_max + 0.1, num=50)
+        counts, bins = np.histogram(self.df_top_50['loudness'], bins=bins)
+        bins = np.round(bins, 2)
 
-        sns.histplot(self.df_top_50['loudness'], bins=50, kde=True, alpha = 0.7, color=color_top_50,edgecolor='black', label=f"{selected_playlist}", ax=ax)
-        ax.axvline(audio_features['loudness'], color=color_your_track, linewidth=2, label='Your Track')
-        ax.axvline(self.df_top_50['loudness'].mean(), color=color_average_duration, linestyle='dashed', linewidth=2, label='Average Track Loudness')
+        # Group data into bins
+        bin_labels = [f"{bins[i]} - {bins[i+1]}" for i in range(len(bins)-1)]
+        self.df_top_50['bin'] = pd.cut(self.df_top_50['loudness'], bins=bins, labels=bin_labels, include_lowest=True)
 
-        ax.set_xlabel('Loudness (in dB)')
-        ax.set_ylabel('Frequency')
-
-        # Determine max y-value (rounded up) and set y-ticks accordingly
-        max_count = int(max(ax.get_yticks()))  # Find the current max y-tick and round up
-        ax.set_yticks(range(0, max_count))
-
-        ax.legend(prop={'size': 8})
-        ax.grid(False, axis='x')
-        ax.grid(True, axis='y', linestyle='--',alpha=0.6)
+        # Prepare data for the tooltips
+        grouped = self.df_top_50.groupby('bin', observed=False)
+        tooltip_data = grouped['track_name'].agg(lambda x: ', '.join(x)).reset_index()
         
-        fig.patch.set_facecolor('lightgrey')
-        ax.set_facecolor('lightgrey')
+        fig = go.Figure()
 
-        return plt
+        # Add bars for histogram
+        for label, group in grouped:
+            fig.add_trace(go.Bar(
+                x=[label],
+                y=[group['tempo'].count()],
+                text=[tooltip_data[tooltip_data['bin'] == label]['track_name'].values[0]],
+                hoverinfo="text",
+                marker=dict(color=color_top_50, line=dict(width=1, color='black')),
+                name=label,
+                showlegend=False
+            ))
+
+        # Add vertical line for average loudness
+        mean_loudness = self.df_top_50['loudness'].mean()
+        mean_loudness_bin = pd.cut([mean_loudness], bins=bins, labels=bin_labels, include_lowest=True)[0]
+        fig.add_trace(go.Scatter(
+            x=[mean_loudness_bin, mean_loudness_bin],
+            y=[0, counts.max()],
+            mode='lines',
+            line=dict(color=color_average_loudness, width=2, dash='dash'),
+            name='Average Loudness',
+            hoverinfo='text',
+            text=f"Mean Loudness: {mean_loudness} dB"
+        ))
+
+        # Add vertical line for the user's track loudness
+        user_loudness = audio_features['loudness']
+        user_bin = pd.cut([user_loudness], bins=bins, labels=bin_labels, include_lowest=True)[0]
+        fig.add_trace(go.Scatter(
+            x=[user_bin, user_bin],
+            y=[0, counts.max()],
+            mode='lines',
+            line=dict(color=color_your_track, width=2),
+            name=f'{user_track_name}',
+            hoverinfo='text',
+            text=f"{user_track_name}: {user_loudness} dB"
+        ))
+
+        # Update layout
+        fig.update_layout(
+            xaxis_title='Loudness (dB)',
+            yaxis_title='Frequency',
+            template='plotly_white',
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
+            legend=dict(
+                orientation='h',
+                y=1.1,
+            ),
+            margin=dict(l=20, r=20, t=40, b=20),
+            autosize=True
+        )
+
+        return fig
 
 
     def create_explicit_pie_chart(self, audio_features: Dict[str, float]) -> plt.Figure:
@@ -709,8 +760,8 @@ class SpotifyAnalyzer:
                 # Create a Loudness Histogram Chart
                 st.header('Histogram Chart Comparison - Loudness:')
                 st.text(f'Comparison of Loudness {selected_playlist} vs. {track_name} by {artist_name}')
-                loudness_chart = self.create_loudness_histogram(audio_features)
-                st.pyplot(loudness_chart)
+                loudness_chart = self.create_loudness_histogram(audio_features, track_name)
+                st.plotly_chart(loudness_chart, use_container_width=True)
 
                 # Create a Mode Pie Chart
                 st.header('Mode Pie Chart:')
