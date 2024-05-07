@@ -513,12 +513,15 @@ class SpotifyAnalyzer:
         return fig
 
 
-    def create_explicit_pie_chart(self, audio_features: Dict[str, float]) -> plt.Figure:
+    def create_explicit_pie_chart(self, audio_features: Dict[str, float], user_track_name:str) -> plt.Figure:
         """
         Create a pie chart displaying the percentage of explicit tracks in the top 50
         Returns:
         pie chart
         """
+        explicit_color = px.colors.sequential.Plasma[2]
+        nonexplicit_color = px.colors.sequential.Plasma[6]
+
         # Extract the attribute from user's selected track 
         is_explicit = audio_features.get('is_explicit', False)
 
@@ -526,34 +529,37 @@ class SpotifyAnalyzer:
         explicit_counts = self.df_top_50['is_explicit'].sum()
         non_explicit_count = len(self.df_top_50) - explicit_counts
 
-        explicit_counts = [explicit_counts,non_explicit_count]
-        labels = ['Explicit','Non-Explicit']
-        colors = [cm.plasma(0.10), cm.plasma(0.65)]
-        explode = [0.02, 0] if is_explicit else [0,0.02]
+        counts = [explicit_counts, non_explicit_count]
+        labels = ['Explicit', 'Non-Explicit']
+        colors = [explicit_color, nonexplicit_color]  # Use Plotly's Plasma colors
 
-        fig, ax = plt.subplots(figsize=(6, 4))
-        patches, _,_= ax.pie(explicit_counts, 
-                            #labels=labels,
-                            colors=colors, 
-                            autopct='%1.1f%%', 
-                            startangle=90, 
-                            explode=explode, 
-                            textprops={'fontsize': 12}, 
-                            radius=1.2)
-        
-        if is_explicit:
-            patches[0].set_alpha(0.65)
-            patches[1].set_alpha(0.5)
-        else:
-            patches[0].set_alpha(0.25)
-            patches[1].set_alpha(1)
+        fig = go.Figure(go.Pie(
+            labels=labels,
+            values=counts,
+            pull=[0.02 if is_explicit else 0, 0 if is_explicit else 0.02],  # pull out slice for visual emphasis
+            marker=dict(colors=colors, line=dict(color='white', width=2)),
+            textinfo='label+percent',
+            insidetextorientation='radial'  # adjust the text orientation inside slices
+        ))
+
+        # Customize hover information
+        fig.update_traces(hoverinfo='label+percent', textinfo='label+percent')
 
         # Convert the boolean to a readable string
         explicit_status = "Explicit" if is_explicit else "Non-Explicit"
-        st.write(f"<p style='font-size:24px'>Explicitness Status for '{selected_track}': {explicit_status}</p>", unsafe_allow_html=True)
-        ax.axis('equal')
-        ax.legend(patches, labels, loc='best', fontsize='small', title="Track Type")
-        plt.tight_layout()
+
+        # Update layout for a clean look
+        fig.update_layout(
+            title_text=f"Track Explicitness for {user_track_name}: '{explicit_status}'",
+            title_x=0,
+            title_y=0.98,
+            showlegend=False,
+            template='plotly_white',
+            margin=dict(l=20, r=20, t=40, b=20),
+            paper_bgcolor='WhiteSmoke',  # Transparent background
+            plot_bgcolor='WhiteSmoke',  # Transparent background
+            autosize=True
+        )
 
         return fig
     
@@ -682,7 +688,7 @@ class SpotifyAnalyzer:
                     'borderwidth': 2,
                     'bordercolor': "gray",
                     'steps': [
-                        {'range': [0, 100], 'color': 'white'},
+                        {'range': [0, 100], 'color': 'GhostWhite'},
                         {'range': [0, popularity], 'color': 'rgba(65, 105, 225, 0.5)'}
                     ],
                     'threshold': {
@@ -699,7 +705,7 @@ class SpotifyAnalyzer:
                            showarrow=False, font=dict(size=14, color="rgba(195, 107, 0, 1.0)"))
 
             fig.update_layout(
-                paper_bgcolor="lightgrey",
+                paper_bgcolor="WhiteSmoke",
                 font={"color": "black"},
                 height=450,
                 width=700,
@@ -772,8 +778,8 @@ class SpotifyAnalyzer:
                 # Create a Explicit Pie Chart
                 st.header('Explicitness Pie Chart:')
                 st.text(f'Comparison of Explicitness {selected_playlist} & {track_name} by {artist_name}')
-                explicit_chart = self.create_explicit_pie_chart(audio_features)
-                st.pyplot(explicit_chart)
+                explicit_chart = self.create_explicit_pie_chart(audio_features, track_name)
+                st.plotly_chart(explicit_chart, use_container_width=True)
 
                 # Create a Genres Word Cloud
                 st.header("Genres Word Cloud:")
