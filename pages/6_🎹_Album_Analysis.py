@@ -220,35 +220,69 @@ class AlbumAnalyzer:
         return fig
 
     
-    def loudness_histogram(self) -> plt.Figure:
-        color_album = cm.plasma(0.15)
-        color_average_loud = cm.plasma(0.55)
+    def loudness_histogram(self) -> go.Figure:
+        color_top_50 = px.colors.sequential.Plasma[2]  
+        color_average_loudness = px.colors.sequential.Plasma[6]  
 
-        fig, ax = plt.subplots(figsize=(6, 4))
-        sns.histplot(self.df_album['loudness'],
-                     bins=50,
-                     # kde=True,
-                     color=color_album,
-                     edgecolor='black',
-                     ax=ax)
+        # Calculate histogram data
+        data_min = self.df_album['loudness'].min()
+        data_max = self.df_album['loudness'].max()
+        bins = np.linspace(data_min - 0.1, data_max + 0.1, num=50)
+        counts, bins = np.histogram(self.df_album['loudness'], bins=bins)
+        bins = np.round(bins, 2)  # Round bins to two decimal places
+
+        # Create bin labels for grouping
+        bin_labels = [f"{bins[i]} - {bins[i+1]}" for i in range(len(bins)-1)]
+        self.df_album['bin'] = pd.cut(self.df_album['loudness'], bins=bins, labels=bin_labels, include_lowest=True)
+
+        # Prepare data for the tooltips
+        grouped = self.df_album.groupby('bin', observed=False)
+        tooltip_data = grouped['track_name'].agg(lambda x: ', '.join(x)).reset_index()
+
+        # Create the figure and add histogram bars manually
+        fig = go.Figure()
+        for label, group in grouped:
+            fig.add_trace(go.Bar(
+                x=[label], 
+                y=[group['loudness'].count()],
+                text=[tooltip_data[tooltip_data['bin'] == label]['track_name'].values[0]],
+                hoverinfo="text",
+                marker=dict(color=color_top_50, line=dict(width=1, color='black')),
+                name=label,
+                showlegend=False  # Hide legend for bars
+            ))
+
+        # Calculate mean loudness
         mean_loudness = self.df_album['loudness'].mean()
-        ax.axvline(mean_loudness,
-                   color=color_average_loud,
-                   linestyle='dashed',
-                   linewidth=2,
-                   label='Average Loudness')
-        ax.set_xlabel('Loudness')
-        ax.set_ylabel('Frequency')
-        ax.legend()
+        # Find the bin label for the mean loudness
+        mean_loudness_bin = pd.cut([mean_loudness], bins=bins, labels=bin_labels, include_lowest=True)[0]
 
-        max_count = int(max(ax.get_yticks())) # Find the current max y-tick and round up
-        ax.set_yticks(range(0, max_count))
+        # Add a line for the average loudness
+        fig.add_trace(go.Scatter(
+            x=[mean_loudness_bin, mean_loudness_bin],
+            y=[0, counts.max()],  # Use the maximum count as the top of the line
+            mode='lines',
+            line=dict(color=color_average_loudness, width=2, dash='dash'),
+            name='Average Loudness',
+            hoverinfo='text',
+            text=f"Mean Loudness: {mean_loudness:.2f} dB" 
+        ))
 
-        ax.grid(False, axis='x')
-        ax.grid(True, axis='y', linestyle='--', alpha=0.6)
-
-        fig.patch.set_facecolor('lightgrey')
-        ax.set_facecolor('lightgrey')
+        # Update layout with additional options
+        fig.update_layout(
+            xaxis_title='Loudness (dB)',
+            yaxis_title='Frequency',
+            template='plotly_white',
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
+            legend=dict(
+                orientation='h',
+                x=0.8,
+                y=1.1,
+            ),
+            margin=dict(l=20, r=20, t=20, b=20),
+            autosize=True
+        )
 
         return fig
     
@@ -412,7 +446,7 @@ class AlbumAnalyzer:
             st.header('Loudness Histogram')
             st.text("The loudness histogram plots the loudness levels (in decibels) of each track, showing the dynamic range of the album.")
             fig = self.loudness_histogram()
-            st.pyplot(fig)
+            st.plotly_chart(fig, use_container_width=True)
 
             st.header('Key Histogram')
             st.text("The histogram displays the musical keys of the album's tracks, indicating the most common keys used.")

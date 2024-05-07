@@ -335,7 +335,7 @@ class SpotifyAnalyzer:
         return fig
 
     
-    def loudness_histogram(self) -> plt.Figure:
+    def loudness_histogram(self) -> go.Figure:
         color_top_50 = px.colors.sequential.Plasma[2]  
         color_average_loudness = px.colors.sequential.Plasma[6]  
 
