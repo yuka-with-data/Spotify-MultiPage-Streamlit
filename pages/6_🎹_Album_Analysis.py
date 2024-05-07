@@ -59,10 +59,16 @@ class AlbumAnalyzer:
         fig.update_layout(
             polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
             showlegend=True,
-            paper_bgcolor='white',
+            legend=dict(
+                orientation='h',
+                x=0.9,
+                y=1.1,
+            ),
+            paper_bgcolor='WhiteSmoke',
             font={"color": "black"},
             height=450,
             width=700,
+            margin=dict(l=40, r=40, t=40, b=40),
             autosize=True
         )
 
