@@ -143,39 +143,82 @@ class AlbumAnalyzer:
         return fig
 
 
-    def duration_histogram(self) -> plt.Figure:
-        color_album = cm.plasma(0.15)
-        color_average_duration = cm.plasma(0.55)
+    def duration_histogram(self) -> go.Figure:
+        color_album = px.colors.sequential.Plasma[2]
+        color_average_duration = px.colors.sequential.Plasma[6]
 
-        self.df_album['duration_min'] = self.df_album['duration_ms'] / 60000 # Convert duration from milliseconds to minutes for readability
+        # Convert duration from milliseconds to minutes
+        self.df_album['duration_min'] = self.df_album['duration_ms'] / 60000
 
-        fig, ax = plt.subplots(figsize=(6, 4))
-        sns.histplot(self.df_album['duration_min'],
-                     bins=50,
-                     # kde=True,
-                     color=color_album,
-                     edgecolor='black',
-                     ax=ax)
+        # Inner function
+        def format_min_minsec(minutes):
+            full_minutes = int(minutes)
+            seconds = int((minutes - full_minutes) * 60)
+            return f"{full_minutes}m {seconds}s"
+        
+        # Calculate histogram data
+        data_min = self.df_album['duration_min'].min()
+        data_max = self.df_album['duration_min'].max()
+        bins = np.linspace(data_min - 0.1, data_max + 0.1, num=50)
+        counts, bins = np.histogram(self.df_album['duration_min'], bins=bins)
+        bins = np.round(bins, 2)
+
+        # Group data into bins
+        # Create bin labels for grouping
+        bin_labels = [f"{format_min_minsec(bins[i])} - {format_min_minsec(bins[i+1])}" for i in range(len(bins)-1)]
+        self.df_album['bin'] = pd.cut(self.df_album['duration_min'], bins=bins, labels=bin_labels, include_lowest=True)
+
+        # Prepare tooltips
+        grouped = self.df_album.groupby('bin', observed=False)
+        tooltip_data = grouped['track_name'].agg(lambda x: ', '.join(x)).reset_index()
+
+        # Create the figure and add bars
+        fig = go.Figure()
+        for label, group in grouped:
+            tooltip = tooltip_data[tooltip_data['bin'] == label]['track_name'].values[0]
+            fig.add_trace(go.Bar(
+                x=[label],
+                y=[group['duration_min'].count()],
+                hoverinfo="text",
+                text=[tooltip],
+                marker=dict(color=color_album, line=dict(width=1, color='black')),
+                name=label,
+                showlegend=False
+            ))
+
+        # Calculate mean duration and find the bin
         mean_duration = self.df_album['duration_min'].mean()
-        ax.axvline(mean_duration,
-                   color=color_average_duration,
-                   linestyle='dashed',
-                   linewidth=2,
-                   label='Average Duration')
-        ax.set_xlabel('Duration (min)')
-        ax.set_ylabel('Frequency')
-        ax.legend()
+        mean_duration_bin = pd.cut([mean_duration], bins=bins, labels=bin_labels, include_lowest=True)[0]
 
-        max_count = int(max(ax.get_yticks())) # Find the current max y-tick and round up
-        ax.set_yticks(range(0, max_count))
+        # Add a line for average duration
+        fig.add_trace(go.Scatter(
+            x=[mean_duration_bin, mean_duration_bin],
+            y=[0, counts.max()],
+            mode='lines',
+            line=dict(color=color_average_duration, width=2, dash='dash'),
+            name='Average Duration',
+            hoverinfo='text',
+            text=f"Mean Duration: {format_min_minsec(mean_duration)}"
+        ))
 
-        ax.grid(False, axis='x')
-        ax.grid(True, axis='y', linestyle='--', alpha=0.6)
-
-        fig.patch.set_facecolor('lightgrey')
-        ax.set_facecolor('lightgrey')
+        # Update layout
+        fig.update_layout(
+            xaxis_title='Duration (min)',
+            yaxis_title='Frequency',
+            template='plotly_white',
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
+            legend=dict(
+                orientation='h',
+                x=0.8,
+                y=1.1,
+            ),
+            margin=dict(l=20, r=20, t=20, b=20),
+            autosize=True
+        )
 
         return fig
+
     
     def loudness_histogram(self) -> plt.Figure:
         color_album = cm.plasma(0.15)
@@ -364,7 +407,7 @@ class AlbumAnalyzer:
             st.header('Duration Histogram')
             st.text("The histogram illustrates the distribution of track durations within the album, highlighting variability in song lengths.")
             fig = self.duration_histogram()
-            st.pyplot(fig)
+            st.plotly_chart(fig, use_container_width=True)
 
             st.header('Loudness Histogram')
             st.text("The loudness histogram plots the loudness levels (in decibels) of each track, showing the dynamic range of the album.")
