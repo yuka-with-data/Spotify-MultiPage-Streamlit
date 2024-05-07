@@ -255,6 +255,12 @@ class SpotifyAnalyzer:
     
     def duration_histogram(self) -> plt.Figure:
 
+        def format_min_to_minsec(minutes):
+            # Convert decimal minutes to minutes and seconds format
+            full_minutes = int(minutes)
+            seconds = int((minutes - full_minutes) * 60)
+            return f"{full_minutes}m {seconds}s"
+
         color_top_50 = px.colors.sequential.Plasma[2]  
         color_average_duration = px.colors.sequential.Plasma[6]  
 
@@ -269,7 +275,7 @@ class SpotifyAnalyzer:
         bins = np.round(bins, 2)  # Round bins to two decimal places
 
         # Create bin labels for grouping
-        bin_labels = [f"{bins[i]} - {bins[i+1]}" for i in range(len(bins)-1)]
+        bin_labels = [f"{format_min_to_minsec(bins[i])} - {format_min_to_minsec(bins[i+1])}" for i in range(len(bins)-1)]
 
         # Group by bins
         self.df_top_50['bin'] = pd.cut(self.df_top_50['duration_min'], bins=bins, labels=bin_labels, include_lowest=True)
@@ -303,7 +309,7 @@ class SpotifyAnalyzer:
             line=dict(color=color_average_duration, width=2, dash='dash'),
             name='Average Duration',
             hoverinfo='text',
-            text=f"Mean Duration: {mean_duration:.2f} min" 
+            text=f"Mean Duration: {format_min_to_minsec(mean_duration)}" 
         ))
 
         # Update layout with additional options
