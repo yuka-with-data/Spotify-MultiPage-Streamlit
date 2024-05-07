@@ -516,7 +516,7 @@ class SpotifyAnalyzer:
         return fig
 
     
-    def explicit_pie_chart(self) -> plt.Figure:
+    def explicit_pie_chart(self) -> go.Figure:
         # Prepare data for Explicit vs. Non-Explicit
         explicit_data = self.df_top_50[['is_explicit', 'track_name']].copy()
         explicit_data['is_explicit'] = explicit_data['is_explicit'].map({True: 'Explicit', False: 'Non-Explicit'})
