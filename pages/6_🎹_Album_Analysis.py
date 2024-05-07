@@ -357,31 +357,48 @@ class AlbumAnalyzer:
 
         return fig
     
-    def mode_pie_chart(self) -> plt.Figure:
-        # Count values for each mode category
-        major_count = self.df_album['mode'].sum()  # mode 1 is major
-        minor_count = len(self.df_album) - major_count
+    def mode_pie_chart(self) -> go.Figure:
+        # Prepare data for Major vs. Minor mode
+        mode_data = self.df_album[['mode', 'track_name']].copy()
+        mode_data['mode'] = mode_data['mode'].map({1: 'Major', 0: 'Minor'})
 
-        mode_counts = [major_count, minor_count]
-        labels = ['Major', 'Minor']
-        # Colors
-        color_major = cm.plasma(0.10)
-        color_minor = cm.plasma(0.65)
-        colors_with_alpha = [(color_major[0], color_major[1], color_major[2], 0.7),  # 70% opacity for Major
-                            (color_minor[0], color_minor[1], color_minor[2], 0.7)]  # 70% opacity for Minor
+        # Aggregate track names for each category
+        title_summary = mode_data.groupby('mode', observed=False)['track_name'].apply(lambda x: '<br>'.join(x[:5]) + ('...' if len(x) > 5 else '')).reset_index()
+        title_summary.columns = ['mode', 'titles']  # Correctly rename columns
 
-        fig, ax = plt.subplots(figsize=(6, 4))
-        patches, texts, autotexts = ax.pie(mode_counts,
-                                        # labels=labels,
-                                        colors=colors_with_alpha,
-                                        autopct='%1.1f%%',
-                                        startangle=90,
-                                        textprops={'fontsize': 12},
-                                        radius=1.2)
-        
-        ax.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
-        ax.legend(patches, labels, loc='best', fontsize='small', title="Track Type")
-        plt.tight_layout()
+        # Calculate counts for each category
+        count_summary = mode_data['mode'].value_counts().reset_index()
+        count_summary.columns = ['mode', 'count']  # Directly assigning new column names
+
+        # Merge titles and counts data
+        final_data = pd.merge(title_summary, count_summary, on='mode')
+
+        # Create the pie chart
+        fig = px.pie(
+            final_data,
+            names='mode',
+            values='count',
+            color_discrete_sequence=[px.colors.sequential.Plasma[2], px.colors.sequential.Plasma[7]],
+            hole=0.2,
+            custom_data=['titles']
+        )
+
+        # Setting tooltip to display track titles, each on a new line
+        fig.update_traces(
+            textposition='inside',
+            textinfo='percent+label',
+            hovertemplate="<br><b>Tracks:</b><br>%{customdata[0]}<extra></extra>"
+        )
+
+        # Update layout
+        fig.update_layout(
+            template='plotly_white',
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
+            autosize=True,
+            showlegend=False,
+            margin=dict(l=20, r=20, t=30, b=20)
+        )
 
         return fig
     
@@ -492,7 +509,7 @@ class AlbumAnalyzer:
             st.header("Mode Pie Chart")
             st.text("Major modes are bright and uplifting, while minor modes are somber and serious.")
             mode_pie = self.mode_pie_chart()
-            st.pyplot(mode_pie)
+            st.plotly_chart(mode_pie, use_container_width=True)
 
             st.header('Explicitness Pie Chart')
             st.text("The pie chart breaks down the proportion of explicit to non-explicit tracks, providing insight into the album's content.")
