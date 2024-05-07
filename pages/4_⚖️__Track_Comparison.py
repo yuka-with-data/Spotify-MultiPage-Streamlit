@@ -652,7 +652,7 @@ class SpotifyAnalyzer:
         regexp = r"\w(?:[-']?\w)+"
         wc = WordCloud(width=700, 
                               height=500,
-                              background_color='white',
+                              background_color='#F5F5F5',
                               stopwords=None,
                               colormap='plasma_r',
                               collocations=True,
@@ -801,7 +801,7 @@ class SpotifyAnalyzer:
                 st.text(f'Genres Word Cloud for {selected_playlist}')
                 user_genres = audio_features.get('genres', '')
                 if user_genres:
-                    st.write(f"<p style='font-size:24px'>{selected_artist}'s Genres: {user_genres}</p>", unsafe_allow_html=True)
+                    st.write(f"<p style='font-size:24px; font-family:Roboto;'>{selected_artist}'s Genres: {user_genres}</p>", unsafe_allow_html=True)
                 else:
                     st.warning("No genres data available for the selected track/artist")
                 fig = self.create_genres_wordcloud()
