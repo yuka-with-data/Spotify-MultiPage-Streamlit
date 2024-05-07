@@ -539,7 +539,7 @@ class SpotifyAnalyzer:
             pull=[0.02 if is_explicit else 0, 0 if is_explicit else 0.02],  # pull out slice for visual emphasis
             marker=dict(colors=colors, line=dict(color='white', width=2)),
             textinfo='label+percent',
-            insidetextorientation='radial'  # adjust the text orientation inside slices
+            insidetextorientation='horizontal'  # adjust the text orientation inside slices
         ))
 
         # Customize hover information
@@ -551,61 +551,76 @@ class SpotifyAnalyzer:
         # Update layout for a clean look
         fig.update_layout(
             title_text=f"Track Explicitness for {user_track_name}: '{explicit_status}'",
+            title_font=dict(family='Roboto'),
             title_x=0,
             title_y=0.98,
             showlegend=False,
             template='plotly_white',
             margin=dict(l=20, r=20, t=40, b=20),
-            paper_bgcolor='WhiteSmoke',  # Transparent background
-            plot_bgcolor='WhiteSmoke',  # Transparent background
+            paper_bgcolor='WhiteSmoke',  
+            plot_bgcolor='WhiteSmoke', 
             autosize=True
         )
 
         return fig
     
-    def create_mode_pie_chart(self, audio_features: Dict[str, float]) -> plt.Figure:
+    def create_mode_pie_chart(self, audio_features: Dict[str, float], user_track_name: str) -> go.Figure:
         """
         Create a pie chart displaying the percentage of tracks in Major and Minor modes in the top chart
         and highlight the mode of the selected track.
         Returns:
         pie chart
         """
-        # Extract the mode attribute from the user's selected track
-        is_major = audio_features.get('mode', 1) == 1  # '1' for Major and '0' for Minor
+        # Set colors
+        major_color = px.colors.sequential.Plasma[2]
+        minor_color = px.colors.sequential.Plasma[6]
 
-        # Count values for each mode category in the playlist
-        major_count = self.df_top_50['mode'].sum()
-        minor_count = len(self.df_top_50) - major_count
+        # Extract attribute from user's selected track
+        user_mode = audio_features.get('mode', 1) # boolean
 
-        mode_counts = [major_count, minor_count]
+        mode_counts = self.df_top_50['mode'].value_counts()
+        major_count = mode_counts.get(1,0)
+        minor_count = mode_counts.get(0,0)
+
+        counts = [major_count, minor_count]
         labels = ['Major', 'Minor']
-        colors = [cm.plasma(0.10), cm.plasma(0.65)]
-        explode = [0.02, 0] if is_major else [0, 0.02]  # Highlight the selected track's mode
+        colors = [major_color, minor_color]
 
-        fig, ax = plt.subplots(figsize=(6, 4))
-        patches, _, _ = ax.pie(mode_counts,
-                            #labels=labels,
-                            colors=colors,
-                            autopct='%1.1f%%',
-                            startangle=90,
-                            explode=explode,
-                            textprops={'fontsize': 12},
-                            radius=1.2)
+        fig = go.Figure(go.Pie(
+            labels=labels, 
+            values=counts,
+            pull=[0.02 if user_mode else 0, 0 if user_mode else 0.02],
+            marker=dict(
+                colors=colors,
+                line=dict(
+                    color='white',
+                    width=2
+                )
+            ),
+            textinfo='label+percent',
+            insidetextorientation='horizontal'
+        ))
+
+        # Customize hover info
+        fig.update_traces(hoverinfo='label+percent',
+                          textinfo='label+percent')
         
-        if is_major:
-            patches[0].set_alpha(0.65)
-            patches[1].set_alpha(0.5)
-        else:
-            patches[0].set_alpha(0.25)
-            patches[1].set_alpha(1)
+        # Convert the mode boolean to string
+        mode_status = "Major" if user_mode else "Minor"
 
-        # Convert the boolean to a readable string
-        mode_status = "Major" if is_major else "Minor"
-        st.write(f"<p style='font-size:24px'>Mode Status for '{selected_track}': {mode_status}</p>", unsafe_allow_html=True)
-        ax.axis('equal')
-        ax.legend(patches, labels, loc='best', fontsize='small', title="Track Type")
-        plt.tight_layout()
-
+        # Update layout 
+        fig.update_layout(
+            title_text=f"Mode for {user_track_name}: '{mode_status}'",
+            title_font=dict(family='Roboto'),
+            title_x=0,  # Align the title to the left
+            title_y=0.98,  # Adjust the vertical position of the title
+            showlegend=False,
+            template='plotly_white',
+            margin=dict(l=20, r=20, t=40, b=20),
+            paper_bgcolor='WhiteSmoke',
+            plot_bgcolor='WhiteSmoke',
+            autosize=True
+        )
         return fig
 
 
@@ -772,8 +787,8 @@ class SpotifyAnalyzer:
                 # Create a Mode Pie Chart
                 st.header('Mode Pie Chart:')
                 st.text(f'Comparison of Mode for {selected_playlist} & {track_name} by {artist_name}')
-                mode_chart = self.create_mode_pie_chart(audio_features)
-                st.pyplot(mode_chart)
+                mode_chart = self.create_mode_pie_chart(audio_features, track_name)
+                st.plotly_chart(mode_chart, use_container_width=True)
 
                 # Create a Explicit Pie Chart
                 st.header('Explicitness Pie Chart:')
