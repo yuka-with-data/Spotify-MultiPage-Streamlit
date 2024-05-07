@@ -287,12 +287,11 @@ class AlbumAnalyzer:
         return fig
     
     
-    def key_histogram(self) -> plt.Figure:
-        color_album = cm.plasma(0.15)
-        color_average_key = cm.plasma(0.55)
-
+    def key_histogram(self) -> go.Figure:
         # Mapping of numeric key values to corresponding alphabetic keys
         key_mapping = ('C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B')
+
+        grouped = self.df_album.groupby('key', observed=False)['track_name'].apply(list).reindex(range(12), fill_value=[])
 
         # Get key counts and ensure all keys are present
         key_counts = self.df_album['key'].value_counts().reindex(range(12), fill_value=0)
@@ -300,25 +299,61 @@ class AlbumAnalyzer:
         # Create a DataFrame for easier sorting and mapping
         key_df = pd.DataFrame({
             'Key': range(12),
-            'Count': key_counts.values,
-            'Alphabetical Key': key_mapping
+            'Count': key_counts.values,             
+            'Track Names': grouped.values
         })
 
-        # Sort the DataFrame by key count in descending order
-        key_df = key_df.sort_values(by='Count', ascending=False)
+        # Format track names into a single string per key
+        key_df['Formatted Tracks'] = key_df['Track Names'].apply(lambda x: '<br>'.join(x))
 
-        # Create a bar chart with the key counts
-        fig, ax = plt.subplots(figsize=(10, 6))
-        sns.set_theme(style="whitegrid")
+        # Map numeric keys to their names
+        key_df['Key Name'] = key_df['Key'].apply(lambda x: key_mapping[x])
 
-        sns.barplot(x='Alphabetical Key', y='Count', data=key_df, palette='plasma', ax=ax)
-        # Set y-axis ticks to integers
-        ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+        # Sort the DataFrame by 'Count'
+        key_df_sorted = key_df.sort_values(by='Count', ascending=False)
+        # print(key_df_sorted)
 
-        ax.set_facecolor('lightgrey')
-        plt.xlabel('Key')
-        plt.ylabel('Count')
-        fig.patch.set_facecolor('lightgrey')
+        # Map numeric keys to their names
+        # key_df_sorted['Key Name'] = key_df_sorted['Key'].apply(lambda x: key_mapping[x])
+
+        fig = go.Figure()
+
+        # Custom Plasma colorscale with 0.8 alpha
+        colorscale = [
+        [0.0, "rgba(232, 148, 88, 0.8)"],   # Lighter orange
+        [0.12, "rgba(213, 120, 98, 0.8)"],  # Dark orange
+        [0.24, "rgba(190, 97, 111, 0.8)"],  # Reddish-pink
+        [0.36, "rgba(164, 77, 126, 0.8)"],  # Lighter magenta
+        [0.48, "rgba(136, 60, 137, 0.8)"],  # Deep magenta
+        [0.58, "rgba(125, 50, 140, 0.8)"],  # Mid purple
+        [0.68, "rgba(106, 44, 141, 0.8)"],  # Purple-pink
+        [0.78, "rgba(87, 35, 142, 0.8)"],   # Deep purple
+        [0.88, "rgba(69, 27, 140, 0.8)"],   # Rich purple
+        [0.94, "rgba(40, 16, 137, 0.8)"],   # Darker purple
+        [0.97, "rgba(26, 12, 135, 0.8)"],   # between darker purple and dark blue
+        [1.0, "rgba(12, 7, 134, 0.8)"]      # Dark blue
+    ]
+
+        # Add the bar trace with custom tooltips
+        fig.add_trace(go.Bar(
+            x=key_df_sorted['Key Name'],
+            y=key_df_sorted['Count'],
+            text=key_df_sorted['Formatted Tracks'],
+            hovertemplate='<br><b>Tracks:</b><br>%{text}<extra></extra>',
+            marker=dict(color=key_df_sorted['Count'], colorscale=colorscale)
+        ))
+
+        # Update layout
+        fig.update_layout(
+            # title='Key Distribution',
+            xaxis_title='Key',
+            yaxis_title='Count',
+            template='plotly_white',
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
+            autosize=True,
+            margin=dict(l=20, r=20, t=30, b=20)
+        )
 
         return fig
     
@@ -380,6 +415,7 @@ class AlbumAnalyzer:
         ax.set_facecolor('none')
 
         return fig
+    
     
     def album_popularity_gauge_chart(self) -> go.Figure:
         """ 
@@ -451,7 +487,7 @@ class AlbumAnalyzer:
             st.header('Key Histogram')
             st.text("The histogram displays the musical keys of the album's tracks, indicating the most common keys used.")
             fig = self.key_histogram()
-            st.pyplot(fig)
+            st.plotly_chart(fig, use_container_width=True)
 
             st.header("Mode Pie Chart")
             st.text("Major modes are bright and uplifting, while minor modes are somber and serious.")
