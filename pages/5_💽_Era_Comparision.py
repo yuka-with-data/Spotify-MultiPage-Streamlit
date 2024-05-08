@@ -204,8 +204,13 @@ class EraComparison:
 
         # Add Mean line
         fig.add_trace(go.Scatter(
-            x=[mean_bin_label1, mean_bin_label1], y=[0, tooltip_data1['track_name'].apply(len).max()],
-            mode='lines', name=f'Mean {label1}', line=dict(color='red', dash='dash'),
+            x=[mean_bin_label1, mean_bin_label1], 
+            y=[0, tooltip_data1['track_name'].apply(len).max()],
+            mode='lines', 
+            name=f'Mean {label1}', 
+            line=dict(color='red', dash='dash'),
+            hoverinfo='text',
+            hovertext=f"{mean_duration1:.2f}"
         ), row=1, col=1)
 
         # Add Mean line
@@ -215,11 +220,13 @@ class EraComparison:
             mode='lines', 
             name=f'Mean {label2}', 
             line=dict(color='blue', dash='dash'),
+            hoverinfo='text',
+            hovertext=f"{mean_duration2:.2f}"
         ), row=2, col=1)
 
         # Update layout
         fig.update_layout(
-            xaxis_title='Duration (min:sec)',
+            #xaxis_title='Duration (min:sec)',
             yaxis_title='Frequency',
             template='plotly_white',
             plot_bgcolor='WhiteSmoke',
@@ -237,7 +244,7 @@ class EraComparison:
         return fig
         
 
-    def tempo_histogram(self, df1, df2, label1, label2) -> plt.Figure:
+    def tempo_histogram(self, df1, df2, label1, label2) -> go.Figure:
         """ 
          Create histogram chart comparing track tempo between two eras.
 
@@ -250,57 +257,109 @@ class EraComparison:
          Returns:
             plt.Figure
          """
-        fig, axs = plt.subplots(2,1,figsize=(10,8), sharex=True)
+        color_1 = px.colors.sequential.Plasma[2]
+        color_2 = px.colors.sequential.Plasma[6]
 
-        tempo_1 = df1['tempo']
-        tempo_2 = df2['tempo']
+        # Define bins for histogram
+        all_tempo = pd.concat([df1['tempo'], df2['tempo']])
+        bins = np.linspace(all_tempo.min(), all_tempo.max(), 30)
 
-        mean1 = tempo_1.mean()
-        mean2 = tempo_2.mean()
+        # Create bin labels formatted to two decimal places
+        #bin_labels = [f"{(bins[i] + bins[i+1])/2:.2f}" for i in range(len(bins)-1)]
 
-        # Define colors
-        color_1 = cm.plasma(0.15)
-        color_2 = cm.plasma(0.7)
+        # Convert tempo to bin
+        df1['bin'] = pd.cut(df1['tempo'], bins=bins, include_lowest=True)
+        df2['bin'] = pd.cut(df2['tempo'], bins=bins, include_lowest=True)
 
-        # Plot first playlist
-        sns.histplot(tempo_1,
-                     bins=30,
-                     kde=True,
-                     alpha=0.7,
-                     color=color_1,
-                     edgecolor='black',
-                     label=label1,
-                     ax=axs[0])
-        axs[0].axvline(mean1, color='blue', linestyle='dashed', linewidth=2, label=f'Mean Tempo: {mean1:.2f} BPM')
-        axs[0].set_ylabel('Frequency')
-        axs[0].legend()
-        axs[0].grid(True, axis='y', linestyle='--',alpha=0.6)
-        axs[0].set_facecolor('whitesmoke')
+        # Group and aggregate track names for tooltips
+        tooltip_data1 = df1.groupby('bin', observed=False)['track_name'].apply(list).reset_index()
+        tooltip_data2 = df2.groupby('bin', observed=False)['track_name'].apply(list).reset_index()
+
+        # Format bin labels for x-axis
+        #tooltip_data1['bin'] = tooltip_data1['bin'].apply(lambda x: f"{x.left:.2f} - {x.right:.2f}")
+        #tooltip_data2['bin'] = tooltip_data2['bin'].apply(lambda x: f"{x.left:.2f} - {x.right:.2f}")
         
-        # Plot second playlist
-        sns.histplot(tempo_2,
-                     bins=30,
-                     kde=True,
-                     alpha=0.7,
-                     color=color_2,
-                     edgecolor='black',
-                     label=label2,
-                     ax=axs[1])
-        axs[1].axvline(mean2, color='blue', linestyle='dashed', linewidth=2, label=f'Mean Tempo: {mean2:.2f} BPM')
-        axs[1].set_xlabel('Tempo (BPM)')
-        axs[1].set_ylabel('Frequency')
-        axs[1].legend()
-        axs[1].grid(True, axis='y', linestyle='--', alpha=0.6)
-        axs[1].set_facecolor('whitesmoke')
+        # Initialize subplots
+        fig = make_subplots(rows=2,
+                            cols=1,
+                            shared_xaxes=True,
+                            subplot_titles=(label1, label2),
+                            vertical_spacing=0.1)
+        
+        # Add histogram
+        for idx, row in tooltip_data1.iterrows():
+            bin_label = f"{row['bin'].left:.2f} - {row['bin'].right:.2f}"  # Format bin label
+            fig.add_trace(go.Bar(
+                x=[bin_label], y=[len(row['track_name'])],
+                name=label1,
+                hoverinfo='text',
+                text=["<br>".join(row['track_name'])],
+                marker=dict(color=color_1),
+                showlegend=False
+            ), row=1, col=1)
 
-        # Ensure y-axis ticks are int
-        axs[0].yaxis.set_major_locator(MaxNLocator(integer=True))
-        axs[1].yaxis.set_major_locator(MaxNLocator(integer=True))
+        for idx, row in tooltip_data2.iterrows():
+            bin_label = f"{row['bin'].left:.2f} - {row['bin'].right:.2f}"  # Format bin label
+            fig.add_trace(go.Bar(
+                x=[bin_label], y=[len(row['track_name'])],
+                name=label2,
+                hoverinfo='text',
+                text=["<br>".join(row['track_name'])],
+                marker=dict(color=color_2),
+                showlegend=False
+            ), row=2, col=1)
 
-        fig.patch.set_facecolor('lightgrey')
-        fig.tight_layout(pad=3.0)
+        # Add mean lines
+        mean1 = df1['tempo'].mean()
+        mean2 = df2['tempo'].mean()
+
+        # Find bins for the means
+        mean1_bin = tooltip_data1.loc[tooltip_data1['bin'].apply(lambda x: x.left <= mean1 <= x.right), 'bin'].values[0]
+        mean1_bin_label = f"{mean1_bin.left:.2f} - {mean1_bin.right:.2f}"
+        mean2_bin = tooltip_data2.loc[tooltip_data2['bin'].apply(lambda x: x.left <= mean2 <= x.right), 'bin'].values[0]
+        mean2_bin_label = f"{mean2_bin.left:.2f} - {mean2_bin.right:.2f}"
+
+        fig.add_trace(go.Scatter(
+            x=[mean1_bin_label, mean1_bin_label],
+            y=[0, tooltip_data1['track_name'].apply(len).max()],
+            mode='lines',
+            name=f"Mean {label1}", 
+            line=dict(color='red', dash='dash'),
+            hoverinfo='text',
+            hovertext=f"{mean1:.2f} BPM",
+            showlegend=True
+        ), row=1, col=1)
+
+        fig.add_trace(go.Scatter(
+            x=[mean2_bin_label, mean2_bin_label], 
+            y=[0, tooltip_data2['track_name'].apply(len).max()],
+            mode='lines', 
+            name=f'Mean {label2}', 
+            line=dict(color='blue', dash='dash'),
+            hoverinfo='text',
+            hovertext=f"{mean2:.2f} BPM",
+            showlegend=True
+        ), row=2, col=1)
+
+        # Update layout
+        fig.update_layout(
+            #xaxis_title='Tempo (BPM)',
+            yaxis_title='Frequency',
+            template='plotly_white',
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
+            legend=dict(
+                orientation='h',
+                x=0.5,
+                y=1.1
+            ),
+            height=800,
+            showlegend=True,
+            autosize=True
+        )
 
         return fig
+
     
     def key_distribution(self, df1, df2, label1, label2) -> plt.Figure:
         """
@@ -626,7 +685,7 @@ class EraComparison:
         st.header('Tempo (BPM) Histogram Comparision:')
         st.text("Music Era Comparision of Tempo")
         tempohist = self.tempo_histogram(df1, df2, label1, label2)
-        st.pyplot(tempohist)
+        st.plotly_chart(tempohist, use_container_width=True)
 
         st.header('Key Distribution Comparision:')
         st.text("Music Era Comparision of Key")
