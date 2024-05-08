@@ -1,12 +1,10 @@
 # Load Libraries
-import os
 import pandas as pd
 import numpy as np
-import time
-import json
-import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 import plotly.graph_objects as go
+import plotly.express as px
+from plotly.subplots import make_subplots
 import streamlit as st
 # from decouple import config
 import matplotlib.pyplot as plt
@@ -124,7 +122,7 @@ class EraComparison:
         
         return fig
     
-    def duration_histogram(self, df1, df2, label1, label2) -> plt.Figure:
+    def duration_histogram(self, df1, df2, label1, label2) -> go.Figure:
         """ 
          Create histogram chart comparing track durations between two eras.
 
@@ -137,59 +135,107 @@ class EraComparison:
          Returns:
             plt.Figure
          """
-        fig, axs = plt.subplots(2,1,figsize=(10,8), sharex=True)
+        def format_min_minsec(minutes):
+            full_minutes = int(minutes)
+            seconds = int((minutes - full_minutes) * 60)
+            return f"{full_minutes}m {seconds}s"
 
-        # Convert from milliseconds to seconds
-        duration_1 = df1['duration_ms']/1000
-        duration_2 = df2['duration_ms']/1000
+        color_1 = px.colors.sequential.Plasma[2]
+        color_2 = px.colors.sequential.Plasma[6]
 
-        mean_1 = duration_1.mean()
-        mean_2 = duration_2.mean()
+        # Convert duration from milliseconds to minutes for readability
+        df1['duration_min'] = df1['duration_ms'] / 60000
+        df2['duration_min'] = df2['duration_ms'] / 60000
 
-        # Define colors
-        color_1 = cm.plasma(0.15)
-        color_2 = cm.plasma(0.7)
+        # Define bins for histogram
+        bins = np.linspace(min(df1['duration_min'].min(), df2['duration_min'].min()),
+                        max(df1['duration_min'].max(), df2['duration_min'].max()), 30)
+        bin_labels = [format_min_minsec((bins[i] + bins[i+1])/2) for i in range(len(bins)-1)]
 
-        # Plot first playlist
-        sns.histplot(duration_1,
-                     bins=30,
-                     kde=True,
-                     alpha=0.7,
-                     color=color_1,
-                     edgecolor='black',
-                     label=label1,
-                     ax=axs[0])
-        axs[0].axvline(mean_1, color='blue', linestyle='dashed', linewidth=2, label=f'Mean Duration: {mean_1:.2f}s')
-        axs[0].set_ylabel('Frequency')
-        axs[0].legend()
-        axs[0].grid(True, axis='y', linestyle='--',alpha=0.6)
-        axs[0].set_facecolor('whitesmoke')
+        # Group and aggregate track names for tooltips
+        df1['bin'] = pd.cut(df1['duration_min'], bins=bins, labels=bin_labels, include_lowest=True)
+        tooltip_data1 = df1.groupby('bin', observed=False)['track_name'].apply(list).reset_index()
+
+        df2['bin'] = pd.cut(df2['duration_min'], bins=bins, labels=bin_labels, include_lowest=True)
+        tooltip_data2 = df2.groupby('bin', observed=False)['track_name'].apply(list).reset_index()
+
+        # Create subplots
+        fig = make_subplots(rows=2, 
+                            cols=1, 
+                            shared_xaxes=True, 
+                            subplot_titles=(label1, label2),
+                            vertical_spacing=0.1)
+
+        # Add histograms
+        for idx, row in tooltip_data1.iterrows():
+            fig.add_trace(go.Bar(
+                x=[row['bin']], y=[len(row['track_name'])], 
+                name=label1, 
+                hoverinfo='text', 
+                text=["<br>".join(row['track_name'])],
+                marker=dict(color=color_1),
+                showlegend=False  
+            ), row=1, col=1)
+
+        for idx, row in tooltip_data2.iterrows():
+            fig.add_trace(go.Bar(
+                x=[row['bin']], y=[len(row['track_name'])], 
+                name=label2, 
+                hoverinfo='text', 
+                text=["<br>".join(row['track_name'])],
+                marker=dict(color=color_2),
+                showlegend=False  
+            ), row=2, col=1)
+
+        def find_closest_bin(duration, bins, bin_labels):
+            # Find the index of the closest bin
+            index = np.digitize(duration, bins) - 1
+            # Clamp index to valid range
+            index = max(0, min(index, len(bin_labels) - 1))
+            return bin_labels[index]
         
-        # Plot second playlist
-        sns.histplot(duration_2,
-                     bins=30,
-                     kde=True,
-                     alpha=0.7,
-                     color=color_2,
-                     edgecolor='black',
-                     label=label2,
-                     ax=axs[1])
-        axs[1].axvline(mean_2, color='blue', linestyle='dashed', linewidth=2, label=f'Mean Duration: {mean_2:.2f}s')
-        axs[1].set_xlabel('Duration (in seconds)')
-        axs[1].set_ylabel('Frequency')
-        axs[1].legend()
-        axs[1].grid(True, axis='y', linestyle='--', alpha=0.6)
-        axs[1].set_facecolor('whitesmoke')
+        # Mean duration line
+        mean_duration1 = df1['duration_min'].mean()
+        mean_duration2 = df2['duration_min'].mean()
 
-        # Ensure y-axis ticks are int
-        axs[0].yaxis.set_major_locator(MaxNLocator(integer=True))
-        axs[1].yaxis.set_major_locator(MaxNLocator(integer=True))
+        # Find the closest bin labels for the mean durations
+        mean_bin_label1 = find_closest_bin(mean_duration1, bins, bin_labels)
+        mean_bin_label2 = find_closest_bin(mean_duration2, bins, bin_labels)
 
-        fig.patch.set_facecolor('lightgrey')
-        fig.tight_layout(pad=3.0)
+        # Add Mean line
+        fig.add_trace(go.Scatter(
+            x=[mean_bin_label1, mean_bin_label1], y=[0, tooltip_data1['track_name'].apply(len).max()],
+            mode='lines', name=f'Mean {label1}', line=dict(color='red', dash='dash'),
+        ), row=1, col=1)
+
+        # Add Mean line
+        fig.add_trace(go.Scatter(
+            x=[mean_bin_label2, mean_bin_label2], 
+            y=[0, tooltip_data2['track_name'].apply(len).max()],
+            mode='lines', 
+            name=f'Mean {label2}', 
+            line=dict(color='blue', dash='dash'),
+        ), row=2, col=1)
+
+        # Update layout
+        fig.update_layout(
+            xaxis_title='Duration (min:sec)',
+            yaxis_title='Frequency',
+            template='plotly_white',
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
+            legend=dict(
+                orientation='h',
+                x=0.5,
+                y=1.1  
+            ),
+            height=800,
+            showlegend=True,
+            autosize=True
+        )
 
         return fig
-    
+        
 
     def tempo_histogram(self, df1, df2, label1, label2) -> plt.Figure:
         """ 
@@ -575,7 +621,7 @@ class EraComparison:
         st.header('Duration Histogram Comparison:')
         st.text("Music Era Comparison of Track Duration")
         durationhist = self.duration_histogram(df1, df2, label1, label2)
-        st.pyplot(durationhist)
+        st.plotly_chart(durationhist, use_container_width=True)
 
         st.header('Tempo (BPM) Histogram Comparision:')
         st.text("Music Era Comparision of Tempo")
