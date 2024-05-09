@@ -458,70 +458,124 @@ class EraComparison:
 
         return fig
 
-    def loudness_histogram(self, df1, df2, label1, label2) -> plt.Figure:
-            """ 
-            Create histogram chart comparing track loudness between two eras.
+    def loudness_histogram(self, df1, df2, label1, label2) -> go.Figure:
+        """ 
+        Create histogram chart comparing track loudness between two eras.
 
-            Args:
-                df1: DataFrame containing tracks of the first playlist
-                df2: DataFrame containing tracks of the second playlist
-                label1: Label (name) of the first playlist
-                label2: Label (name) of the second playlist
-            
-            Returns:
-                plt.Figure
-            """
-            fig, axs = plt.subplots(2,1,figsize=(10,8), sharex=True)
+        Args:
+            df1: DataFrame containing tracks of the first playlist
+            df2: DataFrame containing tracks of the second playlist
+            label1: Label (name) of the first playlist
+            label2: Label (name) of the second playlist
+        
+        Returns:
+            plt.Figure
+        """
+        color_1 = px.colors.sequential.Plasma[2]
+        color_2 = px.colors.sequential.Plasma[6]
 
-            loudness_1 = df1['loudness']
-            loudness_2 = df2['loudness']
+        # Define histogram
+        all_loudness = pd.concat([df1['loudness'], df2['loudness']])
+        bin_edges = np.linspace(all_loudness.min(), all_loudness.max(), 30)
+        bin_labels = [f"{left:.2f} dB - {right:.2f} dB" for left, right in zip(bin_edges[:-1], bin_edges[1:])]
 
-            mean1 = loudness_1.mean()
-            mean2 = loudness_2.mean()
 
-            # Define colors
-            color_1 = cm.plasma(0.15)
-            color_2 = cm.plasma(0.7)
+        # Group and aggregate track names for tooltips
+        df1['bin'] = pd.cut(df1['loudness'], bins=bin_edges, include_lowest=True)
+        df2['bin'] = pd.cut(df2['loudness'], bins=bin_edges, include_lowest=True)
+        tooltip_data1 = df1.groupby('bin')['track_name'].apply(list).reset_index()
+        tooltip_data2 = df2.groupby('bin')['track_name'].apply(list).reset_index()
 
-            # Plot first playlist
-            sns.histplot(loudness_1,
-                        bins=30,
-                        kde=True,
-                        alpha=0.7,
-                        color=color_1,
-                        edgecolor='black',
-                        label=label1,
-                        ax=axs[0])
-            axs[0].axvline(mean1, color='blue', linestyle='dashed', linewidth=2, label=f'Mean loudness: {mean1:.2f} BPM')
-            axs[0].set_ylabel('Frequency')
-            axs[0].legend()
-            axs[0].grid(True, axis='y', linestyle='--',alpha=0.6)
-            axs[0].set_facecolor('whitesmoke')
-            
-            # Plot second playlist
-            sns.histplot(loudness_2,
-                        bins=30,
-                        kde=True,
-                        alpha=0.7,
-                        color=color_2,
-                        edgecolor='black',
-                        label=label2,
-                        ax=axs[1])
-            axs[1].axvline(mean2, color='blue', linestyle='dashed', linewidth=2, label=f'Mean loudness: {mean2:.2f} BPM')
-            axs[1].set_xlabel('Loudness (dB)')
-            axs[1].set_ylabel('Frequency')
-            axs[1].legend()
-            axs[1].grid(True, axis='y', linestyle='--', alpha=0.6)
-            axs[1].set_facecolor('whitesmoke')
+        # Initialize subplots
+        fig = make_subplots(rows=2,
+                            cols=1,
+                            shared_xaxes=True,
+                            subplot_titles=(label1,label2),
+                            vertical_spacing=0.1)
 
-            # Ensure y-axis ticks are int
-            axs[0].yaxis.set_major_locator(MaxNLocator(integer=True))
-            axs[1].yaxis.set_major_locator(MaxNLocator(integer=True))
+        # Add histogram
+        for idx, row in tooltip_data1.iterrows():
+            fig.add_trace(go.Bar(
+                x=[bin_labels[idx]], 
+                y=[len(row['track_name'])], 
+                name=label1,
+                hoverinfo='text', 
+                text=["<br>".join(row['track_name'])],
+                hovertemplate='<br><b>Tracks:</b><br>%{text}<extra></extra>',
+                marker=dict(color=color_1), 
+                showlegend=False),
+                row=1, col=1)
 
-            fig.patch.set_facecolor('lightgrey')
-            fig.tight_layout(pad=3.0)
+        for idx, row in tooltip_data2.iterrows():
+            fig.add_trace(go.Bar(
+                x=[bin_labels[idx]], 
+                y=[len(row['track_name'])], 
+                name=label2,
+                hoverinfo='text', 
+                text=["<br>".join(row['track_name'])],
+                hovertemplate='<br><b>Tracks:</b><br>%{text}<extra></extra>',
+                marker=dict(color=color_2), 
+                showlegend=False), 
+                row=2, col=1)
+        
+        # Define means
+        mean1 = df1['loudness'].mean()
+        mean2 = df2['loudness'].mean()
+        print("Mean1:", mean1, "Mean2:", mean2)
 
-            return fig
+        # Function to find the closest bin label
+        def find_closest_bin(duration, bins, bin_labels):
+            index = np.digitize([duration], bins) - 1  # Use digitize to find appropriate bin
+            index = max(0, min(index[0], len(bin_labels) - 1))  # Clamp index to valid range
+            return bin_labels[index]
+
+        mean1_label = find_closest_bin(mean1, bin_edges, bin_labels)
+        mean2_label = find_closest_bin(mean2, bin_edges, bin_labels)
+
+        max_y1 = tooltip_data1['track_name'].apply(len).max()
+        max_y2 = tooltip_data2['track_name'].apply(len).max()
+
+        # Add mean lines
+        fig.add_trace(go.Scatter(
+            x=[mean1_label, mean1_label], 
+            y=[0, max_y1],
+            mode='lines', 
+            name=f"Mean {label1}", 
+            line=dict(color='red', dash='dash'),
+            hoverinfo='text', 
+            hovertext=f"{mean1:.2f} dB", 
+            showlegend=True), 
+            row=1, col=1)
+        
+        fig.add_trace(go.Scatter(
+            x=[mean2_label, mean2_label], 
+            y=[0, max_y2],
+            mode='lines', 
+            name=f'Mean {label2}', 
+            line=dict(color='blue', dash='dash'),
+            hoverinfo='text', 
+            hovertext=f"{mean2:.2f} dB", 
+            showlegend=True), 
+            row=2, col=1)
+
+        # Update layout
+        fig.update_layout(
+            yaxis_title='Frequency',
+            template='plotly_white',
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
+            legend=dict(
+                orientation='h',
+                x=0.5,
+                y=1.1
+            ),
+            height=800,
+            showlegend=True,
+            autosize=True
+        )
+
+        return fig
+
     
     def genre_wordcloud(self, df1, df2, label1, label2) -> plt.Figure:
         """
@@ -734,7 +788,7 @@ class EraComparison:
         st.header('Loudness (dB) Histogram Comparison:')
         st.text("Music Era Comparision of Loudness")
         loudhist = self.loudness_histogram(df1, df2, label1, label2)
-        st.pyplot(loudhist)
+        st.plotly_chart(loudhist, use_container_width=True)
 
         st.header('Artist Genres Word Cloud Comparison:')
         st.text("Music Era Comparison of Word Cloud")
