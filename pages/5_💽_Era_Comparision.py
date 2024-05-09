@@ -361,7 +361,7 @@ class EraComparison:
         return fig
 
     
-    def key_distribution(self, df1, df2, label1, label2) -> plt.Figure:
+    def key_distribution(self, df1, df2, label1, label2) -> go.Figure:
         """
         Compare the key distribution between two playlists.
         
@@ -377,47 +377,82 @@ class EraComparison:
         # Key mapping
         key_mapping = ('C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B')
 
-        # Calculating key distribution and sorting
-        key_counts_1 = df1['key'].value_counts().reindex(range(12), fill_value=0).sort_index()
-        key_counts_2 = df2['key'].value_counts().reindex(range(12), fill_value=0).sort_index()
+        colorscale = [
+            [0.0, "rgba(232, 148, 88, 0.8)"],
+            [0.12, "rgba(213, 120, 98, 0.8)"],
+            [0.24, "rgba(190, 97, 111, 0.8)"],
+            [0.36, "rgba(164, 77, 126, 0.8)"],
+            [0.48, "rgba(136, 60, 137, 0.8)"],
+            [0.58, "rgba(125, 50, 140, 0.8)"],
+            [0.68, "rgba(106, 44, 141, 0.8)"],
+            [0.78, "rgba(87, 35, 142, 0.8)"],
+            [0.88, "rgba(69, 27, 140, 0.8)"],
+            [0.94, "rgba(40, 16, 137, 0.8)"],
+            [0.97, "rgba(26, 12, 135, 0.8)"],
+            [1.0, "rgba(12, 7, 134, 0.8)"]
+        ]
 
-        fig, axs = plt.subplots(1, 2, figsize=(14, 6), sharey=True)
+        # Prepare data function
+        def prepare_data(df):
+            grouped_tracks = df.groupby('key')['track_name'].apply(list).reindex(range(12), fill_value=[])
+            key_counts = df['key'].value_counts().reindex(range(12), fill_value=0)
+            key_df = pd.DataFrame({
+                'Key Name': [key_mapping[k] for k in range(12)],
+                'Count': key_counts.values,
+                'Track Names': ['<br>'.join(tracks) for tracks in grouped_tracks]
+                })
+            return key_df.sort_values(by='Count', ascending=False)
+        
+        key_df1 = prepare_data(df1)
+        key_df2 = prepare_data(df2)
 
-        # Plot for first DataFrame
-        # Specify x-axis value. 
-        # Apply the mapping to each index to convert each numeric to alphabetic key
-        bars1 = axs[0].bar(key_counts_1.index.map(lambda x: key_mapping[x]), key_counts_1.values)
-        axs[0].set_title(label1)
-        axs[0].set_xlabel('Key')
-        axs[0].set_ylabel('Count')
-        axs[0].set_facecolor('whitesmoke')
+        # Create subplots
+        fig = make_subplots(rows=1,
+                            cols=2,
+                            subplot_titles=(label1, label2),
+                            shared_yaxes=True)
+        
+        fig.add_trace(go.Bar(
+            x=key_df1['Key Name'],
+            y=key_df1['Count'],
+            name=label1,
+            marker=dict(color=key_df1['Count'], colorscale=colorscale),
+            hovertemplate='<br><b>Tracks:</b><br>%{text}<extra></extra>',
+            text=key_df1['Track Names']
+        ), row=1, col=1)
 
-        # Color the bars using the plasma colormap
-        # generates a sequence of colors using the "plasma" colormap
-        # creates a linear array of numbers from 0 to 1, inclusive
-        # Passing this array to generates colors from the plasma colormap
-        # pairs each bar in bars1 with a color from the generated sequence of colors
-        # zip creates tuples where the first element is a bar and the second element is a color
-        num_bars = len(key_counts_1)
-        for bar, color in zip(bars1, plt.cm.plasma(np.linspace(0, 1, num_bars))):
-            rgba_color1 = (*color[:3], 0.8)
-            bar.set_color(rgba_color1)
+        fig.add_trace(go.Bar(
+            x=key_df2['Key Name'],
+            y=key_df2['Count'],
+            name=label2,
+            marker=dict(color=key_df2['Count'], colorscale=colorscale),
+            hovertemplate='<br><b>Tracks:</b><br>%{text}<extra></extra>',
+            text=key_df2['Track Names']
+        ), row=1, col=2)
 
-        # Plot for second DataFrame
-        bars2 = axs[1].bar(key_counts_2.index.map(lambda x: key_mapping[x]), key_counts_2.values)
-        axs[1].set_title(label2)
-        axs[1].set_xlabel('Key')
-        axs[1].set_facecolor('whitesmoke')
+        # Adding annotations for central x-axis title
+        fig.add_annotation(
+            x=0.5, y=-0.15,
+            xref="paper", yref="paper",
+            showarrow=False,
+            text="Key",
+            font=dict(size=14),
+            align="center"
+        )
 
-        # Color the bars using the plasma colormap
-        for bar, color in zip(bars2, plt.cm.plasma(np.linspace(0, 1, num_bars))):
-            rgba_color2 = (*color[:3], 0.8)
-            bar.set_color(rgba_color2)
+        # Update layout
+        fig.update_layout(
+            showlegend=False,
+            xaxis_title='', # remove xaxis title
+            yaxis_title='Count',
+            template='plotly_white',
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
+            autosize=True,
+            margin=dict(l=20, r=20, t=30, b=20)
+        )
 
-        fig.patch.set_facecolor('lightgrey')
-        fig.tight_layout(pad=3.0)
         return fig
-
 
     def loudness_histogram(self, df1, df2, label1, label2) -> plt.Figure:
             """ 
@@ -690,7 +725,7 @@ class EraComparison:
         st.header('Key Distribution Comparision:')
         st.text("Music Era Comparision of Key")
         keybar = self.key_distribution(df1, df2, label1, label2)
-        st.pyplot(keybar)
+        st.plotly_chart(keybar, use_container_width=True)
 
         st.header('Loudness (dB) Histogram Comparison:')
         st.text("Music Era Comparision of Loudness")
