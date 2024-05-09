@@ -173,6 +173,7 @@ class EraComparison:
                 name=label1, 
                 hoverinfo='text', 
                 text=["<br>".join(row['track_name'])],
+                hovertemplate='<br><b>Tracks:</b><br>%{text}<extra></extra>',
                 marker=dict(color=color_1),
                 showlegend=False  
             ), row=1, col=1)
@@ -183,6 +184,7 @@ class EraComparison:
                 name=label2, 
                 hoverinfo='text', 
                 text=["<br>".join(row['track_name'])],
+                hovertemplate='<br><b>Tracks:</b><br>%{text}<extra></extra>',
                 marker=dict(color=color_2),
                 showlegend=False  
             ), row=2, col=1)
@@ -294,6 +296,7 @@ class EraComparison:
                 name=label1,
                 hoverinfo='text',
                 text=["<br>".join(row['track_name'])],
+                hovertemplate='<br><b>Tracks:</b><br>%{text}<extra></extra>',
                 marker=dict(color=color_1),
                 showlegend=False
             ), row=1, col=1)
@@ -305,6 +308,7 @@ class EraComparison:
                 name=label2,
                 hoverinfo='text',
                 text=["<br>".join(row['track_name'])],
+                hovertemplate='<br><b>Tracks:</b><br>%{text}<extra></extra>',
                 marker=dict(color=color_2),
                 showlegend=False
             ), row=2, col=1)
