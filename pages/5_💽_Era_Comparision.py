@@ -189,10 +189,8 @@ class EraComparison:
                 showlegend=False  
             ), row=2, col=1)
 
-        def find_closest_bin(duration, bins, bin_labels):
-            # Find the index of the closest bin
-            index = np.digitize(duration, bins) - 1
-            # Clamp index to valid range
+        def find_closest_bin_label(value, bins, bin_labels):
+            index = np.digitize([value], bins)[0] - 1
             index = max(0, min(index, len(bin_labels) - 1))
             return bin_labels[index]
         
@@ -201,8 +199,8 @@ class EraComparison:
         mean_duration2 = df2['duration_min'].mean()
 
         # Find the closest bin labels for the mean durations
-        mean_bin_label1 = find_closest_bin(mean_duration1, bins, bin_labels)
-        mean_bin_label2 = find_closest_bin(mean_duration2, bins, bin_labels)
+        mean_bin_label1 = find_closest_bin_label(mean_duration1, bins, bin_labels)
+        mean_bin_label2 = find_closest_bin_label(mean_duration2, bins, bin_labels)
 
         # Add Mean line
         fig.add_trace(go.Scatter(
@@ -212,10 +210,9 @@ class EraComparison:
             name=f'Mean {label1}', 
             line=dict(color='red', dash='dash'),
             hoverinfo='text',
-            hovertext=f"{mean_duration1:.2f}"
+            hovertext=f"{format_min_minsec(mean_duration1)}"
         ), row=1, col=1)
 
-        # Add Mean line
         fig.add_trace(go.Scatter(
             x=[mean_bin_label2, mean_bin_label2], 
             y=[0, tooltip_data2['track_name'].apply(len).max()],
@@ -223,7 +220,7 @@ class EraComparison:
             name=f'Mean {label2}', 
             line=dict(color='blue', dash='dash'),
             hoverinfo='text',
-            hovertext=f"{mean_duration2:.2f}"
+            hovertext=f"{format_min_minsec(mean_duration2)}"
         ), row=2, col=1)
 
         # Update layout
