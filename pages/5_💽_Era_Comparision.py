@@ -632,7 +632,7 @@ class EraComparison:
         return fig
     
 
-    def mode_pie_chart(self, df1, df2, pl1, pl2) -> plt.Figure:
+    def mode_pie_chart(self, df1, df2, pl1, pl2) -> go.Figure:
         """ 
         Creates side-by-side pie charts comparing the mode (Major vs Minor) percentages 
         between two playlists.
@@ -646,49 +646,68 @@ class EraComparison:
         Returns:
         plt.Figure
         """
-        def get_mode_data(df):
-            major_count = (df['mode'] == 1).sum() 
-            minor_count = (df['mode'] == 0).sum()
-            return [major_count, minor_count]
+        color_1 = px.colors.sequential.Plasma[2]
+        color_2 = px.colors.sequential.Plasma[6]
+
+        def prepare_data(df):
+            df['mode'] = df['mode'].map({1: 'Major', 0: 'Minor'})
+            title_summary = df.groupby('mode', observed=False)['track_name'].apply(lambda x: '<br>'.join(x[:5]) + ('...' if len(x) > 5 else '')).reset_index()
+            title_summary.columns=['mode', 'titles']
+
+            count_summary = df['mode'].value_counts().reset_index()
+            count_summary.columns = ['mode', 'count']
+
+            final_data = pd.merge(title_summary, count_summary, on='mode')
+            print(final_data)
+            return final_data
         
-        # Get mode data from each playlist
-        mode_1 = get_mode_data(df1)
-        mode_2 = get_mode_data(df2)
+        data1 = prepare_data(df1)
+        data2 = prepare_data(df2)
 
-        labels = ['Major', 'Minor']
-        colors = [cm.plasma(0.10, alpha=0.65), cm.plasma(0.65, alpha=0.75)]
+        fig = make_subplots(rows=1, cols=2, specs=[[{'type':'pie'}, {'type':'pie'}]])
+        colors = {'Major': color_1, 'Minor': color_2}
 
-        # Initialize subplots for side-by-side pie charts
-        fig, axs = plt.subplots(1, 2, figsize=(12, 6))
+        # Plot for playlist 1
+        fig.add_trace(
+            go.Pie(labels=data1['mode'], 
+                   values=data1['count'], 
+                   name=pl1, 
+                   marker_colors = [colors[label] for label in data1['mode']],
+                   customdata=data1['titles'],
+                   hovertemplate="<b>%{label}</b><br>Count: %{value}<br><b>Tracks:</b><br>%{customdata}<extra></extra>"),
+            row=1, col=1
+        )
 
-        axs[0].pie(mode_1,
-                #labels=labels,
-                colors=colors,
-                autopct='%1.1f%%',
-                startangle=90,
-                textprops={'fontsize': 12}, 
-                radius=1.2)
-        axs[0].set_title(pl1)
-        axs[0].axis('equal')
-        
-        wedges2, _, _ = axs[1].pie(mode_2,
-                #labels=labels,
-                colors=colors,
-                autopct='%1.1f%%',
-                startangle=90,
-                textprops={'fontsize': 12}, 
-                radius=1.2)
-        axs[1].set_title(pl2)
-        axs[1].axis('equal')
+        # Plot for playlist 2
+        fig.add_trace(
+            go.Pie(labels=data2['mode'], 
+                   values=data2['count'], 
+                   name=pl2, 
+                   marker_colors=[colors[label] for label in data2['mode']],
+                   customdata=data2['titles'],
+                   hovertemplate="<b>%{label}</b><br>Count: %{value}<br><b>Tracks:</b><br>%{customdata}<extra></extra>"),
+            row=1, col=2
+        )
 
-        fig.legend(wedges2, 
-                   labels, 
-                   title="Mode", 
-                   loc="center right", 
-                   fontsize='small'
-                   )
-        fig.patch.set_facecolor('lightgrey')
-        plt.tight_layout()
+        # Update layout 
+        fig.update_layout(
+            # title_text=f"Mode Comparison: {pl1} vs {pl2}",
+            annotations=[
+            dict(text=pl1, x=0.18, y=1.1, font_size=12, showarrow=False, yanchor='bottom'),
+            dict(text=pl2, x=0.82, y=1.1, font_size=12, showarrow=False, yanchor='bottom')],
+            template='plotly_white',
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
+            #margin=dict(l=40, r=40, t=40, b=40),
+            showlegend=True,
+            legend=dict(
+                orientation='h',
+                x=0.7,
+                y=-0.1  
+            ),
+            autosize=True
+
+        )
 
         return fig
 
@@ -801,7 +820,7 @@ class EraComparison:
         st.header('Mode Pie Chart Comparison:')
         st.text("Music Era Comparison of Mode (Major vs Minor)")
         mode_chart = self.mode_pie_chart(df1, df2, label1, label2)
-        st.pyplot(mode_chart)
+        st.plotly_chart(mode_chart, use_container_width=True)
 
         st.header('Explicitness Pie Chart Comparision:')
         st.text("Music Era Comparision of Explicitness")
