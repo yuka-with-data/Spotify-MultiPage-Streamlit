@@ -658,7 +658,7 @@ class EraComparison:
             count_summary.columns = ['mode', 'count']
 
             final_data = pd.merge(title_summary, count_summary, on='mode')
-            print(final_data)
+            #print(final_data)
             return final_data
         
         data1 = prepare_data(df1)
@@ -712,7 +712,7 @@ class EraComparison:
         return fig
 
     
-    def explicit_pie_chart(self, df1, df2, pl1, pl2) -> plt.Figure:
+    def explicit_pie_chart(self, df1, df2, pl1, pl2) -> go.Figure:
         """ 
          Creates side-by-side pie charts comparing the explicit content percentages 
          between two playlists.
@@ -726,49 +726,77 @@ class EraComparison:
          Returns:
           plt.Figure
            """
+        color_1 = px.colors.sequential.Plasma[2]
+        color_2 = px.colors.sequential.Plasma[6]
+
         def get_explicit_data(df):
-            explicit_count = df['is_explicit'].sum()
-            non_explicit_count = len(df) - explicit_count
-            return [explicit_count, non_explicit_count]
+            df['is_explicit'] = df['is_explicit'].map({True: 'Explicit', False: 'Non-Explicit'})
+            title_summary = df.groupby('is_explicit')['track_name'].apply(lambda x: '<br>'.join(x[:5]) + ('...' if len(x) > 5 else '')).reset_index()
+            title_summary.columns=['is_explicit', 'titles']
+
+            count_summary = df['is_explicit'].value_counts().reset_index()
+            count_summary.columns = ['is_explicit', 'count']
+
+            final_data = pd.merge(title_summary, 
+                                  count_summary, 
+                                  on='is_explicit',
+                                  how='right').fillna("No tracks available")
+            print(final_data)
+            return final_data
         
-        # Get explicit data from each playlist (in the list)
-        explicit_1 = get_explicit_data(df1)
-        explicit_2 = get_explicit_data(df2)
+        data1 = get_explicit_data(df1)
+        data2 = get_explicit_data(df2)
+       
+        labels = ['Explicit', 'Non-Explicit']
+        colors = [color_1, color_2] 
 
-        labels = ['Explicit', 'Non Explicit']
-        colors = [cm.plasma(0.10, alpha=0.65), cm.plasma(0.65, alpha=0.75)]
+        # Initialize subplots
+        fig = make_subplots(rows=1, cols=2, specs=[[{'type':'pie'}, {'type':'pie'}]])
 
-        # Initialize subplots for side-by-side pie charts
-        fig, axs = plt.subplots(1,2,figsize=(12,6))
+        # Plot for playlist 1
+        fig.add_trace(
+            go.Pie(labels=data1['is_explicit'],
+                values=data1['count'],
+                name=pl1,
+                marker_colors=[colors[i] for i in range(len(data1['is_explicit']))],
+                textinfo='percent',
+                hoverinfo='label+percent',
+                customdata=data1['titles'],
+                hovertemplate="<b>%{label}</b><br>Count: %{value}<br><b>Tracks:</b><br>%{customdata}<extra></extra>"),
+            row=1, col=1
+        )
+                
+        # Pie chart for playlist 2
+        fig.add_trace(
+            go.Pie(labels=data2['is_explicit'],
+                values=data2['count'],
+                name=pl2,
+                marker_colors=[colors[i] for i in range(len(data2['is_explicit']))],
+                textinfo='percent',
+                hoverinfo='label+percent',
+                customdata=data2['titles'],
+                hovertemplate="<b>%{label}</b><br>Count: %{value}<br><b>Tracks:</b><br>%{customdata}<extra></extra>"),
+            row=1, col=2
+        )
 
-        axs[0].pie(explicit_1,
-                   # labels=labels,
-                   colors=colors,
-                   autopct='%1.1f%%',
-                   startangle=90,
-                   textprops={'fontsize': 12}, 
-                   radius=1.2)
-        axs[0].set_title(pl1)
-        axs[0].axis('equal')
-        
-        wedges2, _, _ = axs[1].pie(explicit_2,
-                   # labels=labels,
-                   colors=colors,
-                   autopct='%1.1f%%',
-                   startangle=90,
-                   textprops={'fontsize': 12}, 
-                   radius=1.2)
-        axs[1].set_title(pl2)
-        axs[1].axis('equal')
-
-        fig.legend(wedges2, 
-                   labels, 
-                   title="Mode", 
-                   loc="center right", 
-                   fontsize='small'
-                   )
-        fig.patch.set_facecolor('lightgrey')
-        plt.tight_layout()
+        # Update layout 
+        fig.update_layout(
+            # title_text=f"Mode Comparison: {pl1} vs {pl2}",
+            annotations=[
+            dict(text=pl1, x=0.18, y=1.1, font_size=12, showarrow=False, yanchor='bottom'),
+            dict(text=pl2, x=0.82, y=1.1, font_size=12, showarrow=False, yanchor='bottom')],
+            template='plotly_white',
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
+            #margin=dict(l=40, r=40, t=40, b=40),
+            showlegend=True,
+            legend=dict(
+                orientation='h',
+                x=0.7,
+                y=-0.1  
+            ),
+            autosize=True
+        )
 
         return fig
 
@@ -825,7 +853,7 @@ class EraComparison:
         st.header('Explicitness Pie Chart Comparision:')
         st.text("Music Era Comparision of Explicitness")
         explicit = self.explicit_pie_chart(df1, df2, label1, label2)
-        st.pyplot(explicit)
+        st.plotly_chart(explicit, use_container_width=True)
         
 
 # Initialize the Spotify client
