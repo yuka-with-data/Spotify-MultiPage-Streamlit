@@ -619,7 +619,7 @@ class EraComparison:
                         max_words=200,
                         min_font_size=10).generate(all_genres_2)
 
-        fig, axs = plt.subplots(2, 1, figsize=(14,7))
+        fig, axs = plt.subplots(2, 1, figsize=(14,10))
         axs[0].imshow(wc1, interpolation='bilinear')
         axs[0].axis("off")
         axs[0].set_title(label1)
@@ -627,8 +627,9 @@ class EraComparison:
         axs[1].imshow(wc2, interpolation='bilinear')
         axs[1].axis("off")
         axs[1].set_title(label2)
-
-        plt.tight_layout(pad=0)
+        
+        plt.subplots_adjust(hspace=0.15)
+        #plt.tight_layout(pad=0)
         return fig
     
 
