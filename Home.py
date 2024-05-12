@@ -18,6 +18,7 @@ with st.sidebar:
                 
     🚧 **In Development:**
     - Artist Analysis
+    - Playlist Analysis
     - Soothing Music Chatbot
         """)
 
