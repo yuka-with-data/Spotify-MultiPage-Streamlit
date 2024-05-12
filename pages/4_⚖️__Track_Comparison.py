@@ -197,7 +197,7 @@ class SpotifyAnalyzer:
         
         # Prepare data for the tooltips
         grouped = self.df_top_50.groupby('bin', observed=False)
-        tooltip_data = grouped['track_name'].agg(lambda x: ', '.join(x)).reset_index()
+        tooltip_data = grouped['track_name'].agg(lambda x: '<br>'.join(x)).reset_index()
 
         fig = go.Figure()
         for label, group in grouped:
@@ -206,10 +206,11 @@ class SpotifyAnalyzer:
                 y=[group['tempo'].count()],
                 text=[tooltip_data[tooltip_data['bin'] == label]['track_name'].values[0]],
                 hoverinfo="text",
+                hovertemplate='<br><b>Tracks:</b><br>%{text}<extra></extra>',
                 marker=dict(color=color_top_50, line=dict(width=1, color='black')),
                 name=label,
-                showlegend=False
-            ))
+                showlegend=False),
+                )
 
         # Calculate mean tempo and find the bin for the mean
         mean_tempo = self.df_top_50['tempo'].mean()
@@ -367,7 +368,7 @@ class SpotifyAnalyzer:
         # Group data into bins
         bin_labels = [f"{format_min_to_minsec(bins[i])} - {format_min_to_minsec(bins[i+1])}" for i in range(len(bins)-1)]
         self.df_top_50['bin'] = pd.cut(self.df_top_50['duration_min'], bins=bins, labels=bin_labels, include_lowest=True)
-        tooltip_data = self.df_top_50.groupby('bin', observed=False)['track_name'].agg(lambda x: ', '.join(x)).reset_index()
+        tooltip_data = self.df_top_50.groupby('bin', observed=False)['track_name'].agg(lambda x: '<br>'.join(x)).reset_index()
 
         fig = go.Figure()
         for label, group in self.df_top_50.groupby('bin', observed=False):
@@ -376,10 +377,11 @@ class SpotifyAnalyzer:
                 y=[group['duration_min'].count()],
                 text=[tooltip_data[tooltip_data['bin'] == label]['track_name'].values[0]],
                 hoverinfo="text",
+                hovertemplate='<br><b>Tracks:</b><br>%{text}<extra></extra>',
                 marker=dict(color=color_top_50, line=dict(width=1, color='black')),
                 name=label,
-                showlegend=False
-            ))
+                showlegend=False),
+                )
 
         # Calculate mean duration and find the bin for the mean
         mean_duration_min = self.df_top_50['duration_min'].mean()
@@ -453,7 +455,7 @@ class SpotifyAnalyzer:
 
         # Prepare data for the tooltips
         grouped = self.df_top_50.groupby('bin', observed=False)
-        tooltip_data = grouped['track_name'].agg(lambda x: ', '.join(x)).reset_index()
+        tooltip_data = grouped['track_name'].agg(lambda x: '<br>'.join(x)).reset_index()
         
         fig = go.Figure()
 
@@ -464,10 +466,11 @@ class SpotifyAnalyzer:
                 y=[group['tempo'].count()],
                 text=[tooltip_data[tooltip_data['bin'] == label]['track_name'].values[0]],
                 hoverinfo="text",
+                hovertemplate='<br><b>Tracks:</b><br>%{text}<extra></extra>',
                 marker=dict(color=color_top_50, line=dict(width=1, color='black')),
                 name=label,
-                showlegend=False
-            ))
+                showlegend=False),
+                )
 
         # Add vertical line for average loudness
         mean_loudness = self.df_top_50['loudness'].mean()
