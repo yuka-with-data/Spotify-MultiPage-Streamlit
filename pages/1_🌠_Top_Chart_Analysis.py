@@ -686,7 +686,6 @@ playlists = {
     "Top Songs Global (Weekly)": "37i9dQZEVXbNG2KDcFcKOF",
     "Big On Ineternet": "37i9dQZF1DX5Vy6DFOcx00",
     "Viral 50 Global (Daily)": "37i9dQZEVXbLiRSasKsNU9"
-    
 }
 
 # Sidebar
