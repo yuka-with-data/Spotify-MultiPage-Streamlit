@@ -93,7 +93,7 @@ class AlbumAnalyzer:
         # Prepare data for tooltips
         grouped = self.df_album.groupby('bin', observed=False)
         print(grouped)
-        tooltip_data = grouped['track_name'].agg(lambda x: ', '.join(x)).reset_index()
+        tooltip_data = grouped['track_name'].agg(lambda x: '<br>'.join(x)).reset_index()
 
         # Create the figure and add bars
         fig = go.Figure()
@@ -103,10 +103,11 @@ class AlbumAnalyzer:
                 y=[group['tempo'].count()],
                 text=[tooltip_data[tooltip_data['bin'] == label]['track_name'].values[0]],
                 hoverinfo="text",
+                hovertemplate='<br><b>Tracks:</b><br>%{text}<extra></extra>',
                 marker=dict(color=color_album, line=dict(width=1, color='black')),
                 name=label,
-                showlegend=False 
-            ))
+                showlegend=False),
+                )
 
         # Calculate mean tempo and find the bin
         mean_tempo = self.df_album['tempo'].mean()
@@ -170,7 +171,7 @@ class AlbumAnalyzer:
 
         # Prepare tooltips
         grouped = self.df_album.groupby('bin', observed=False)
-        tooltip_data = grouped['track_name'].agg(lambda x: ', '.join(x)).reset_index()
+        tooltip_data = grouped['track_name'].agg(lambda x: '<br>'.join(x)).reset_index()
 
         # Create the figure and add bars
         fig = go.Figure()
@@ -181,10 +182,11 @@ class AlbumAnalyzer:
                 y=[group['duration_min'].count()],
                 hoverinfo="text",
                 text=[tooltip],
+                hovertemplate='<br><b>Tracks:</b><br>%{text}<extra></extra>',
                 marker=dict(color=color_album, line=dict(width=1, color='black')),
                 name=label,
-                showlegend=False
-            ))
+                showlegend=False),
+                )
 
         # Calculate mean duration and find the bin
         mean_duration = self.df_album['duration_min'].mean()
@@ -237,7 +239,7 @@ class AlbumAnalyzer:
 
         # Prepare data for the tooltips
         grouped = self.df_album.groupby('bin', observed=False)
-        tooltip_data = grouped['track_name'].agg(lambda x: ', '.join(x)).reset_index()
+        tooltip_data = grouped['track_name'].agg(lambda x: '<br>'.join(x)).reset_index()
 
         # Create the figure and add histogram bars manually
         fig = go.Figure()
@@ -247,10 +249,11 @@ class AlbumAnalyzer:
                 y=[group['loudness'].count()],
                 text=[tooltip_data[tooltip_data['bin'] == label]['track_name'].values[0]],
                 hoverinfo="text",
+                hovertemplate='<br><b>Tracks:</b><br>%{text}<extra></extra>',
                 marker=dict(color=color_top_50, line=dict(width=1, color='black')),
                 name=label,
-                showlegend=False  # Hide legend for bars
-            ))
+                showlegend=False),
+                )
 
         # Calculate mean loudness
         mean_loudness = self.df_album['loudness'].mean()
