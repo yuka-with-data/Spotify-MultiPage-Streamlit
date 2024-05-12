@@ -209,7 +209,7 @@ class SpotifyAnalyzer:
 
         # Prepare data for the tooltips
         grouped = self.df_top_50.groupby('bin', observed=False)
-        tooltip_data = grouped['track_name'].agg(lambda x: ', '.join(x)).reset_index()
+        tooltip_data = grouped['track_name'].agg(lambda x: '<br>'.join(x)).reset_index()
 
         # Create the figure and add bars manually
         fig = go.Figure()
@@ -219,6 +219,7 @@ class SpotifyAnalyzer:
                 y=[group['tempo'].count()],
                 text=[tooltip_data[tooltip_data['bin'] == label]['track_name'].values[0]],
                 hoverinfo="text",
+                hovertemplate='<br><b>Tracks:</b><br>%{text}<extra></extra>',
                 marker=dict(color=color_top_50, line=dict(width=1, color='black')),
                 name=label,
                 showlegend=False  # Hide legend for bars
@@ -286,7 +287,7 @@ class SpotifyAnalyzer:
         self.df_top_50['bin'] = pd.cut(self.df_top_50['duration_min'], bins=bins, labels=bin_labels, include_lowest=True)
         grouped = self.df_top_50.groupby('bin', observed=False)
 
-        tooltip_data = grouped['track_name'].agg(lambda x: ', '.join(x)).reset_index()
+        tooltip_data = grouped['track_name'].agg(lambda x: '<br>'.join(x)).reset_index()
 
         # Create the figure and add histogram bars manually
         fig = go.Figure()
@@ -296,6 +297,7 @@ class SpotifyAnalyzer:
                 y=[group['duration_min'].count()],
                 text=[tooltip_data[tooltip_data['bin'] == label]['track_name'].values[0]],
                 hoverinfo="text",
+                hovertemplate='<br><b>Tracks:</b><br>%{text}<extra></extra>',
                 marker=dict(color=color_top_50, line=dict(width=1, color='black')),
                 name=label,
                 showlegend=False  # Hide legend for bars
@@ -352,7 +354,7 @@ class SpotifyAnalyzer:
 
         # Prepare data for the tooltips
         grouped = self.df_top_50.groupby('bin', observed=False)
-        tooltip_data = grouped['track_name'].agg(lambda x: ', '.join(x)).reset_index()
+        tooltip_data = grouped['track_name'].agg(lambda x: '<br>'.join(x)).reset_index()
 
         # Create the figure and add histogram bars manually
         fig = go.Figure()
@@ -362,6 +364,7 @@ class SpotifyAnalyzer:
                 y=[group['loudness'].count()],
                 text=[tooltip_data[tooltip_data['bin'] == label]['track_name'].values[0]],
                 hoverinfo="text",
+                hovertemplate='<br><b>Tracks:</b><br>%{text}<extra></extra>',
                 marker=dict(color=color_top_50, line=dict(width=1, color='black')),
                 name=label,
                 showlegend=False  # Hide legend for bars
