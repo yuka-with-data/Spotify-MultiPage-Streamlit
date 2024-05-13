@@ -158,7 +158,7 @@ class SpotifyAnalyzer:
 
     
     def radar_chart(self) -> go.Figure:
-        color_top_50 = px.colors.sequential.Plasma[2] 
+        color_top_50 = 'rgba(93, 58, 155, 0.9)' 
         means_values_top_50p = self.mean_values_top_50 * 100
         att_list = ['danceability', 'valence', 'energy', 'acousticness', 'instrumentalness', 'liveness', 'speechiness']
         fig = go.Figure()
