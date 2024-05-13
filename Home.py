@@ -10,9 +10,10 @@ st.write("# Welcome to rhythmGalax! 👋")
 with st.sidebar:
     st.success("☝️Select an analysis from the sidebar to begin exploring music data.")
     st.subheader("🔥 **What's New?**")
-    st.text("Version 0.4 Beta")
+    st.text("Version 0.5 Beta")
     st.markdown("""
     🌟 **Now Live:**
+    - Converted most of Matplotlib charts to Plotly
     - Album Analysis:
     - Fine-Tuned Track Recommendations:
                 
