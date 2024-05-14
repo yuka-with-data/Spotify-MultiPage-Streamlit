@@ -27,6 +27,20 @@ from data_galaxy import init_spotify_client, retrieve_era_data
 class EraComparison:
     def __init__(self, sp) -> None:
         self.sp = sp
+        self.colorscale = [
+            [0.0, "rgba(232, 148, 88, 0.8)"],
+            [0.12, "rgba(213, 120, 98, 0.8)"],
+            [0.24, "rgba(190, 97, 111, 0.8)"],
+            [0.36, "rgba(164, 77, 126, 0.8)"],
+            [0.48, "rgba(136, 60, 137, 0.8)"],
+            [0.58, "rgba(125, 50, 140, 0.8)"],
+            [0.68, "rgba(106, 44, 141, 0.8)"],
+            [0.78, "rgba(87, 35, 142, 0.8)"],
+            [0.88, "rgba(69, 27, 140, 0.8)"],
+            [0.94, "rgba(40, 16, 137, 0.8)"],
+            [0.97, "rgba(26, 12, 135, 0.8)"],
+            [1.0, "rgba(12, 7, 134, 0.8)"]
+        ]
 
     def retrieve_latest_data(self, playlist_id: str)-> Tuple[pd.Series, pd.DataFrame]:
         try:
@@ -378,21 +392,6 @@ class EraComparison:
         # Key mapping
         key_mapping = ('C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B')
 
-        colorscale = [
-            [0.0, "rgba(232, 148, 88, 0.8)"],
-            [0.12, "rgba(213, 120, 98, 0.8)"],
-            [0.24, "rgba(190, 97, 111, 0.8)"],
-            [0.36, "rgba(164, 77, 126, 0.8)"],
-            [0.48, "rgba(136, 60, 137, 0.8)"],
-            [0.58, "rgba(125, 50, 140, 0.8)"],
-            [0.68, "rgba(106, 44, 141, 0.8)"],
-            [0.78, "rgba(87, 35, 142, 0.8)"],
-            [0.88, "rgba(69, 27, 140, 0.8)"],
-            [0.94, "rgba(40, 16, 137, 0.8)"],
-            [0.97, "rgba(26, 12, 135, 0.8)"],
-            [1.0, "rgba(12, 7, 134, 0.8)"]
-        ]
-
         # Prepare data function
         def prepare_data(df):
             grouped_tracks = df.groupby('key')['track_name'].apply(list).reindex(range(12), fill_value=[])
@@ -417,7 +416,7 @@ class EraComparison:
             x=key_df1['Key Name'],
             y=key_df1['Count'],
             name=label1,
-            marker=dict(color=key_df1['Count'], colorscale=colorscale),
+            marker=dict(color=key_df1['Count'], colorscale=self.colorscale),
             hovertemplate='<br><b>Tracks:</b><br>%{text}<extra></extra>',
             text=key_df1['Track Names']
         ), row=1, col=1)
@@ -426,7 +425,7 @@ class EraComparison:
             x=key_df2['Key Name'],
             y=key_df2['Count'],
             name=label2,
-            marker=dict(color=key_df2['Count'], colorscale=colorscale),
+            marker=dict(color=key_df2['Count'], colorscale=self.colorscale),
             hovertemplate='<br><b>Tracks:</b><br>%{text}<extra></extra>',
             text=key_df2['Track Names']
         ), row=1, col=2)
