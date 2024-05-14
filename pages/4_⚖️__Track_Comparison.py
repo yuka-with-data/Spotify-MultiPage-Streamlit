@@ -31,6 +31,20 @@ class SpotifyAnalyzer:
         self.sp = sp
         # Load Playlist Data
         self.mean_values_top_50, self.df_top_50 = retrieve_playlist_data(self.sp, playlist_id)
+        self.colorscale = [
+            [0.0, "rgba(12, 7, 134, 1.0)"],       # Dark blue
+            [0.12, "rgba(26, 12, 135, 1.0)"],     # Between darker purple and dark blue
+            [0.24, "rgba(40, 16, 137, 1.0)"],     # Darker purple
+            [0.36, "rgba(69, 27, 140, 1.0)"],     # Rich purple
+            [0.48, "rgba(87, 35, 142, 1.0)"],     # Deep purple
+            [0.58, "rgba(106, 44, 141, 1.0)"],    # Purple-pink
+            [0.68, "rgba(125, 50, 140, 1.0)"],    # Mid purple
+            [0.78, "rgba(136, 60, 137, 1.0)"],    # Deep magenta
+            [0.88, "rgba(164, 77, 126, 1.0)"],    # Lighter magenta
+            [0.94, "rgba(190, 97, 111, 1.0)"],    # Reddish-pink
+            [0.97, "rgba(213, 120, 98, 1.0)"],    # Dark orange
+            [1.0, "rgba(232, 148, 88, 1.0)"]      # Lighter orange
+        ]
 
     #@st.cache_data
     def get_spotify_data(_self, artist:str, track:str) -> Tuple[Optional[Dict[str, float]], Optional[str]]:
@@ -275,22 +289,6 @@ class SpotifyAnalyzer:
         # Mapping of numeric key values to corresponding alphabetic keys
         key_mapping = ('C','C#','D','D#','E','F','F#','G','G#','A','A#','B')
 
-        # Custom Plasma colorscale 
-        colorscale = [
-            [0.0, "rgba(12, 7, 134, 1.0)"],       # Dark blue
-            [0.12, "rgba(26, 12, 135, 1.0)"],     # Between darker purple and dark blue
-            [0.24, "rgba(40, 16, 137, 1.0)"],     # Darker purple
-            [0.36, "rgba(69, 27, 140, 1.0)"],     # Rich purple
-            [0.48, "rgba(87, 35, 142, 1.0)"],     # Deep purple
-            [0.58, "rgba(106, 44, 141, 1.0)"],    # Purple-pink
-            [0.68, "rgba(125, 50, 140, 1.0)"],    # Mid purple
-            [0.78, "rgba(136, 60, 137, 1.0)"],    # Deep magenta
-            [0.88, "rgba(164, 77, 126, 1.0)"],    # Lighter magenta
-            [0.94, "rgba(190, 97, 111, 1.0)"],    # Reddish-pink
-            [0.97, "rgba(213, 120, 98, 1.0)"],    # Dark orange
-            [1.0, "rgba(232, 148, 88, 1.0)"]      # Lighter orange
-        ]
-
         # Get the key distribution for the top 50 tracks
         # Sort the key counts in descending order by count values
         key_counts = self.df_top_50['key'].value_counts().reindex(range(12), fill_value=0).sort_values(ascending=False)
@@ -318,7 +316,7 @@ class SpotifyAnalyzer:
                 y=[count],
                 marker=dict(
                     # if there are more bars than colors, the color selection starts again from beginning
-                    color=colorscale[i % len(colorscale)][1], # access the second element of each tuple in colorscale
+                    color=self.colorscale[i % len(self.colorscale)][1], # access the second element of each tuple in colorscale
                     opacity=opacity
                 ),
                 hoverinfo=hoverinfo,
