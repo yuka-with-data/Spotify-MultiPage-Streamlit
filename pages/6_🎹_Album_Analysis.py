@@ -283,7 +283,7 @@ class AlbumAnalyzer:
 
         fig.update_layout(
             xaxis_title='Loudness (dB)',
-            yaxis_title='Track Titles',
+            yaxis_title='Track Titles',    
             yaxis=dict(autorange='reversed', showticklabels=False),  # Reverse y-axis to have the highest loudness at the top
             template='plotly_white',
             plot_bgcolor='WhiteSmoke',
@@ -298,6 +298,25 @@ class AlbumAnalyzer:
             width=700,
             margin=dict(l=20, r=20, t=20, b=20),
             autosize=True
+        )
+
+        fig.add_vrect(
+            x0=-20, x1=-10, 
+            fillcolor="LightSkyBlue", opacity=0.2, 
+            layer="below", line_width=0,
+            annotation_text="Quiet", annotation_position="top"
+        )
+        fig.add_vrect(
+            x0=-10, x1=-5, 
+            fillcolor="LightGreen", opacity=0.2, 
+            layer="below", line_width=0,
+            annotation_text="Moderate", annotation_position="top"
+        )
+        fig.add_vrect(
+            x0=-5, x1=0, 
+            fillcolor="LightSalmon", opacity=0.2, 
+            layer="below", line_width=0,
+            annotation_text="Loud", annotation_position="top"
         )
 
         return fig
