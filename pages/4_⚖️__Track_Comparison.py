@@ -143,7 +143,7 @@ class SpotifyAnalyzer:
            radar chart
            """
 
-        color_top_50 = 'rgba(93, 58, 155, 0.9)' 
+        color_top_50 = "rgba(69, 27, 140, 0.9)" # Rich Purple
         color_your_track = 'rgba(230, 97, 0, 0.7)'
 
         means_values_top_50p = self.mean_values_top_50 * 100
@@ -199,7 +199,7 @@ class SpotifyAnalyzer:
            histogram chart
            """
         # Use Plasma colormap colors
-        color_top_50 = px.colors.sequential.Plasma[2]  
+        color_top_50 = "rgba(69, 27, 140, 0.9)" # Rich Purple
         color_your_track = px.colors.sequential.Plasma[4]  
         color_average_tempo = px.colors.sequential.Plasma[6]   
 
@@ -353,7 +353,7 @@ class SpotifyAnalyzer:
             return f"{full_minutes}m {seconds}s"
         
         # Set colors
-        color_top_50 = px.colors.sequential.Plasma[2]  
+        color_top_50 = "rgba(69, 27, 140, 0.9)" # Rich Purple 
         color_your_track = px.colors.sequential.Plasma[4]  
         color_average_duration = px.colors.sequential.Plasma[6] 
 
@@ -441,7 +441,7 @@ class SpotifyAnalyzer:
         histogram chart
         """
         # Define colors using Plotly's Plasma colormap
-        color_top_50 = px.colors.sequential.Plasma[2]
+        color_top_50 = "rgba(69, 27, 140, 0.9)" # Rich Purple 
         color_your_track = px.colors.sequential.Plasma[4]
         color_average_loudness = px.colors.sequential.Plasma[6]
 
@@ -525,8 +525,9 @@ class SpotifyAnalyzer:
         Returns:
         pie chart
         """
-        explicit_color = px.colors.sequential.Plasma[2]
-        nonexplicit_color = px.colors.sequential.Plasma[6]
+
+        explicit_color = "rgba(26, 12, 135, 0.8)"
+        nonexplicit_color = "rgba(213, 120, 98, 0.8)"
 
         # Extract the attribute from user's selected track 
         is_explicit = audio_features.get('is_explicit', False)
@@ -578,8 +579,8 @@ class SpotifyAnalyzer:
         pie chart
         """
         # Set colors
-        major_color = px.colors.sequential.Plasma[2]
-        minor_color = px.colors.sequential.Plasma[6]
+        major_color = "rgba(26, 12, 135, 0.8)"
+        minor_color = "rgba(213, 120, 98, 0.8)"
 
         # Extract attribute from user's selected track
         user_mode = audio_features.get('mode', 1) # boolean
@@ -710,7 +711,7 @@ class SpotifyAnalyzer:
                     'bordercolor': "gray",
                     'steps': [
                         {'range': [0, 100], 'color': 'GhostWhite'},
-                        {'range': [0, popularity], 'color': 'rgba(65, 105, 225, 0.5)'}
+                        {'range': [0, popularity], 'color': 'rgba(26, 12, 135, 0.5)'}
                     ],
                     'threshold': {
                         'line': {'color': 'rgba(255, 140, 0, 1.0)', 'width': 4},
