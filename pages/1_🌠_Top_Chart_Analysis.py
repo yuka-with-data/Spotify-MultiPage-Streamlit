@@ -25,6 +25,20 @@ class SpotifyAnalyzer:
     def __init__(self, sp, playlist_id: str) -> None:
         self.sp = sp
         self.mean_values_top_50, self.df_top_50 = retrieve_playlist_data(self.sp, playlist_id)
+        self.colorscale=[  # Custom colorscale
+            [0.0, "rgba(232, 148, 88, 0.9)"],   # Lighter orange
+            [0.12, "rgba(213, 120, 98, 0.9)"],  # Dark orange
+            [0.24, "rgba(190, 97, 111, 0.9)"],  # Reddish-pink
+            [0.36, "rgba(164, 77, 126, 0.9)"],  # Lighter magenta
+            [0.48, "rgba(136, 60, 137, 0.9)"],  # Deep magenta
+            [0.58, "rgba(125, 50, 140, 0.9)"],  # Mid purple
+            [0.68, "rgba(106, 44, 141, 0.9)"],  # Purple-pink
+            [0.78, "rgba(87, 35, 142, 0.9)"],   # Deep purple
+            [0.88, "rgba(69, 27, 140, 0.9)"],   # Rich purple
+            [0.94, "rgba(40, 16, 137, 0.9)"],   # Darker purple
+            [0.97, "rgba(26, 12, 135, 0.9)"],   # New shade between darker purple and dark blue
+            [1.0, "rgba(12, 7, 134, 0.9)"]      # Dark blue
+        ]
 
     def artist_bubble(self) -> go.Figure:
         artist_counts = self.df_top_50['artist_name'].value_counts().reset_index()
@@ -43,21 +57,6 @@ class SpotifyAnalyzer:
         # Set visible text only for top 3 frequent artists
         merged_df.loc[0, 'visible_text'] = merged_df.loc[0, 'artist_name']
 
-        colorscale=[  # Custom colorscale
-            [0.0, "rgba(232, 148, 88, 0.9)"],   # Lighter orange
-            [0.12, "rgba(213, 120, 98, 0.9)"],  # Dark orange
-            [0.24, "rgba(190, 97, 111, 0.9)"],  # Reddish-pink
-            [0.36, "rgba(164, 77, 126, 0.9)"],  # Lighter magenta
-            [0.48, "rgba(136, 60, 137, 0.9)"],  # Deep magenta
-            [0.58, "rgba(125, 50, 140, 0.9)"],  # Mid purple
-            [0.68, "rgba(106, 44, 141, 0.9)"],  # Purple-pink
-            [0.78, "rgba(87, 35, 142, 0.9)"],   # Deep purple
-            [0.88, "rgba(69, 27, 140, 0.9)"],   # Rich purple
-            [0.94, "rgba(40, 16, 137, 0.9)"],   # Darker purple
-            [0.97, "rgba(26, 12, 135, 0.9)"],   # New shade between darker purple and dark blue
-            [1.0, "rgba(12, 7, 134, 0.9)"]      # Dark blue
-        ]
-
         # Create bubble chart
         fig = go.Figure(data=[go.Scatter(
             x=merged_df['frequency'],
@@ -73,7 +72,7 @@ class SpotifyAnalyzer:
                 sizemin=4,
                 color=merged_df['popularity'],
                 colorbar=dict(title='Score', thickness=10),
-                colorscale=colorscale 
+                colorscale=self.colorscale 
             ),
             hoverinfo='text+x+y',
             hovertemplate='<b>%{hovertext}</b><br>Frequency: %{x}<br>Popularity: %{y}<extra></extra>'
@@ -158,7 +157,7 @@ class SpotifyAnalyzer:
 
     
     def radar_chart(self) -> go.Figure:
-        color_top_50 = 'rgba(93, 58, 155, 0.9)' 
+        color_top_50 = "rgba(69, 27, 140, 0.9)" # Rich Purple
         means_values_top_50p = self.mean_values_top_50 * 100
         att_list = ['danceability', 'valence', 'energy', 'acousticness', 'instrumentalness', 'liveness', 'speechiness']
         fig = go.Figure()
@@ -193,7 +192,7 @@ class SpotifyAnalyzer:
         return fig
         
     def tempo_histogram(self) -> go.Figure:
-        color_top_50 = px.colors.sequential.Plasma[2]  
+        color_top_50 = "rgba(69, 27, 140, 0.9)" # Rich Purple
         color_average_tempo = px.colors.sequential.Plasma[6]  
 
         # Calculate histogram data manually to determine the max frequency
@@ -267,7 +266,7 @@ class SpotifyAnalyzer:
             seconds = int((minutes - full_minutes) * 60)
             return f"{full_minutes}m {seconds}s"
 
-        color_top_50 = px.colors.sequential.Plasma[2]  
+        color_top_50 = "rgba(69, 27, 140, 0.9)" #Rich Purple
         color_average_duration = px.colors.sequential.Plasma[6]  
 
         # Convert duration from milliseconds to minutes for readability
@@ -338,7 +337,7 @@ class SpotifyAnalyzer:
 
     
     def loudness_histogram(self) -> go.Figure:
-        color_top_50 = px.colors.sequential.Plasma[2]  
+        color_top_50 = "rgba(69, 27, 140, 0.9)" # Rich Purple
         color_average_loudness = px.colors.sequential.Plasma[6]  
 
         # Calculate histogram data
@@ -434,29 +433,13 @@ class SpotifyAnalyzer:
 
         fig = go.Figure()
 
-        # Custom Plasma colorscale with 0.8 alpha
-        colorscale = [
-        [0.0, "rgba(232, 148, 88, 0.8)"],   # Lighter orange
-        [0.12, "rgba(213, 120, 98, 0.8)"],  # Dark orange
-        [0.24, "rgba(190, 97, 111, 0.8)"],  # Reddish-pink
-        [0.36, "rgba(164, 77, 126, 0.8)"],  # Lighter magenta
-        [0.48, "rgba(136, 60, 137, 0.8)"],  # Deep magenta
-        [0.58, "rgba(125, 50, 140, 0.8)"],  # Mid purple
-        [0.68, "rgba(106, 44, 141, 0.8)"],  # Purple-pink
-        [0.78, "rgba(87, 35, 142, 0.8)"],   # Deep purple
-        [0.88, "rgba(69, 27, 140, 0.8)"],   # Rich purple
-        [0.94, "rgba(40, 16, 137, 0.8)"],   # Darker purple
-        [0.97, "rgba(26, 12, 135, 0.8)"],   # between darker purple and dark blue
-        [1.0, "rgba(12, 7, 134, 0.8)"]      # Dark blue
-    ]
-
         # Add the bar trace with custom tooltips
         fig.add_trace(go.Bar(
             x=key_df_sorted['Key Name'],
             y=key_df_sorted['Count'],
             text=key_df_sorted['Formatted Tracks'],
             hovertemplate='<br><b>Tracks:</b><br>%{text}<extra></extra>',
-            marker=dict(color=key_df_sorted['Count'], colorscale=colorscale)
+            marker=dict(color=key_df_sorted['Count'], colorscale=self.colorscale)
         ))
 
         # Update layout
@@ -494,7 +477,7 @@ class SpotifyAnalyzer:
             final_data,
             names='mode',
             values='count',
-            color_discrete_sequence=[px.colors.sequential.Plasma[2], px.colors.sequential.Plasma[7]],
+            color_discrete_sequence=["rgba(26, 12, 135, 0.8)", "rgba(213, 120, 98, 0.8)"],
             hole=0.2,
             custom_data=['titles']
         )
@@ -540,7 +523,7 @@ class SpotifyAnalyzer:
             final_data,
             names='is_explicit',
             values='count',
-            color_discrete_sequence=[px.colors.sequential.Plasma[2], px.colors.sequential.Plasma[7]],
+            color_discrete_sequence=["rgba(26, 12, 135, 0.8)", "rgba(213, 120, 98, 0.8)"],
             hole=0.2,
             custom_data=['titles']
         )
