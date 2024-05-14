@@ -35,6 +35,38 @@ class AlbumAnalyzer:
     def __init__(self, sp, album_id: str) -> None:
         self.sp = sp
         self.mean_values_album, self.df_album = retrieve_album_data(self.sp, album_id)
+        self.colorscale = [
+            [0.0, "rgba(232, 148, 88, 0.8)"],   # Lighter orange
+            [0.12, "rgba(213, 120, 98, 0.8)"],  # Dark orange
+            [0.24, "rgba(190, 97, 111, 0.8)"],  # Reddish-pink
+            [0.36, "rgba(164, 77, 126, 0.8)"],  # Lighter magenta
+            [0.48, "rgba(136, 60, 137, 0.8)"],  # Deep magenta
+            [0.58, "rgba(125, 50, 140, 0.8)"],  # Mid purple
+            [0.68, "rgba(106, 44, 141, 0.8)"],  # Purple-pink
+            [0.78, "rgba(87, 35, 142, 0.8)"],   # Deep purple
+            [0.88, "rgba(69, 27, 140, 0.8)"],   # Rich purple
+            [0.94, "rgba(40, 16, 137, 0.8)"],   # Darker purple
+            [0.97, "rgba(26, 12, 135, 0.8)"],   # Between darker purple and dark blue
+            [1.0, "rgba(12, 7, 134, 0.8)"]      # Dark blue
+        ]
+
+    def get_color(self, value, min_value, max_value):
+        # Ensure that the values are floats
+        if isinstance(value, str):
+            value = float(value)
+        if isinstance(min_value, str):
+            min_value = float(min_value)
+        if isinstance(max_value, str):
+            max_value = float(max_value)
+        
+        # Normalize the value to a range [0, 1]
+        normalized_value = (value - min_value) / (max_value - min_value)
+        # Find the corresponding color in the colorscale
+        for i in range(len(self.colorscale) - 1):
+            if normalized_value <= self.colorscale[i + 1][0]:
+                return self.colorscale[i][1]
+        return self.colorscale[-1][1]
+    
 
     def radar_chart(self) -> go.Figure:
         color_album = 'rgba(93, 58, 155, 0.9)' 
@@ -220,69 +252,61 @@ class AlbumAnalyzer:
         )
 
         return fig
-
+    
     
     def loudness_histogram(self) -> go.Figure:
         color_top_50 = px.colors.sequential.Plasma[2]  
         color_average_loudness = px.colors.sequential.Plasma[6]  
 
-        # Calculate histogram data
-        data_min = self.df_album['loudness'].min()
-        data_max = self.df_album['loudness'].max()
-        bins = np.linspace(data_min - 0.1, data_max + 0.1, num=50)
-        counts, bins = np.histogram(self.df_album['loudness'], bins=bins)
-        bins = np.round(bins, 2)  # Round bins to two decimal places
+        sorted_df = self.df_album.sort_values(by='loudness', ascending=False)
 
-        # Create bin labels for grouping
-        bin_labels = [f"{bins[i]} - {bins[i+1]}" for i in range(len(bins)-1)]
-        self.df_album['bin'] = pd.cut(self.df_album['loudness'], bins=bins, labels=bin_labels, include_lowest=True)
-
-        # Prepare data for the tooltips
-        grouped = self.df_album.groupby('bin', observed=False)
-        tooltip_data = grouped['track_name'].agg(lambda x: '<br>'.join(x)).reset_index()
-
-        # Create the figure and add histogram bars manually
         fig = go.Figure()
-        for label, group in grouped:
-            fig.add_trace(go.Bar(
-                x=[label], 
-                y=[group['loudness'].count()],
-                text=[tooltip_data[tooltip_data['bin'] == label]['track_name'].values[0]],
-                hoverinfo="text",
-                hovertemplate='<br><b>Tracks:</b><br>%{text}<extra></extra>',
-                marker=dict(color=color_top_50, line=dict(width=1, color='black')),
-                name=label,
-                showlegend=False),
-                )
 
-        # Calculate mean loudness
+        # Generate color for each bar based on the loudness value
+        min_loudness = sorted_df['loudness'].min()
+        max_loudness = sorted_df['loudness'].max()
+        color_values = sorted_df['loudness'].apply(lambda x: self.get_color(x, min_loudness, max_loudness))
+
+        fig.add_trace(go.Bar(
+            x=sorted_df['loudness'],
+            y=sorted_df['track_name'],
+            orientation='h',
+            marker=dict(color=color_values, line=dict(width=1, color='black')),
+            text=sorted_df['track_name'],
+            hoverinfo='text',
+            hovertemplate='<b>%{text}</b><br>Loudness: %{x:.2f} dB<extra></extra>',
+            showlegend=False
+        ))
+
         mean_loudness = self.df_album['loudness'].mean()
-        # Find the bin label for the mean loudness
-        mean_loudness_bin = pd.cut([mean_loudness], bins=bins, labels=bin_labels, include_lowest=True)[0]
 
-        # Add a line for the average loudness
+        # Mean verical line
         fig.add_trace(go.Scatter(
-            x=[mean_loudness_bin, mean_loudness_bin],
-            y=[0, counts.max()],  # Use the maximum count as the top of the line
+            x=[mean_loudness, mean_loudness],
+            y=[sorted_df['track_name'].iloc[-1], sorted_df['track_name'].iloc[0]],  # Full range of y-axis
             mode='lines',
             line=dict(color=color_average_loudness, width=2, dash='dash'),
             name='Average Loudness',
             hoverinfo='text',
-            text=f"Mean Loudness: {mean_loudness:.2f} dB" 
+            hovertext=[f"Mean Loudness: {mean_loudness:.2f} dB"] * 2,
+            showlegend=True
         ))
 
-        # Update layout with additional options
         fig.update_layout(
             xaxis_title='Loudness (dB)',
-            yaxis_title='Frequency',
+            yaxis_title='Track Titles',
+            yaxis=dict(autorange='reversed', showticklabels=False),  # Reverse y-axis to have the highest loudness at the top
             template='plotly_white',
             plot_bgcolor='WhiteSmoke',
             paper_bgcolor='WhiteSmoke',
+            
             legend=dict(
                 orientation='h',
                 x=0.8,
                 y=1.1,
             ),
+            height=550,
+            width=700,
             margin=dict(l=20, r=20, t=20, b=20),
             autosize=True
         )
