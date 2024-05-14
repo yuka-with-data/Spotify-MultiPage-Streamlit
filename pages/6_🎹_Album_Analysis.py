@@ -394,7 +394,7 @@ class AlbumAnalyzer:
             final_data,
             names='mode',
             values='count',
-            color_discrete_sequence=[px.colors.sequential.Plasma[2], px.colors.sequential.Plasma[7]],
+            color_discrete_sequence=["rgba(26, 12, 135, 0.8)", "rgba(213, 120, 98, 0.8)"],
             hole=0.2,
             custom_data=['titles']
         )
@@ -439,7 +439,7 @@ class AlbumAnalyzer:
             final_data,
             names='is_explicit',
             values='count',
-            color_discrete_sequence=[px.colors.sequential.Plasma[2], px.colors.sequential.Plasma[7]],
+            color_discrete_sequence=["rgba(26, 12, 135, 0.8)", "rgba(213, 120, 98, 0.8)"],
             hole=0.2,
             custom_data=['titles']
         )
@@ -491,7 +491,7 @@ class AlbumAnalyzer:
                 'bordercolor': "gray",
                 'steps': [
                 {'range': [0, 100], 'color': 'GhostWhite'},
-                {'range': [0, mean_popularity], 'color': 'rgba(65, 105, 225, 0.5)'}
+                {'range': [0, mean_popularity], 'color': 'rgba(26, 12, 135, 0.5)'}
                 ],
             }
         ))
