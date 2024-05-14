@@ -517,23 +517,23 @@ class AlbumAnalyzer:
             fig = self.radar_chart()
             st.plotly_chart(fig, use_container_width=True)
 
-            st.header('Tempo Histogram')
-            st.text("The tempo histogram shows the distribution of the tempo (beats per minute) across all tracks in the album.")
+            st.header('Tempo Bar Chart')
+            st.text("The tempo bars shows the distribution of the tempo (beats per minute) across all tracks in the album.")
             fig = self.tempo_histogram()
             st.plotly_chart(fig, use_container_width=True)
 
-            st.header('Duration Histogram')
-            st.text("The histogram illustrates the distribution of track durations within the album, highlighting variability in song lengths.")
+            st.header('Duration Bar Chart')
+            st.text("The bar chart illustrates the distribution of track durations within the album, highlighting variability in song lengths.")
             fig = self.duration_histogram()
             st.plotly_chart(fig, use_container_width=True)
 
-            st.header('Loudness Histogram')
-            st.text("The loudness histogram plots the loudness levels (in decibels) of each track, showing the dynamic range of the album.")
+            st.header('Loudness Bar Chart')
+            st.text("The loudness bar chart plots the loudness levels (in decibels) of each track, showing the dynamic range of the album.")
             fig = self.loudness_histogram()
             st.plotly_chart(fig, use_container_width=True)
 
-            st.header('Key Histogram')
-            st.text("The histogram displays the musical keys of the album's tracks, indicating the most common keys used.")
+            st.header('Key Distribution')
+            st.text("This key distribution displays the musical keys of the album's tracks, indicating the most common keys used.")
             fig = self.key_histogram()
             st.plotly_chart(fig, use_container_width=True)
 
