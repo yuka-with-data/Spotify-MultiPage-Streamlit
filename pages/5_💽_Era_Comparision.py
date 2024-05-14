@@ -91,7 +91,7 @@ class EraComparison:
         att2_values = (att2 * 100).tolist()
         
         # Colors for the radar chart
-        color_era1 = 'rgba(93, 58, 155, 0.9)'
+        color_era1 = "rgba(69, 27, 140, 0.9)" # Rich Purple
         color_era2 = 'rgba(230, 97, 0, 0.7)'
         
         # Create the radar chart
@@ -154,8 +154,8 @@ class EraComparison:
             seconds = int((minutes - full_minutes) * 60)
             return f"{full_minutes}m {seconds}s"
 
-        color_1 = px.colors.sequential.Plasma[2]
-        color_2 = px.colors.sequential.Plasma[6]
+        color_1 = "rgba(69, 27, 140, 0.9)" # Rich Purple
+        color_2 = 'rgba(230, 97, 0, 0.7)' # Cream Orange
 
         # Convert duration from milliseconds to minutes for readability
         df1['duration_min'] = df1['duration_ms'] / 60000
@@ -270,8 +270,8 @@ class EraComparison:
          Returns:
             plt.Figure
          """
-        color_1 = px.colors.sequential.Plasma[2]
-        color_2 = px.colors.sequential.Plasma[6]
+        color_1 = "rgba(69, 27, 140, 0.9)" # Rich Purple
+        color_2 = 'rgba(230, 97, 0, 0.7)' # Cream Orange
 
         # Define bins for histogram
         all_tempo = pd.concat([df1['tempo'], df2['tempo']])
@@ -467,8 +467,8 @@ class EraComparison:
         Returns:
             plt.Figure
         """
-        color_1 = px.colors.sequential.Plasma[2]
-        color_2 = px.colors.sequential.Plasma[6]
+        color_1 = "rgba(69, 27, 140, 0.9)" # Rich Purple
+        color_2 = 'rgba(230, 97, 0, 0.7)' # Cream Orange
 
         # Define histogram
         all_loudness = pd.concat([df1['loudness'], df2['loudness']])
@@ -643,8 +643,8 @@ class EraComparison:
         Returns:
         plt.Figure
         """
-        color_1 = px.colors.sequential.Plasma[2]
-        color_2 = px.colors.sequential.Plasma[6]
+        color_1 = "rgba(69, 27, 140, 0.9)" # Rich Purple
+        color_2 = 'rgba(230, 97, 0, 0.7)' # Cream Orange
 
         def prepare_data(df):
             df['mode'] = df['mode'].map({1: 'Major', 0: 'Minor'})
@@ -723,8 +723,8 @@ class EraComparison:
          Returns:
           plt.Figure
            """
-        color_1 = px.colors.sequential.Plasma[2]
-        color_2 = px.colors.sequential.Plasma[6]
+        color_1 = "rgba(69, 27, 140, 0.9)" # Rich Purple
+        color_2 = 'rgba(230, 97, 0, 0.7)' # Cream Orange
 
         def get_explicit_data(df):
             df['is_explicit'] = df['is_explicit'].map({True: 'Explicit', False: 'Non-Explicit'})
