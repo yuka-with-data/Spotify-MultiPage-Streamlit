@@ -108,69 +108,61 @@ class AlbumAnalyzer:
         return fig
     
     def tempo_histogram(self) -> go.Figure:
-        color_album = px.colors.sequential.Plasma[2]  
         color_average_tempo = px.colors.sequential.Plasma[6]
+        # Sort DataFrame by tempo
+        sorted_df = self.df_album.sort_values(by='tempo')
 
-        # Calculate histogram data
-        data_min = self.df_album['tempo'].min()
-        data_max = self.df_album['tempo'].max()
-        bins = np.linspace(data_min - 0.1, data_max + 0.1, num=50)
-        counts, bins = np.histogram(self.df_album['tempo'], bins=bins)
-        bins = np.round(bins, 2)
-
-        # Group data into bins
-        bin_labels = [f"{bins[i]} - {bins[i+1]}" for i in range(len(bins)-1)]
-        self.df_album['bin'] = pd.cut(self.df_album['tempo'], bins=bins, labels=bin_labels, include_lowest=True)
-
-        # Prepare data for tooltips
-        grouped = self.df_album.groupby('bin', observed=False)
-        print(grouped)
-        tooltip_data = grouped['track_name'].agg(lambda x: '<br>'.join(x)).reset_index()
+        # Generate color for each bar based on the tempo value
+        min_tempo = sorted_df['tempo'].min()
+        max_tempo = sorted_df['tempo'].max()
+        color_values = sorted_df['tempo'].apply(lambda x: self.get_color(x, min_tempo, max_tempo))
 
         # Create the figure and add bars
-        fig = go.Figure()
-        for label, group in grouped:
-            fig.add_trace(go.Bar(
-                x=[label],
-                y=[group['tempo'].count()],
-                text=[tooltip_data[tooltip_data['bin'] == label]['track_name'].values[0]],
+        fig = go.Figure(data=[
+            go.Bar(
+                x=sorted_df['tempo'],
+                y=sorted_df['track_name'],
+                orientation='h',
                 hoverinfo="text",
-                hovertemplate='<br><b>Tracks:</b><br>%{text}<extra></extra>',
-                marker=dict(color=color_album, line=dict(width=1, color='black')),
-                name=label,
-                showlegend=False),
-                )
+                text=sorted_df['track_name'].apply(lambda x: f"{x}"),
+                hovertemplate='<b>%{text}</b><br>Tempo: %{x:.2f} BPM<extra></extra>',
+                marker=dict(color=color_values, line=dict(width=1, color='black')),
+                showlegend=False
+            )
+        ])
 
-        # Calculate mean tempo and find the bin
+        # Calculate mean tempo
         mean_tempo = self.df_album['tempo'].mean()
-        mean_tempo_bin = pd.cut([mean_tempo], bins=bins, labels=bin_labels, include_lowest=True)[0]
 
         # Add a line for average tempo
         fig.add_trace(go.Scatter(
-            x=[mean_tempo_bin, mean_tempo_bin],
-            y=[0, counts.max()], 
+            x=[mean_tempo, mean_tempo],
+            y=[sorted_df['track_name'].iloc[-1], sorted_df['track_name'].iloc[0]],  # Covers the full range of y-axis
             mode='lines',
             line=dict(color=color_average_tempo, width=2, dash='dash'),
             name='Average Tempo',
             hoverinfo='text',
-            text=f"Mean Tempo: {mean_tempo:.2f} BPM"
+            hovertext=[f"Mean Tempo: {mean_tempo:.2f} BPM"],
+            showlegend=True
         ))
 
-        # Update layout with additional options
+        # Update layout
         fig.update_layout(
             xaxis_title='Tempo (BPM)',
-            yaxis_title='Frequency',
+            yaxis_title='Track Titles',
+            yaxis=dict(showticklabels=False),
             template='plotly_white',
-            showlegend=True,
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
             legend=dict(
                 orientation='h',
                 x=0.8,
                 y=1.1,
             ),
-            plot_bgcolor='WhiteSmoke',
-            paper_bgcolor='WhiteSmoke',
             margin=dict(l=20, r=20, t=20, b=20),
-            autosize=True
+            autosize=True,
+            height=550,
+            width=700
         )
 
         return fig
