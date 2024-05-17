@@ -57,12 +57,14 @@ class TrackRecommendation:
 
         # Extract information from result
         similar_tracks = []
+        seen_track_ids = set()
+
         for track in results['tracks']:
             # Check if any of the artists match the input artist name
             if any(artist['name'].lower() == selected_artist.lower() for artist in track['artists']):
                 continue
             # Ensuring the target track is not included in the list of recommendations
-            if track['id'] != target_track_id:
+            if track['id'] != target_track_id and track['id'] not in seen_track_ids:
                 audio_features = self.sp.audio_features(track['id'])[0]
                 popularity = track.get('popularity', None)
 
@@ -73,6 +75,7 @@ class TrackRecommendation:
                     'popularity': popularity,
                     'audio_features': audio_features
                 })
+                seen_track_ids.add(track['id'])
 
         return similar_tracks
 
