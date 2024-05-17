@@ -334,3 +334,70 @@ def retrieve_era_data(_sp, playlist_id:str) -> Tuple[pd.Series, pd.DataFrame]:
         st.error("Failed to retrieve the latest Top 50 Tracks data. Please try again later.")
         return pd.Series(), pd.DataFrame()
     
+# Artist Data Retrieval
+def fetch_artist_tracks(artist_id):
+    tracks_data = []
+    albums = []
+
+    # Fetch all albums from the artist
+    results = sp.artist_albums(artist_id, album_type='album,single')
+    albums.extend(results['items'])
+    # Albums pagination
+    while results['next']:
+        results = sp.next(results)
+        albums.extend(results['items'])
+
+    # Fetch genres
+    artist_genres = sp.artist(artist_id)['genres']
+
+    # Iterate through each album to fetch tracks
+    for album in albums:
+        results = sp.album_tracks(album['id'])
+        tracks = results['items']
+        # Tracks pagination
+        while results['next']:
+            results = sp.next(results)
+            tracks.extend(results['items'])
+
+        for track in tracks:
+            # Only proceed if 'track' is not None and the first artist matches the artist_id
+            if track is not None and track['artists'][0]['id'] == artist_id:
+                track_info = {
+                    'artist_name': ', '.join([artist['name'] for artist in track['artists']]),  # Handling multiple artists
+                    'track_name': track['name'],
+                    'album_name': album['name'],
+                    'is_explicit': track['explicit'],
+                    'genres': ', '.join(artist_genres),
+                    'release_date': album['release_date'],
+                    'track_id': track['id'],
+                }
+
+                # Fetch audio features and update track_info if needed
+                audio_features = sp.audio_features(track['id'])[0]
+                if audio_features:
+                    track_info.update({
+                        'danceability': audio_features['danceability'],
+                        'valence': audio_features['valence'],
+                        'energy': audio_features['energy'],
+                        'loudness': audio_features['loudness'],
+                        'acousticness': audio_features['acousticness'],
+                        'instrumentalness': audio_features['instrumentalness'],
+                        'liveness': audio_features['liveness'],
+                        'speechiness': audio_features['speechiness'],
+                        'key': audio_features['key'],
+                        'tempo': audio_features['tempo'],
+                        'mode': audio_features['mode'],
+                        'duration_ms': audio_features['duration_ms'],
+                        'time_signature': audio_features['time_signature']
+                    })
+
+                tracks_data.append(track_info)
+    
+    df = pd.DataFrame(tracks_data)
+
+    # Calculate mean values for each attribute
+    att_list = ['danceability', 'valence', 'energy', 'acousticness', 'instrumentalness', 'liveness', 'speechiness']
+    # Calculate mean of attributes
+    selected_atts = df[att_list].mean()
+
+    return att_list, df
