@@ -335,6 +335,7 @@ def retrieve_era_data(_sp, playlist_id:str) -> Tuple[pd.Series, pd.DataFrame]:
         return pd.Series(), pd.DataFrame()
     
 # Artist Data Retrieval
+@st.cache_data(ttl=604800, show_spinner=False)
 def fetch_artist_tracks(_sp, artist_id):
     tracks_data = []
     albums = []
@@ -400,4 +401,4 @@ def fetch_artist_tracks(_sp, artist_id):
     # Calculate mean of attributes
     selected_atts = df[att_list].mean()
 
-    return att_list, df
+    return selected_atts, df
