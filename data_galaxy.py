@@ -335,28 +335,28 @@ def retrieve_era_data(_sp, playlist_id:str) -> Tuple[pd.Series, pd.DataFrame]:
         return pd.Series(), pd.DataFrame()
     
 # Artist Data Retrieval
-def fetch_artist_tracks(artist_id):
+def fetch_artist_tracks(_sp, artist_id):
     tracks_data = []
     albums = []
 
     # Fetch all albums from the artist
-    results = sp.artist_albums(artist_id, album_type='album,single')
+    results = _sp.artist_albums(artist_id, album_type='album,single')
     albums.extend(results['items'])
     # Albums pagination
     while results['next']:
-        results = sp.next(results)
+        results = _sp.next(results)
         albums.extend(results['items'])
 
     # Fetch genres
-    artist_genres = sp.artist(artist_id)['genres']
+    artist_genres = _sp.artist(artist_id)['genres']
 
     # Iterate through each album to fetch tracks
     for album in albums:
-        results = sp.album_tracks(album['id'])
+        results = _sp.album_tracks(album['id'])
         tracks = results['items']
         # Tracks pagination
         while results['next']:
-            results = sp.next(results)
+            results = _sp.next(results)
             tracks.extend(results['items'])
 
         for track in tracks:
@@ -373,7 +373,7 @@ def fetch_artist_tracks(artist_id):
                 }
 
                 # Fetch audio features and update track_info if needed
-                audio_features = sp.audio_features(track['id'])[0]
+                audio_features = _sp.audio_features(track['id'])[0]
                 if audio_features:
                     track_info.update({
                         'danceability': audio_features['danceability'],
