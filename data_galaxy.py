@@ -351,6 +351,12 @@ def fetch_artist_tracks(_sp, artist_id):
     # Fetch genres
     artist_genres = _sp.artist(artist_id)['genres']
 
+    # Initialize a progress bar
+    total_tracks = sum(len(sp.album_tracks(album['id'])['items']) for album in albums)
+    progress_bar = st.progress(0)
+
+    track_counter = 0
+
     # Iterate through each album to fetch tracks
     for album in albums:
         results = _sp.album_tracks(album['id'])
@@ -361,6 +367,11 @@ def fetch_artist_tracks(_sp, artist_id):
             tracks.extend(results['items'])
 
         for track in tracks:
+            track_counter += 1
+            # Update progress bar
+            percent_complete = int((track_counter) / total_tracks * 100)
+            progress_bar.progress(percent_complete, text="🛰️ Fetching The Most Up-To-Date Chart Data. Please Wait.")
+
             # Only proceed if 'track' is not None and the first artist matches the artist_id
             if track is not None and track['artists'][0]['id'] == artist_id:
                 track_info = {
@@ -391,8 +402,26 @@ def fetch_artist_tracks(_sp, artist_id):
                         'duration_ms': audio_features['duration_ms'],
                         'time_signature': audio_features['time_signature']
                     })
+                
+                # Fetch Popularity
+                search_query = f"{track['name']} {track['artists'][0]['name']}"
+                popularity_result = sp.search(q=search_query, type='track', limit=1)
+                if popularity_result['tracks']['items']:
+                    popularity = popularity_result['tracks']['items'][0]['popularity']
+                else:
+                    popularity = None
+                track_info['popularity'] = popularity
 
                 tracks_data.append(track_info)
+    
+    # Progress bar complete
+    progress_bar.progress(100)
+    success_placeholder = st.empty()
+    success_placeholder.success(f"Retrieved {total_tracks} tracks from the artist's discography!", icon="✅")
+    time.sleep(2)
+
+    success_placeholder.empty()
+    progress_bar.empty()
     
     df = pd.DataFrame(tracks_data)
 
