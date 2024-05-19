@@ -15,8 +15,8 @@ from streamlit_searchbox import st_searchbox
 from typing import Optional, Dict, Tuple, List, Union
 
 # Page Config
-st.set_page_config(page_title="Top Chart Analysis", 
-                   page_icon="👯🏼")
+st.set_page_config(page_title="Artist Analysis", 
+                   page_icon="")
 
 # Import data_galaxy after Page Config
 from data_galaxy import init_spotify_client, fetch_artist_tracks
@@ -78,7 +78,21 @@ class SpotifyAnalyzer:
     
 
     def run_analysis(self) -> None:
-        pass
+        try:
+            # Create a DataFrame
+            st.header('Artist Tracks Table')
+            st.dataframe(self.df_artist)
+
+            # Create a Radar Chart
+            st.header('Attributes Radar Chart')
+            st.text("The radar chart displays the distribution of various musical attributes for the selected tracks.")
+            fig = self.radar_chart()
+            st.plotly_chart(fig, use_container_width=True)
+
+
+        except Exception as e:
+            print(e)
+            st.error("An error occurred during analysis. Please try again.")
 
 # Initialize Spotify Client
 sp = init_spotify_client()
@@ -127,10 +141,23 @@ analyze_button = st.sidebar.button("Analyze")
 st.markdown("# Artist Analysis")
 st.info("Select an artist name to analyze. You'll get a comprehensive analysis of your selected album.", icon="📀")
 
-try:
-    if analyze_button:
-        ...
+if not selected_artist:
+    st.warning("Please choose a target artist to analyze.", icon='⚠️')
+elif analyze_button:
+    try:
+        if artist_id:
+            spotify_analyzer = SpotifyAnalyzer(sp, artist_id)
+            artist_embed_url = f"https://open.spotify.com/embed/artist/{artist_id}?utm_source=generator&theme=0"
+            st.components.v1.iframe(artist_embed_url, width=500, height=600, scrolling=True)
+            st.divider()
 
-except Exception as e:
-    print(e)
-    st.error(f'An error occurred: {str(e)}')
+            # Run Analysis
+            spotify_analyzer.run_analysis()
+            st.balloons()
+        
+        else:
+            st.error("Cannot analyze. Artist ID is not available.")
+
+    except Exception as e:
+        print(e)
+        st.error(f'An error occurred: {str(e)}')

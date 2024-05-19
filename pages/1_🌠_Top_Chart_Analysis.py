@@ -703,6 +703,8 @@ elif compare_button:
             # Run Analysis
             spotify_analyzer.run_analysis()
             st.balloons()
+        else:
+            st.error("Cannot analyze. Playlist ID is not available.")
     
     except Exception as e:
         print(e)
