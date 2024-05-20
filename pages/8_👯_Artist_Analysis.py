@@ -141,9 +141,8 @@ analyze_button = st.sidebar.button("Analyze")
 st.markdown("# Artist Analysis")
 st.info("Select an artist name to analyze. You'll get a comprehensive analysis of your selected album.", icon="📀")
 
-if not selected_artist:
-    st.warning("Please choose a target artist to analyze.", icon='⚠️')
-elif analyze_button:
+
+if analyze_button:
     try:
         if artist_id:
             spotify_analyzer = SpotifyAnalyzer(sp, artist_id)
@@ -161,3 +160,6 @@ elif analyze_button:
     except Exception as e:
         print(e)
         st.error(f'An error occurred: {str(e)}')
+
+elif analyze_button and not selected_artist:
+    st.warning("Please choose a target artist to analyze.", icon='⚠️')
