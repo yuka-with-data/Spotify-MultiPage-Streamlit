@@ -102,6 +102,13 @@ class SpotifyAnalyzer:
             xaxis_title='Year',
             yaxis_title='Attribute Mean',
             legend_title='Attribute',
+            legend=dict(
+                orientation='h',
+                xanchor='center',
+                yanchor='bottom',
+                y=5,
+                x=0.5
+            ),
             paper_bgcolor='WhiteSmoke',
             font={"color": "black"},
             height=450,
@@ -126,7 +133,7 @@ class SpotifyAnalyzer:
 
             # Create Attribute Time Series
             st.header('Attribute Time Series')
-            st.text('')
+            st.text("This time series displays the trends of various musical attributes over the years.")
             fig = self.attribute_time_series()
             st.plotly_chart(fig, use_container_width=True)
 
