@@ -76,6 +76,41 @@ class SpotifyAnalyzer:
 
         return fig
     
+    def attribute_time_series(self) -> go.Figure:
+        def compute_yearly_mean(df: pd.DataFrame) -> pd.DataFrame:
+            df['year'] = pd.to_datetime(df['release_date']).dt.year
+            yearly_means = df.groupby('year')[['energy', 'danceability', 'acousticness', 'valence', 'instrumentalness', 'liveness', 'speechiness']].mean().reset_index()
+            return yearly_means.interpolate(method='linear')
+        yearly_means = compute_yearly_mean(self.df_artist)
+
+        fig = go.Figure()
+        attributes = ['energy', 'danceability', 'acousticness', 'valence', 'instrumentalness', 'liveness', 'speechiness']
+        colors = ["rgba(232, 148, 88, 0.9)", "rgba(213, 120, 98, 0.9)", "rgba(190, 97, 111, 0.9)", "rgba(164, 77, 126, 0.9)",
+                  "rgba(136, 60, 137, 0.9)", "rgba(125, 50, 140, 0.9)", "rgba(106, 44, 141, 0.9)"]
+
+        for att, color in zip(attributes, colors):
+            fig.add_trace(go.Scatter(
+                x=yearly_means['year'],
+                y=yearly_means[att],
+                mode='lines+markers',
+                name=att,
+                hovertemplate=f"<b>Year</b>: %{{x}}<br><b>{att}</b>: %{{y:.2f}}<extra></extra>",
+                line=dict(color=color)
+            ))
+        
+        fig.update_layout(
+            xaxis_title='Year',
+            yaxis_title='Attribute Mean',
+            legend_title='Attribute',
+            paper_bgcolor='WhiteSmoke',
+            font={"color": "black"},
+            height=450,
+            width=700,
+            margin=dict(l=40, r=40, t=40, b=40),
+            autosize=True
+        )
+
+        return fig
 
     def run_analysis(self) -> None:
         try:
@@ -87,6 +122,12 @@ class SpotifyAnalyzer:
             st.header('Attributes Radar Chart')
             st.text("The radar chart displays the distribution of various musical attributes for the selected tracks.")
             fig = self.radar_chart()
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Create Attribute Time Series
+            st.header('Attribute Time Series')
+            st.text('')
+            fig = self.attribute_time_series()
             st.plotly_chart(fig, use_container_width=True)
 
 
