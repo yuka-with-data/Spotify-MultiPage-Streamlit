@@ -4,6 +4,7 @@ import numpy as np
 from spotipy.oauth2 import SpotifyClientCredentials
 import plotly.graph_objects as go
 import plotly.express as px
+import plotly.figure_factory as ff
 import streamlit as st
 # from decouple import config
 import matplotlib.pyplot as plt
@@ -118,6 +119,42 @@ class SpotifyAnalyzer:
         )
 
         return fig
+    
+    def attribute_heatmap(self) -> go.Figure:
+        # Create correlation matrix df
+        df_corr = self.df_artist[['energy', 'danceability', 'acousticness', 'valence', 'instrumentalness', 'liveness', 'speechiness']].corr()
+        
+        fig = px.imshow(
+            df_corr,
+            labels=dict(x="Features", y="Features", color="Correlation"),
+            x=df_corr.columns,
+            y=df_corr.index,
+            color_continuous_scale='Spectral'
+        )
+
+        rounded_corr = np.around(df_corr.values, decimals=2)
+        annotations = []
+        for i, row in enumerate(rounded_corr):
+            for j, value in enumerate(row):
+                annotations.append(dict(
+                    x=j,
+                    y=i,
+                    text=str(value),
+                    showarrow=False,
+                    font=dict(color='white'),
+                    ))
+                
+
+        fig.update_layout(
+            height=700,
+            width=700,
+            autosize=True,
+            annotations=annotations
+        )
+
+        return fig
+        
+    
 
     def run_analysis(self) -> None:
         try:
@@ -135,6 +172,11 @@ class SpotifyAnalyzer:
             st.header('Attribute Time Series')
             st.text("This time series displays the trends of various musical attributes over the years.")
             fig = self.attribute_time_series()
+            st.plotly_chart(fig, use_container_width=True)
+
+            st.header('Attribute Heatmap')
+            st.text("This heatmap visualizes the correlation between different musical features in a Spotify dataset.")
+            fig = self.attribute_heatmap()
             st.plotly_chart(fig, use_container_width=True)
 
 
