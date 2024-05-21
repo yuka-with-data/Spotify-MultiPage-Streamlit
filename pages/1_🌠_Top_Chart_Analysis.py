@@ -671,7 +671,9 @@ playlists = {
     "Top 50 Global (Daily)": "37i9dQZEVXbMDoHDwVN2tF",
     "Top Songs Global (Weekly)": "37i9dQZEVXbNG2KDcFcKOF",
     "Big On Ineternet": "37i9dQZF1DX5Vy6DFOcx00",
-    "Viral 50 Global (Daily)": "37i9dQZEVXbLiRSasKsNU9"
+    "Viral 50 Global (Daily)": "37i9dQZEVXbLiRSasKsNU9",
+    "TikTok Top 50 (Weekly)": "4FLeoROn5GT7n2tZq5XB4V",
+    "TikTok Viral Hits (Weekly)": "6mKEyAOZ82zQm4ysV3LvqQ"
 }
 
 # Sidebar
