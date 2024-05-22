@@ -79,6 +79,10 @@ class SpotifyAnalyzer:
     
     def attribute_time_series(self) -> go.Figure:
         def compute_yearly_mean(df: pd.DataFrame) -> pd.DataFrame:
+            # Handle invalid dates
+            df['release_date'] = pd.to_datetime(df['release_date'], errors='coerce')
+            df = df.dropna(subset=['release_date'])
+            
             df['year'] = pd.to_datetime(df['release_date']).dt.year
             yearly_means = df.groupby('year')[['energy', 'danceability', 'acousticness', 'valence', 'instrumentalness', 'liveness', 'speechiness']].mean().reset_index()
             return yearly_means.interpolate(method='linear')
