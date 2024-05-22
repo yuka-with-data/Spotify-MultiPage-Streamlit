@@ -17,7 +17,7 @@ from typing import Optional, Dict, Tuple, List, Union
 
 # Page Config
 st.set_page_config(page_title="Artist Analysis", 
-                   page_icon="")
+                   page_icon="✨")
 
 # Import data_galaxy after Page Config
 from data_galaxy import init_spotify_client, fetch_artist_tracks
@@ -158,6 +158,60 @@ class SpotifyAnalyzer:
 
         return fig
         
+
+    def key_distribution_chart(self) -> go.Figure:
+        # Mapping of numeric key values to corresponding alphabetic keys
+        key_mapping = ('C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B')
+
+        grouped = self.df_artist.groupby('key', observed=False)['track_name'].apply(list).reindex(range(12), fill_value=[])
+
+        # Get key counts and ensure all keys are present
+        key_counts = self.df_artist['key'].value_counts().reindex(range(12), fill_value=0)
+        
+        # Create a DataFrame for easier sorting and mapping
+        key_df = pd.DataFrame({
+            'Key': range(12),
+            'Count': key_counts.values,             
+            'Track Names': grouped.values
+        })
+
+        # Format track names into a single string per key
+        key_df['Formatted Tracks'] = key_df['Track Names'].apply(lambda x: '<br>'.join(x))
+
+        # Map numeric keys to their names
+        key_df['Key Name'] = key_df['Key'].apply(lambda x: key_mapping[x])
+
+        # Sort the DataFrame by 'Count'
+        key_df_sorted = key_df.sort_values(by='Count', ascending=False)
+        # print(key_df_sorted)
+
+        # Map numeric keys to their names
+        # key_df_sorted['Key Name'] = key_df_sorted['Key'].apply(lambda x: key_mapping[x])
+
+        fig = go.Figure()
+
+        # Add the bar trace with custom tooltips
+        fig.add_trace(go.Bar(
+            x=key_df_sorted['Key Name'],
+            y=key_df_sorted['Count'],
+            text=key_df_sorted['Formatted Tracks'],
+            hovertemplate='<br><b>Tracks:</b><br>%{text}<extra></extra>',
+            marker=dict(color=key_df_sorted['Count'], colorscale=self.colorscale)
+        ))
+
+        # Update layout
+        fig.update_layout(
+            # title='Key Distribution',
+            xaxis_title='Key',
+            yaxis_title='Count',
+            template='plotly_white',
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
+            autosize=True,
+            margin=dict(l=20, r=20, t=30, b=20)
+        )
+
+        return fig
     
 
     def run_analysis(self) -> None:
@@ -190,6 +244,11 @@ class SpotifyAnalyzer:
             st.header('Attribute Heatmap')
             st.text("This heatmap visualizes the correlation between different musical features in a Spotify dataset.")
             fig = self.attribute_heatmap()
+            st.plotly_chart(fig, use_container_width=True)
+
+            st.header('Key Distribution Chart')
+            st.text("This chart shows the distribution of artist tracks across different keys.")
+            fig = self.key_distribution_chart()
             st.plotly_chart(fig, use_container_width=True)
 
 
