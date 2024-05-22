@@ -166,6 +166,15 @@ class SpotifyAnalyzer:
             st.header('Artist Tracks Table')
             st.dataframe(self.df_artist)
 
+            st.header('Artist Genre')
+            st.text("This section displays the top genres associated with the artist's tracks.")
+            artist_genres = set(self.df_artist['genres'])
+            artist_genres_list = list(artist_genres)
+            badges_html = " ".join([f"<span style='background-color:rgba(26, 12, 135, 0.9); color:#ffffff; padding:5px; border-radius:5px; margin:2px; display:inline-block;'>{genre}</span>" for genre in artist_genres_list])
+            st.write(f"<div>{badges_html}</div>", unsafe_allow_html=True)
+
+            #st.write(f"<p style='font-size:24px; font-family:Roboto;'>Artist Genres: {artist_genres_str}</p>", unsafe_allow_html=True)
+
             # Create a Radar Chart
             st.header('Attributes Radar Chart')
             st.text("The radar chart displays the distribution of various musical attributes for the selected tracks.")
