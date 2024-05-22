@@ -177,14 +177,14 @@ class SpotifyAnalyzer:
             showlegend=True,
             legend=dict(
                 orientation='h',
-                x=0.9,
+                x=0.4,
                 y=1.1,
             ),
             paper_bgcolor = 'WhiteSmoke',
             font = {"color": "black"},
             height=450,
             width=700,
-            margin=dict(l=40, r=40, t=40, b=40),
+            margin=dict(l=45, r=45, t=45, b=45),
             autosize=True
         )
 
