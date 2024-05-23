@@ -26,6 +26,7 @@ class SpotifyAnalyzer:
     def __init__(self, sp, artist_id: str) -> None:
         self.sp = sp
         self.mean_values_artist, self.df_artist = fetch_artist_tracks(self.sp, artist_id)
+        self.att_list = ['danceability', 'valence', 'energy', 'acousticness', 'instrumentalness', 'liveness', 'speechiness']
         self.colorscale=[  # Custom colorscale
             [0.0, "rgba(232, 148, 88, 0.9)"],   # Lighter orange
             [0.12, "rgba(213, 120, 98, 0.9)"],  # Dark orange
@@ -45,13 +46,12 @@ class SpotifyAnalyzer:
     def radar_chart(self) -> go.Figure:
         color_artist = "rgba(69, 27, 140, 0.9)" # Rich Purple
         mean_values_artist = self.mean_values_artist * 100
-        att_list = ['danceability', 'valence', 'energy', 'acousticness', 'instrumentalness', 'liveness', 'speechiness']
         fig = go.Figure()
 
         # Add trace (mean)
         fig.add_trace(go.Scatterpolar(
             r=mean_values_artist,
-            theta=att_list,
+            theta=self.att_list,
             fill='toself',
             name='Chart (mean)',
             fillcolor=color_artist,
@@ -156,8 +156,7 @@ class SpotifyAnalyzer:
             annotations=annotations
         )
 
-        return fig
-        
+        return fig 
 
     def key_distribution_chart(self) -> go.Figure:
         # Mapping of numeric key values to corresponding alphabetic keys
@@ -212,7 +211,81 @@ class SpotifyAnalyzer:
         )
 
         return fig
+
+
+    def tempo_distribution(self) -> go.Figure:
+        # Calculate mean tempo for each album
+        album_means = self.df_artist.groupby('album_name')['tempo'].mean().reset_index()
+        album_means_sorted = album_means.sort_values(by='tempo', ascending=True)
+
+        # Create the bar plot
+        fig = go.Figure(go.Bar(
+            x=album_means_sorted['tempo'],
+            y=album_means_sorted['album_name'],
+            orientation='h',
+            marker=dict(color='rgba(26, 12, 135, 0.9)'),
+            hoverinfo='x+y',
+        ))
+
+        # Update layout
+        fig.update_layout(
+            xaxis_title='Tempo (Mean)',
+            yaxis_title='Album Name',
+            template='plotly_white',
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
+            autosize=True,
+            margin=dict(l=150, r=20, t=30, b=20)
+        )
+
+        # Update y-axis to fit long album names by truncating labels
+        fig.update_yaxes(
+            tickmode='array',
+            tickvals=self.df_artist['album_name'].unique(),
+            ticktext=[name if len(name) <= 20 else name[:17] + '...' for name in self.df_artist['album_name'].unique()],
+            automargin=True
+        )
+
+        return fig
     
+
+    def duration_distribution(self) -> go.Figure:
+        # Convert duration from milliseconds to minutes
+        self.df_artist['duration_minutes'] = self.df_artist['duration_ms'] / 60000
+        
+        # Calculate mean duration for each album
+        album_means = self.df_artist.groupby('album_name')['duration_minutes'].mean().reset_index()
+        album_means_sorted = album_means.sort_values(by='duration_minutes', ascending=True)
+
+        # Create the bar plot
+        fig = go.Figure(go.Bar(
+            x=album_means_sorted['duration_minutes'],
+            y=album_means_sorted['album_name'],
+            orientation='h',
+            marker=dict(color='rgba(69, 27, 140, 0.9)'),
+            hoverinfo='x+y',
+        ))
+
+        # Update layout
+        fig.update_layout(
+            xaxis_title='Duration (Mean)',
+            yaxis_title='Album Name',
+            template='plotly_white',
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
+            autosize=True,
+            margin=dict(l=150, r=20, t=30, b=20)
+        )
+
+        # Update y-axis to fit long album names by truncating labels
+        fig.update_yaxes(
+            tickmode='array',
+            tickvals=self.df_artist['album_name'].unique(),
+            ticktext=[name if len(name) <= 20 else name[:17] + '...' for name in self.df_artist['album_name'].unique()],
+            automargin=True
+        )
+
+        return fig
 
     def run_analysis(self) -> None:
         try:
@@ -260,6 +333,15 @@ class SpotifyAnalyzer:
             fig = self.key_distribution_chart()
             st.plotly_chart(fig, use_container_width=True)
 
+            st.header('Tempo Bar Chart')
+            st.text("This box plot provides insights into the tempo mean in each album.")
+            fig = self.tempo_distribution()
+            st.plotly_chart(fig, use_container_width=True)
+
+            st.header('Duration Bar Chart')
+            st.text("This box plot displays the duration mean (in minutes) by albums.")
+            fig = self.duration_distribution()
+            st.plotly_chart(fig, use_container_width=True)
 
         except Exception as e:
             print(e)
