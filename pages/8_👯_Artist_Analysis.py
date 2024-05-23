@@ -429,6 +429,44 @@ class SpotifyAnalyzer:
         )
 
         return fig
+    
+
+    def artist_popularity_gauge_chart(self) -> go.Figure:
+        # Calculate popularity score mean
+        def calculate_popularity():
+            return self.df_artist['popularity'].mean()
+        
+        mean_popularity = calculate_popularity()
+
+        # Create a gauge chart
+        fig = go.Figure()
+        fig.add_trace(go.Indicator(
+            mode="gauge+number",
+            value=mean_popularity,
+            domain={'x': [0, 1], 'y': [0, 1]},
+            title={'text': "Artist Popularity Score"},
+            gauge={
+                'axis': {'range': [0, 100], 'tickwidth':1, 'tickcolor': "darkblue"},
+                'bar': {'color': 'rgba(89, 42, 154, 1)'},
+                'bgcolor': "white",
+                'borderwidth': 2,
+                'bordercolor': "gray",
+                'steps': [
+                    {'range': [0, 100], 'color': 'GhostWhite'},
+                    {'range': [0, mean_popularity], 'color': 'rgba(26, 12, 135, 0.5)'}
+                ],
+            }
+        ))
+        fig.update_layout(
+            paper_bgcolor='WhiteSmoke',
+            template='plotly_white',
+            font={'color':"black"},
+            height=450,
+            width=700,
+            autosize=True
+        )
+
+        return fig
 
 
     def run_analysis(self) -> None:
@@ -500,6 +538,11 @@ class SpotifyAnalyzer:
             st.header('Explicitness Pie Chart')
             st.text("This pie chart shows the distribution of explicit and non-explicit tracks across the artist's tracks.")
             fig = self.explicitness_pie_chart()
+            st.plotly_chart(fig, use_container_width=True)
+
+            st.header('Artist Popularity Gauge Chart')
+            st.text("This gauge chart displays today's popularity score (the average of all track's popularity scores) of the artist.")
+            fig = self.artist_popularity_gauge_chart()
             st.plotly_chart(fig, use_container_width=True)
 
 
