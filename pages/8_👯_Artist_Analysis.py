@@ -286,6 +286,61 @@ class SpotifyAnalyzer:
         )
 
         return fig
+    
+    def loudness_distribution(self) -> go.Figure:
+        # Calculate mean loudness for each album
+        album_means = self.df_artist.groupby('album_name')['loudness'].mean().reset_index()
+        album_means_sorted = album_means.sort_values(by='loudness', ascending=True)
+
+        # Create the bar plot
+        fig = go.Figure(go.Bar(
+            x=album_means_sorted['loudness'],
+            y=album_means_sorted['album_name'],
+            orientation='h',
+            marker=dict(color='rgba(136, 60, 137, 0.9)'),
+            hoverinfo='x+y',
+        ))
+
+        # Update layout
+        fig.update_layout(
+            xaxis_title='Loudness (Mean)',
+            yaxis_title='Album Name',
+            template='plotly_white',
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
+            autosize=True,
+            margin=dict(l=150, r=20, t=30, b=20)
+        )
+
+        # Update y-axis to fit long album names by truncating labels
+        fig.update_yaxes(
+            tickmode='array',
+            tickvals=self.df_artist['album_name'].unique(),
+            ticktext=[name if len(name) <= 20 else name[:17] + '...' for name in self.df_artist['album_name'].unique()],
+            automargin=True
+        )
+
+        fig.add_vrect(
+            x0=-20, x1=-10, 
+            fillcolor="LightSkyBlue", opacity=0.2, 
+            layer="below", line_width=0,
+            annotation_text="Quiet", annotation_position="top"
+        )
+        fig.add_vrect(
+            x0=-10, x1=-5, 
+            fillcolor="LightGreen", opacity=0.2, 
+            layer="below", line_width=0,
+            annotation_text="Moderate", annotation_position="top"
+        )
+        fig.add_vrect(
+            x0=-5, x1=0, 
+            fillcolor="LightSalmon", opacity=0.2, 
+            layer="below", line_width=0,
+            annotation_text="Loud", annotation_position="top"
+        )
+
+        return fig
+
 
     def run_analysis(self) -> None:
         try:
@@ -334,13 +389,18 @@ class SpotifyAnalyzer:
             st.plotly_chart(fig, use_container_width=True)
 
             st.header('Tempo Bar Chart')
-            st.text("This box plot provides insights into the tempo mean in each album.")
+            st.text("This bar plot provides insights into the average tempo by albums.")
             fig = self.tempo_distribution()
             st.plotly_chart(fig, use_container_width=True)
 
             st.header('Duration Bar Chart')
-            st.text("This box plot displays the duration mean (in minutes) by albums.")
+            st.text("This bar chart displays the average duration (in minutes) by albums.")
             fig = self.duration_distribution()
+            st.plotly_chart(fig, use_container_width=True)
+
+            st.header('Loudness Bar Chart')
+            st.text("This bar chart shows the average loudness by albums.")
+            fig = self.loudness_distribution()
             st.plotly_chart(fig, use_container_width=True)
 
         except Exception as e:
