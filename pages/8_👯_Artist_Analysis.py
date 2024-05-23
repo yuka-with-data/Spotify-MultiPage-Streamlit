@@ -340,6 +340,95 @@ class SpotifyAnalyzer:
         )
 
         return fig
+    
+    def mode_pie_chart(self) -> go.Figure:
+        # Prepare data for Major vs. Minor mode
+        mode_data = self.df_artist[['mode', 'track_name']].copy()
+        mode_data['mode'] = mode_data['mode'].map({1: 'Major', 0: 'Minor'})
+
+        # Aggregate track names for each category
+        title_summary = mode_data.groupby('mode', observed=False)['track_name'].apply(lambda x: '<br>'.join(x[:5]) + ('...' if len(x) > 5 else '')).reset_index()
+        title_summary.columns = ['mode', 'titles']  # Correctly rename columns
+
+        # Calculate counts for each category
+        count_summary = mode_data['mode'].value_counts().reset_index()
+        count_summary.columns = ['mode', 'count']  # Directly assigning new column names
+
+        # Merge titles and counts data
+        final_data = pd.merge(title_summary, count_summary, on='mode')
+
+        # Create the pie chart
+        fig = go.Figure(go.Pie(
+            labels=final_data['mode'],
+            values=final_data['count'],
+            hole=0.2,
+            marker=dict(colors=["rgba(26, 12, 135, 0.8)", "rgba(213, 120, 98, 0.8)"]),
+            customdata=final_data['titles']
+        ))
+
+        # Setting tooltip to display track titles, each on a new line
+        fig.update_traces(
+            textposition='inside',
+            textinfo='percent+label',
+            hovertemplate="<br><b>Tracks:</b><br>%{customdata}<extra></extra>"
+        )
+
+        # Update layout
+        fig.update_layout(
+            template='plotly_white',
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
+            autosize=True,
+            showlegend=False,
+            margin=dict(l=20, r=20, t=30, b=20)
+        )
+
+        return fig
+    
+    def explicitness_pie_chart(self) -> go.Figure:
+        # Prepare data for explicit vs. non-explicit tracks
+        explicit_data = self.df_artist[['is_explicit', 'track_name']].copy()
+        explicit_data['is_explicit'] = explicit_data['is_explicit'].map({True: 'Explicit', False: 'Non-Explicit'})
+
+        # Aggregate track names for each category
+        title_summary = explicit_data.groupby('is_explicit', observed=False)['track_name'].apply(lambda x: '<br>'.join(x[:5]) + ('...' if len(x) > 5 else '')).reset_index()
+        title_summary.columns = ['is_explicit', 'titles']  # Correctly rename columns
+
+        # Calculate counts for each category
+        count_summary = explicit_data['is_explicit'].value_counts().reset_index()
+        count_summary.columns = ['is_explicit', 'count']  # Directly assigning new column names
+
+        # Merge titles and counts data
+        final_data = pd.merge(title_summary, count_summary, on='is_explicit')
+
+        # Create the pie chart
+        fig = px.pie(
+            final_data,
+            names='is_explicit',
+            values='count',
+            color_discrete_sequence=["rgba(26, 12, 135, 0.8)", "rgba(213, 120, 98, 0.8)"],
+            hole=0.2,
+            custom_data=['titles']
+        )
+
+        # Setting tooltip to display track titles, each on a new line
+        fig.update_traces(
+            textposition='inside',
+            textinfo='percent+label',
+            hovertemplate="<br><b>Tracks:</b><br>%{customdata[0]}<extra></extra>"
+        )
+
+        # Update layout
+        fig.update_layout(
+            template='plotly_white',
+            plot_bgcolor='WhiteSmoke',
+            paper_bgcolor='WhiteSmoke',
+            autosize=True,
+            showlegend=False,
+            margin=dict(l=20, r=20, t=30, b=20)
+        )
+
+        return fig
 
 
     def run_analysis(self) -> None:
@@ -402,6 +491,17 @@ class SpotifyAnalyzer:
             st.text("This bar chart shows the average loudness by albums.")
             fig = self.loudness_distribution()
             st.plotly_chart(fig, use_container_width=True)
+
+            st.header('Mode Pie Chart')
+            st.text("This pie chart illustrates the distribution of major and minor modes across the artist's tracks.")
+            fig = self.mode_pie_chart()
+            st.plotly_chart(fig, use_container_width=True)
+
+            st.header('Explicitness Pie Chart')
+            st.text("This pie chart shows the distribution of explicit and non-explicit tracks across the artist's tracks.")
+            fig = self.explicitness_pie_chart()
+            st.plotly_chart(fig, use_container_width=True)
+
 
         except Exception as e:
             print(e)
