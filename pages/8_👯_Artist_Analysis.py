@@ -358,13 +358,18 @@ class SpotifyAnalyzer:
         final_data = pd.merge(title_summary, count_summary, on='mode')
 
         # Create the pie chart
-        fig = go.Figure(go.Pie(
-            labels=final_data['mode'],
-            values=final_data['count'],
+        fig = px.pie(
+            final_data,
+            names='mode',
+            values='count',
+            color='mode',  # Ensure the color is based on 'mode'
+            color_discrete_map={
+                'Major': "rgba(26, 12, 135, 0.8)",  # Purple
+                'Minor': "rgba(213, 120, 98, 0.8)"  # Orange
+            },
             hole=0.2,
-            marker=dict(colors=["rgba(26, 12, 135, 0.8)", "rgba(213, 120, 98, 0.8)"]),
-            customdata=final_data['titles']
-        ))
+            custom_data=['titles']
+        )
 
         # Setting tooltip to display track titles, each on a new line
         fig.update_traces(
@@ -406,7 +411,12 @@ class SpotifyAnalyzer:
             final_data,
             names='is_explicit',
             values='count',
-            color_discrete_sequence=["rgba(26, 12, 135, 0.8)", "rgba(213, 120, 98, 0.8)"],
+            #color_discrete_sequence=["rgba(26, 12, 135, 0.8)", "rgba(213, 120, 98, 0.8)"],
+            color='is_explicit',# Ensure the color is based on 'is_explicit'
+            color_discrete_map={
+                'Explicit': "rgba(26, 12, 135, 0.8)",  # Purple
+                'Non-Explicit': "rgba(213, 120, 98, 0.8)"  # Orange
+            },
             hole=0.2,
             custom_data=['titles']
         )
