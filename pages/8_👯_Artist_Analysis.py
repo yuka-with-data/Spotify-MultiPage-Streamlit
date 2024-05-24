@@ -106,7 +106,7 @@ class SpotifyAnalyzer:
         fig.update_layout(
             xaxis_title='Year',
             yaxis_title='Attribute Mean',
-            legend_title='Attribute',
+            #legend_title='Attribute',
             legend=dict(
                 orientation='h',
                 xanchor='center',
