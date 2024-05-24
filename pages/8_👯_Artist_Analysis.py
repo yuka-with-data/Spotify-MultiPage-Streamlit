@@ -600,7 +600,7 @@ analyze_button = st.sidebar.button("Analyze")
 #-------- Main ----------
 st.markdown("# Artist Analysis")
 st.info("Select an artist name to analyze. You'll get a comprehensive analysis of your selected album.", icon="📀")
-
+st.warning("It may take a long time to load the data for artists with 100+ tracks.")
 
 if analyze_button:
     try:
