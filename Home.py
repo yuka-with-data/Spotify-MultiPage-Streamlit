@@ -13,12 +13,10 @@ with st.sidebar:
     st.text("Version 0.5 Beta")
     st.markdown("""
     🌟 **Now Live:**
-    - Converted most of Matplotlib charts to Plotly
-    - Album Analysis:
-    - Fine-Tuned Track Recommendations:
+    - Artist Analysis
                 
     🚧 **In Development:**
-    - Artist Analysis
+    - Genre Analysis
     - Playlist Analysis
     - Soothing Music Chatbot
         """)
