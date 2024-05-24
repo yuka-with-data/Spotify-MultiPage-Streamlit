@@ -38,7 +38,9 @@ st.markdown(
     - **Era Comparison:** Explore how musical trends and preferences have evolved across different eras.
     - **Album Analysis:** Examine entire albums to understand the collective mood and technical attributes. 
     - **Fine-Tuned Recommendation:** Harness advanced controls to tailer music recommendations to your specific preferences. 
+    - **Artist Analysis:** Gain deep insights into an artist's discography, popularity, and musical style.
 
+    ## How to Use
     Ready to uncover the secrets of the music industry through data?  
     **👈 Select an analysis from the sidebar** and let the journey begin!
 
