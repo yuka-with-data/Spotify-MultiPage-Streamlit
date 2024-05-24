@@ -482,16 +482,21 @@ class SpotifyAnalyzer:
             def extract_genres(df):
                 genres = set()
                 for genre_list in df['genres']:
-                    individual_genres = genre_list.split(',')
-                    for genre in individual_genres:
-                        genres.add(genre.strip())
-                return genres
+                    if genre_list and genre_list.strip(): # Check if genre_list is not None, not empty, and not just whitespace
+                        individual_genres = genre_list.split(',')
+                        for genre in individual_genres:
+                            genres.add(genre.strip())
+                    return genres
             artist_genres = extract_genres(self.df_artist)
             artist_genres_list = list(artist_genres)
-            # Create HTML for genres as badges with the specified background color
-            badges_html = "".join([f"<span style='background-color:rgba(26, 12, 135, 0.9); color:#ffffff; padding:5px; border-radius:5px; margin:2px; display:inline-block;'>{genre}</span>" for genre in artist_genres_list])
-            # Display the genres using HTML
-            st.write(f"<div style='display: flex; flex-wrap: wrap; gap: 10px;'>{badges_html}</div>", unsafe_allow_html=True)
+
+            if not artist_genres_list:
+                st.warning("No genres found for this artist.")
+            else:
+                # Create HTML for genres as badges with the specified background color
+                badges_html = "".join([f"<span style='background-color:rgba(26, 12, 135, 0.9); color:#ffffff; padding:5px; border-radius:5px; margin:2px; display:inline-block;'>{genre}</span>" for genre in artist_genres_list])
+                # Display the genres using HTML
+                st.write(f"<div style='display: flex; flex-wrap: wrap; gap: 10px;'>{badges_html}</div>", unsafe_allow_html=True)
 
             # Create a Radar Chart
             st.header('Attributes Radar Chart')
