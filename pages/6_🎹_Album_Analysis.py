@@ -583,6 +583,8 @@ sp = init_spotify_client()
 
 # Album Search Function
 def artist_search_func(sp,query) -> List[str]:
+    if not query:
+        return []
     result = sp.search(q=query, type='artist', limit=5)
     artists = [artist['name'] for artist in result['artists']['items']]
     return artists

@@ -96,11 +96,15 @@ popularity_score = PopularityScore(sp)
 
 ###### Search Functions for Autocomplete Features ######
 def artist_search_func(sp,query) -> List[str]:
+    if not query:
+        return []
     result = sp.search(q=query, type='artist', limit=5)
     artists = [artist['name'] for artist in result['artists']['items']]
     return artists
     
 def artist_track_search_func(sp, artist, query) -> List[str]:
+    if not artist or not query:
+        return []
     result = sp.search(q=f"artist:{artist} track:{query}", type='track', limit=10)
     tracks = [track['name'] for track in result['tracks']['items']]
     return tracks

@@ -555,12 +555,16 @@ sp = init_spotify_client()
 
 
 def artist_search_func(sp,query) -> List[str]:
+    if not query:
+        return []
     result = sp.search(q=query, type='artist', limit=5)
     artists = [artist['name'] for artist in result['artists']['items']]
     return artists
 
 # Function to get artist ID from artist name
 def get_artist_id(sp, artist_name) -> str:
+    if not artist_name:
+        return None
     result = sp.search(q=artist_name, type='artist', limit=1)
     if result['artists']['items']:
         return result['artists']['items'][0]['id']
