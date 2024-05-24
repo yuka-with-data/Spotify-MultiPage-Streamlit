@@ -477,9 +477,11 @@ class SpotifyAnalyzer:
             final_data,
             names='mode',
             values='count',
-            color_discrete_sequence=["rgba(26, 12, 135, 0.8)", "rgba(213, 120, 98, 0.8)"],
+            color='mode',
+            color_discrete_map={'Major': "rgba(26, 12, 135, 0.8)", 'Minor': "rgba(213, 120, 98, 0.8)"},
+            custom_data=['titles'],
+            #color_discrete_sequence=["rgba(26, 12, 135, 0.8)", "rgba(213, 120, 98, 0.8)"],
             hole=0.2,
-            custom_data=['titles']
         )
 
         # Setting tooltip to display track titles, each on a new line
@@ -523,7 +525,9 @@ class SpotifyAnalyzer:
             final_data,
             names='is_explicit',
             values='count',
-            color_discrete_sequence=["rgba(26, 12, 135, 0.8)", "rgba(213, 120, 98, 0.8)"],
+            color='is_explicit',
+            color_discrete_map={'Explicit': "rgba(26, 12, 135, 0.8)", 'Non-Explicit': "rgba(213, 120, 98, 0.8)"},
+            #color_discrete_sequence=["rgba(26, 12, 135, 0.8)", "rgba(213, 120, 98, 0.8)"],
             hole=0.2,
             custom_data=['titles']
         )
