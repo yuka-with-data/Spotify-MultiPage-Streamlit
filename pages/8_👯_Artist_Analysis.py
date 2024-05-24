@@ -436,13 +436,18 @@ class SpotifyAnalyzer:
         def calculate_popularity():
             return self.df_artist['popularity'].mean()
         
-        mean_popularity = calculate_popularity()
+        # Calculate the highest popularity score
+        def calculate_highest_popularity():
+            return self.df_artist['popularity'].max()
+        
+        #mean_popularity = calculate_popularity()
+        highest_popularity = calculate_highest_popularity()
 
         # Create a gauge chart
         fig = go.Figure()
         fig.add_trace(go.Indicator(
             mode="gauge+number",
-            value=mean_popularity,
+            value=highest_popularity,
             domain={'x': [0, 1], 'y': [0, 1]},
             title={'text': "Artist Popularity Score"},
             gauge={
@@ -453,7 +458,7 @@ class SpotifyAnalyzer:
                 'bordercolor': "gray",
                 'steps': [
                     {'range': [0, 100], 'color': 'GhostWhite'},
-                    {'range': [0, mean_popularity], 'color': 'rgba(26, 12, 135, 0.5)'}
+                    {'range': [0, highest_popularity], 'color': 'rgba(26, 12, 135, 0.5)'}
                 ],
             }
         ))
