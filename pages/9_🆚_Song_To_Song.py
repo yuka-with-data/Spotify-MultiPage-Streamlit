@@ -82,3 +82,12 @@ with st.sidebar:
 
     # Compare button
     compare_button = st.sidebar.button("Compare")
+
+st.write("## Song-To-Song Comparison")
+st.info("Select two tracks and compare their similarity and differences in their music data.", icon='✨')
+
+# Main section
+if compare_button and selected_track1 and selected_track2:
+    ...
+else:
+    st.warning("Please select two tracks to compare.")
