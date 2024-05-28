@@ -431,3 +431,97 @@ def fetch_artist_tracks(_sp, artist_id):
     selected_atts = df[att_list].mean()
 
     return selected_atts, df
+
+
+# Get track data
+@st.cache_data(ttl=86400)
+def get_spotify_data(_self, artist:str, track:str) -> Tuple[Optional[Dict[str, float]], Optional[str]]:
+    """ 
+        Obtain Spotify data for a given artist and track by the user
+        Args:
+        artist (str): The name of the artist
+        track (str): The name of the track
+        Returns:
+        track attributes
+        access token
+        """
+    try:
+        # Search for the track using the Spotify API
+        result = _self.sp.search(q=f'artist:{artist} track:{track}', type='track', limit=1)
+        #result = self.sp.search(q=f'{artist} {track} -{artist} -cover -remix -parody -piano -Live', type='track', limit=1)
+        print(f"Search result: {result}")
+
+        # Check for successful response for the track search
+        if not result or not result['tracks']['items']:
+            # print(f"No exact match found for '{track}' by '{artist}'")
+            st.error("Error: The right track cannot be found under the chosen artist. Please check your input.")
+            return None, None
+
+        # Save a found track
+        found_track = result['tracks']['items'][0]
+
+        # Check if the found track's name is the same as the expected track name
+        if track.lower() != found_track['name'].lower():
+            st.error(f"Close match found. Did you mean '{found_track['name']}' instead of '{track}'")
+            return None, None
+
+        try:
+            # Retrieve audio features 
+            audio_features_response = _self.sp.audio_features(found_track['id'])
+        except Exception as e:
+            st.error(f"Error fetching audio features: {e}")
+            return None, None
+
+        # Check if the response is valid and contains the expected dictionary
+        if not audio_features_response or not isinstance(audio_features_response, list):
+            print("Error fetching audio features: Invalid response format")
+            return None, None
+
+        audio_features_data = audio_features_response[0]
+
+        # Check if the response is a valid dictionary
+        if not isinstance(audio_features_data, dict):
+            print("Error fetching audio features: Invalid response format")
+            return None, None
+        
+        try:
+            # Genres
+            artist_id = found_track['artists'][0]['id']
+            artist_info = _self.sp.artist(artist_id)
+            genres = artist_info.get('genres', '')
+        except Exception as e:
+            st.error(f"Error fetching artist info: {e}")
+            genres = ''
+
+        # Extract the 'is_explicit' attribute from the found track
+        is_explicit = found_track.get('explicit', False)
+        popularity = found_track.get('popularity', None)
+        track_id = found_track['id']
+
+        # Extract audio features data from the response
+        list_att = ["danceability", 
+                    "valence", 
+                    "energy", 
+                    "acousticness", 
+                    "instrumentalness", 
+                    "liveness", 
+                    "speechiness", 
+                    "key", 
+                    "tempo", 
+                    "duration_ms", 
+                    "loudness"]
+        extracted_attributes = {
+            key: audio_features_data.get(key, None) for key in list_att
+        }
+        extracted_attributes.update({
+                "popularity": popularity,
+                "id": track_id,
+                'is_explicit': is_explicit,
+                'genres': ', '.join(genres) # Convert list of genres to a comma-seperated string
+                })
+
+        # Return 2 objects: extracted_attributes and access_token
+        return extracted_attributes, None
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
+        return None, None
