@@ -25,9 +25,36 @@ st.set_page_config(page_title="Song-To-Song Comparison",
 from data_galaxy import init_spotify_client, get_spotify_data
 
 # Class
+class SpotifyAnalyzer:
+    def __init__(self, sp) -> None:
+        self.sp = sp
+        # fetch track data
+    
+    def retrieve_track_data(self, artist, track):
+        try:
+            audio_features = get_spotify_data(artist, track)
+            return audio_features
+        except Exception as e:
+            print(f"Error retrieving track data: {e}")
+            return None
+        
 
 
 
+    def run_analysis(self, artist1:str, track1:str, artist2:str, track2:str):
+        # This method is to run all the visualization method
+        track_data1 = self.retrieve_track_data(artist1, track1)
+        track_data2 = self.retrieve_track_data(artist2, track2)
+
+        if track_data1 and track_data2:
+            # Visualization methods
+            ...
+        else:
+            st.error("Error retrieving track data for one or both tracks.")
+       
+
+
+    
 
 # Initialize the Spotify client
 sp = init_spotify_client()
@@ -88,6 +115,17 @@ st.info("Select two tracks and compare their similarity and differences in their
 
 # Main section
 if compare_button and selected_track1 and selected_track2:
-    ...
+    try:
+        track_comparison = SpotifyAnalyzer(sp)
+
+        st.header('Compare 2 Tracks for Similarities and Differences')
+
+
+        # Run analysis
+        track_comparison.run_analysis()
+        st.balloons()
+    
+    except Exception as e:
+        st.error(f"Error: {e}")
 else:
     st.warning("Please select two tracks to compare.")
