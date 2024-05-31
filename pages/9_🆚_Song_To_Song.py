@@ -130,7 +130,63 @@ class SpotifyAnalyzer:
 
         return fig
     
+    def track_popularity_gauge_chart(self, track_data1, track_data2, label1, label2) -> go.Figure:
+        # Extract popularity scores from track data
+        popularity1 = track_data1.get('popularity', 0)
+        popularity2 = track_data2.get('popularity', 0)
 
+        # Create a gauge chart for track 1
+        fig = go.Figure()
+
+        fig.add_trace(go.Indicator(
+            mode="gauge+number",
+            value=popularity1,
+            domain={'x': [0, 0.45], 'y': [0, 1]},
+            title={'text': label1},
+            gauge={
+                'axis': {'range': [0, 100], 'tickwidth': 1, 'tickcolor': "darkblue"},
+                'bar': {'color': 'rgba(89, 42, 154, 1)'},
+                'bgcolor': "white",
+                'borderwidth': 2,
+                'bordercolor': "gray",
+                'steps': [
+                    {'range': [0, 100], 'color': 'GhostWhite'},
+                    {'range': [0, popularity1], 'color': 'rgba(26, 12, 135, 0.5)'}
+                ],
+            }
+        ))
+
+        # Create a gauge chart for track 2
+        fig.add_trace(go.Indicator(
+            mode="gauge+number",
+            value=popularity2,
+            domain={'x': [0.55, 1], 'y': [0, 1]},
+            title={'text': label2},
+            gauge={
+                'axis': {'range': [0, 100], 'tickwidth': 1, 'tickcolor': "darkblue"},
+                'bar': {'color': 'rgba(230, 97, 0, 1)'},
+                'bgcolor': "white",
+                'borderwidth': 2,
+                'bordercolor': "gray",
+                'steps': [
+                    {'range': [0, 100], 'color': 'GhostWhite'},
+                    {'range': [0, popularity2], 'color': 'rgba(230, 97, 0, 0.5)'}
+                ],
+            }
+        ))
+
+        fig.update_layout(
+            paper_bgcolor='WhiteSmoke',
+            template='plotly_white',
+            font={'color': "black"},
+            height=450,
+            width=700,
+            autosize=True
+        )
+
+        return fig
+    
+    
     def run_analysis(self, artist1:str, track1:str, artist2:str, track2:str):
         # This method is to run all the visualization method
         track_data1, _ = self.retrieve_track_data(artist1, track1)
@@ -153,7 +209,11 @@ class SpotifyAnalyzer:
             fig = self.key_distribution(track_data1, track_data2, label1, label2)
             st.plotly_chart(fig)
 
-            #return id1, id2
+            # Track Popularity Gauge Chart
+            st.header("Track Popularity Gauge Chart")
+            st.text("Track Popularity Comparison")
+            fig = self.track_popularity_gauge_chart(track_data1, track_data2, label1, label2)
+            st.plotly_chart(fig)
     
         else:
             st.error("Error retrieving track data for one or both tracks.")
@@ -161,7 +221,6 @@ class SpotifyAnalyzer:
 
 
     
-
 # Initialize the Spotify client
 sp = init_spotify_client()
 
