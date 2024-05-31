@@ -435,7 +435,7 @@ def fetch_artist_tracks(_sp, artist_id):
 
 # Get track data
 @st.cache_data(ttl=86400)
-def get_spotify_data(_self, artist:str, track:str) -> Tuple[Optional[Dict[str, float]], Optional[str]]:
+def get_spotify_data(_sp, artist:str, track:str) -> Tuple[Optional[Dict[str, float]], Optional[str]]:
     """ 
         Obtain Spotify data for a given artist and track by the user
         Args:
@@ -447,7 +447,7 @@ def get_spotify_data(_self, artist:str, track:str) -> Tuple[Optional[Dict[str, f
         """
     try:
         # Search for the track using the Spotify API
-        result = _self.sp.search(q=f'artist:{artist} track:{track}', type='track', limit=1)
+        result = _sp.search(q=f'artist:{artist} track:{track}', type='track', limit=1)
         #result = self.sp.search(q=f'{artist} {track} -{artist} -cover -remix -parody -piano -Live', type='track', limit=1)
         print(f"Search result: {result}")
 
@@ -467,7 +467,7 @@ def get_spotify_data(_self, artist:str, track:str) -> Tuple[Optional[Dict[str, f
 
         try:
             # Retrieve audio features 
-            audio_features_response = _self.sp.audio_features(found_track['id'])
+            audio_features_response = _sp.audio_features(found_track['id'])
         except Exception as e:
             st.error(f"Error fetching audio features: {e}")
             return None, None
@@ -487,7 +487,7 @@ def get_spotify_data(_self, artist:str, track:str) -> Tuple[Optional[Dict[str, f
         try:
             # Genres
             artist_id = found_track['artists'][0]['id']
-            artist_info = _self.sp.artist(artist_id)
+            artist_info = _sp.artist(artist_id)
             genres = artist_info.get('genres', '')
         except Exception as e:
             st.error(f"Error fetching artist info: {e}")
