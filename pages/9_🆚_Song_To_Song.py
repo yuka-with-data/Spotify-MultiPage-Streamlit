@@ -32,11 +32,11 @@ class SpotifyAnalyzer:
     
     def retrieve_track_data(self, artist, track):
         try:
-            audio_features, _ = get_spotify_data(self.sp, artist, track) # add placeholder for None
-            return audio_features
+            audio_features, track_id = get_spotify_data(self.sp, artist, track) # add placeholder for None
+            return audio_features, track_id
         except Exception as e:
             print(f"Error retrieving track data: {e}")
-            return None
+            return None, None
         
 
     def radar_chart(self, track_data1, track_data2, label1, label2):
@@ -95,8 +95,8 @@ class SpotifyAnalyzer:
 
     def run_analysis(self, artist1:str, track1:str, artist2:str, track2:str):
         # This method is to run all the visualization method
-        track_data1 = self.retrieve_track_data(artist1, track1)
-        track_data2 = self.retrieve_track_data(artist2, track2)
+        track_data1, id1 = self.retrieve_track_data(artist1, track1)
+        track_data2, id2 = self.retrieve_track_data(artist2, track2)
 
         if track_data1 and track_data2:
             # Generate labels
@@ -108,6 +108,8 @@ class SpotifyAnalyzer:
             st.text("Track Attribute Comparison (Mean Values)")
             fig = self.radar_chart(track_data1, track_data2, label1, label2)
             st.plotly_chart(fig)
+
+            return id1, id2
     
         else:
             st.error("Error retrieving track data for one or both tracks.")
@@ -149,7 +151,7 @@ def artist_track_search_func(sp, artist, query) -> List[str]:
 
 # Sidebar
 with st.sidebar:
-    st.title("Enter Your Track")
+    st.title("Enter 2 Tracks")
     # Artist1 input
     selected_artist1 = st_searchbox(label="Select Artist 1", 
                                    key="artist1_input", 
@@ -178,8 +180,24 @@ if compare_button and selected_track1 and selected_track2:
     try:
         track_comparison = SpotifyAnalyzer(sp)
 
-        st.header('Compare 2 Tracks for Similarities and Differences')
+        _, id1 = track_comparison.retrieve_track_data(selected_artist1, selected_track1)
+        _, id2 = track_comparison.retrieve_track_data(selected_artist2, selected_track2)
 
+        st.subheader("Track 1")
+        st.components.v1.iframe(
+            f"https://open.spotify.com/embed/track/{id1}?utm_source=generator&theme=0",
+            width=500,
+            height=160,
+            scrolling=True
+        )
+
+        st.subheader("Track 2")
+        st.components.v1.iframe(
+            f"https://open.spotify.com/embed/track/{id2}?utm_source=generator&theme=0",
+            width=500,
+            height=160,
+            scrolling=True
+        )
 
         # Run analysis
         track_comparison.run_analysis(selected_artist1, selected_track1, selected_artist2, selected_track2)
