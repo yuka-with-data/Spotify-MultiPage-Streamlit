@@ -521,7 +521,7 @@ def get_spotify_data(_sp, artist:str, track:str) -> Tuple[Optional[Dict[str, flo
                 })
 
         # Return 2 objects: extracted_attributes and access_token
-        return extracted_attributes, None
+        return extracted_attributes, track_id
     except Exception as e:
         st.error(f"An error occurred: {e}")
         return None, None
