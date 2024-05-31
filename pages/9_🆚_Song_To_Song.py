@@ -32,14 +32,66 @@ class SpotifyAnalyzer:
     
     def retrieve_track_data(self, artist, track):
         try:
-            audio_features = get_spotify_data(artist, track)
+            audio_features, _ = get_spotify_data(self.sp, artist, track) # add placeholder for None
             return audio_features
         except Exception as e:
             print(f"Error retrieving track data: {e}")
             return None
         
 
+    def radar_chart(self, track_data1, track_data2, label1, label2):
+        attributes = ['danceability', 'valence', 'energy', 'acousticness', 'instrumentalness', 'liveness', 'speechiness']
 
+        # extract values for track 1 and 2
+        att1_values = [(track_data1.get(attr, 0) * 100) for attr in attributes]
+        att2_values = [(track_data2.get(attr, 0) * 100) for attr in attributes]
+
+        # Colors for the radar chart
+        color_track1 = "rgba(69, 27, 140, 0.9)"  # Rich Purple
+        color_track2 = 'rgba(230, 97, 0, 0.7)'  # Rich Orange
+        
+        # Create the radar chart
+        fig = go.Figure()
+
+        # Trace for the first track
+        fig.add_trace(go.Scatterpolar(
+            r=att1_values,
+            theta=attributes,
+            fill='toself',
+            name=label1,
+            fillcolor=color_track1,
+            line=dict(color=color_track1),
+        ))
+        
+        # Trace for the second track
+        fig.add_trace(go.Scatterpolar(
+            r=att2_values,
+            theta=attributes,
+            fill='toself',
+            name=label2,
+            fillcolor=color_track2,
+            line=dict(color=color_track2, dash='dot'),
+        ))
+
+        # Update layout
+        fig.update_layout(
+            polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
+            showlegend=True,
+            legend=dict(
+                orientation='h',
+                x=0.7,
+                y=1.1,
+            ),
+            paper_bgcolor='WhiteSmoke',
+            font={"color": "black"},
+            margin=dict(l=40, r=40, t=40, b=40),
+            height=450,
+            width=700,
+            autosize=True
+        )
+        
+        return fig
+    
 
     def run_analysis(self, artist1:str, track1:str, artist2:str, track2:str):
         # This method is to run all the visualization method
@@ -47,8 +99,16 @@ class SpotifyAnalyzer:
         track_data2 = self.retrieve_track_data(artist2, track2)
 
         if track_data1 and track_data2:
-            # Visualization methods
-            ...
+            # Generate labels
+            label1 = f"{artist1} - {track1}"
+            label2 = f"{artist2} - {track2}"
+
+            # Radar Chart
+            st.header("Radar Chart Comparison")
+            st.text("Track Attribute Comparison (Mean Values)")
+            fig = self.radar_chart(track_data1, track_data2, label1, label2)
+            st.plotly_chart(fig)
+    
         else:
             st.error("Error retrieving track data for one or both tracks.")
        
@@ -92,19 +152,19 @@ with st.sidebar:
     st.title("Enter Your Track")
     # Artist1 input
     selected_artist1 = st_searchbox(label="Select Artist 1", 
-                                   key="artist_input", 
+                                   key="artist1_input", 
                                    search_function=lambda query: artist_search_func(sp, query))
     # Track1 input
     selected_track1 = st_searchbox(label="Select Track 1", 
-                                  key="track_input", 
+                                  key="track1_input", 
                                   search_function=lambda query: artist_track_search_func(sp, selected_artist1, query))
    
     selected_artist2 = st_searchbox(label="Select Artist 2", 
-                                   key="artist_input", 
+                                   key="artist2_input", 
                                    search_function=lambda query: artist_search_func(sp, query))
     
     selected_track2 = st_searchbox(label="Select Track 2", 
-                                  key="track_input", 
+                                  key="track2_input", 
                                   search_function=lambda query: artist_track_search_func(sp, selected_artist2, query))
 
     # Compare button
@@ -122,7 +182,7 @@ if compare_button and selected_track1 and selected_track2:
 
 
         # Run analysis
-        track_comparison.run_analysis()
+        track_comparison.run_analysis(selected_artist1, selected_track1, selected_artist2, selected_track2)
         st.balloons()
     
     except Exception as e:
