@@ -20,7 +20,7 @@ st.set_page_config(page_title="Artist Analysis",
                    page_icon="✨")
 
 # Import data_galaxy after Page Config
-from data_galaxy import init_spotify_client, fetch_artist_tracks
+from data_galaxy import init_spotify_client, fetch_artist_tracks, retrieve_playlist_data
 
 class SpotifyAnalyzer:
     def __init__(self, sp, artist_id: str) -> None:
@@ -564,6 +564,29 @@ class SpotifyAnalyzer:
             st.text("This gauge chart displays today's popularity score (the average of all track's popularity scores) of the artist.")
             fig = self.artist_popularity_gauge_chart()
             st.plotly_chart(fig, use_container_width=True)
+
+            st.subheader('Artist Presence in Billboard Top 100')
+            st.text("This chart shows the presence of the artist in the Billboard Top 100 charts.")
+            # set the ID
+            billboard_playlist_id = "6UeSakyzhiEt4NB3UAd6NQ"
+            _, df_top_100 = retrieve_playlist_data(self.sp, billboard_playlist_id)
+            print(df_top_100)
+            # Filter the tracks from the specified artist
+            artist_in_100 = df_top_100[df_top_100['artist_name'] == selected_artist]
+
+            if not artist_in_100.empty:
+                # Highlight tracks by the specified artist
+                def highlight_artist_tracks(row):
+                    if row['artist_name'] == selected_artist:
+                        return ['background-color: rgba(26, 12, 135, 0.5)'] * len(row)
+                    else:
+                        return [''] * len(row)
+                
+                artist_in_100_revised = artist_in_100.style.apply(highlight_artist_tracks, axis=1)
+                st.dataframe(artist_in_100_revised)
+
+            else:
+                st.warning("Artist not found in the latest Billboard Top 100.")
 
 
         except Exception as e:
