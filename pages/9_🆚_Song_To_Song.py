@@ -92,11 +92,49 @@ class SpotifyAnalyzer:
         
         return fig
     
+    def key_distribution(self, track_data1, track_data2, label1, label2):
+        keys = {
+            0: 'C', 
+            1: 'C#/Db', 
+            2: 'D', 
+            3: 'D#/Eb', 
+            4: 'E', 
+            5: 'F', 
+            6: 'F#/Gb', 
+            7: 'G', 
+            8: 'G#/Ab', 
+            9: 'A', 
+            10: 'A#/Bb', 
+            11: 'B'
+        }
+
+        key_data = [track_data1['key'], track_data2['key']]
+        key_labels = [keys[key] for key in key_data]
+
+        fig = go.Figure(data=[
+            go.Scatter(
+                x=key_labels, 
+                y=[1, 1], 
+                mode='markers+text', 
+                marker=dict(color=['#4CAF50', '#FF9800'], size=20),
+                text=[label1, label2],
+                textposition='top center'
+            )
+        ])
+
+        fig.update_layout(
+            xaxis_title='Key',
+            yaxis_title='Count',
+            showlegend=False
+        )
+
+        return fig
+    
 
     def run_analysis(self, artist1:str, track1:str, artist2:str, track2:str):
         # This method is to run all the visualization method
-        track_data1, id1 = self.retrieve_track_data(artist1, track1)
-        track_data2, id2 = self.retrieve_track_data(artist2, track2)
+        track_data1, _ = self.retrieve_track_data(artist1, track1)
+        track_data2, _ = self.retrieve_track_data(artist2, track2)
 
         if track_data1 and track_data2:
             # Generate labels
@@ -109,7 +147,13 @@ class SpotifyAnalyzer:
             fig = self.radar_chart(track_data1, track_data2, label1, label2)
             st.plotly_chart(fig)
 
-            return id1, id2
+            # Key Distribution
+            st.header("Key Distribution")
+            st.text("Distribution of Keys For Each Track")
+            fig = self.key_distribution(track_data1, track_data2, label1, label2)
+            st.plotly_chart(fig)
+
+            #return id1, id2
     
         else:
             st.error("Error retrieving track data for one or both tracks.")
