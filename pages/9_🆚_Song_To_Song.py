@@ -147,6 +147,39 @@ class SpotifyAnalyzer:
 
         return fig
     
+    def duration_bar_chart(self, track_data1, track_data2, label1, label2) -> go.Figure:
+        # Extract duration values in milliseconds from track data and convert to minutes
+        duration1 = track_data1.get('duration_ms', 0) / 60000  # convert ms to minutes
+        duration2 = track_data2.get('duration_ms', 0) / 60000  # convert ms to minutes
+
+        # Create a bar chart
+        fig = go.Figure(data=[
+            go.Bar(name=label1, x=["Duration"], y=[duration1], marker_color='rgba(89, 42, 154, 0.7)'),
+            go.Bar(name=label2, x=["Duration"], y=[duration2], marker_color='rgba(230, 97, 0, 0.7)')
+        ])
+        
+        fig.update_layout(
+            yaxis_title='Duration (Minutes)',
+            barmode='group',
+            paper_bgcolor='WhiteSmoke',
+            template='plotly_white',
+            font={'color': "black"},
+            legend=dict(
+                orientation='h',
+                x=1,
+                y=1.1,
+                xanchor='right',
+                yanchor='top'
+            ),
+            margin=dict(l=40, r=40, t=55, b=40),
+            height=450,
+            width=700,
+            autosize=True
+        )
+        
+        return fig
+
+    
     def tempo_bar_chart(self, track_data1, track_data2, label1, label2) -> go.Figure:
         # Extract tempo values from track data
         tempo1 = track_data1.get('tempo', 0)
@@ -192,7 +225,6 @@ class SpotifyAnalyzer:
         ])
         
         fig.update_layout(
-            xaxis_title='Attribute',
             yaxis_title='Loudness (dB)',
             barmode='group',
             paper_bgcolor='WhiteSmoke',
@@ -291,6 +323,12 @@ class SpotifyAnalyzer:
             st.header("Key Distribution")
             st.text("Distribution of Keys Comparison")
             fig = self.key_distribution(track_data1, track_data2, label1, label2)
+            st.plotly_chart(fig)
+
+            # Duration Bar Chart
+            st.header("Duration Bar Chart")
+            st.text("Duration Bar Chart Comparison")
+            fig = self.duration_bar_chart(track_data1, track_data2, label1, label2)
             st.plotly_chart(fig)
 
             # Tempo Bar Chart
