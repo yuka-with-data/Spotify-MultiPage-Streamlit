@@ -79,12 +79,14 @@ class SpotifyAnalyzer:
             showlegend=True,
             legend=dict(
                 orientation='h',
-                x=0.7,
+                x=1,
                 y=1.1,
+                xanchor='right',
+                yanchor='top'
             ),
             paper_bgcolor='WhiteSmoke',
             font={"color": "black"},
-            margin=dict(l=40, r=40, t=40, b=40),
+            margin=dict(l=40, r=40, t=55, b=40),
             height=450,
             width=700,
             autosize=True
@@ -111,10 +113,15 @@ class SpotifyAnalyzer:
         key_data = [track_data1['key'], track_data2['key']]
         key_labels = [keys[key] for key in key_data]
 
+        if key_data[0] == key_data[1]:
+            y_values = [1, 1.1]  # Apply a small offset to one of the labels
+        else:
+            y_values = [1, 1]
+
         fig = go.Figure(data=[
             go.Scatter(
                 x=key_labels, 
-                y=[1, 1], 
+                y=y_values, 
                 mode='markers+text', 
                 marker=dict(color=['rgba(89, 42, 154, 0.7)', 'rgba(230, 97, 0, 0.7)'], size=20),
                 text=[label1, label2],
@@ -124,7 +131,10 @@ class SpotifyAnalyzer:
 
         fig.update_layout(
             xaxis_title='Key',
-            yaxis_title='Count',
+            yaxis=dict(
+                visible=False,
+                showticklabels=False
+            ),
             showlegend=False,
             paper_bgcolor='WhiteSmoke',
             template='plotly_white',
@@ -149,12 +159,19 @@ class SpotifyAnalyzer:
         ])
         
         fig.update_layout(
-            xaxis_title='Attribute',
             yaxis_title='Tempo (BPM)',
             barmode='group',
             paper_bgcolor='WhiteSmoke',
             template='plotly_white',
             font={'color': "black"},
+            legend=dict(
+                orientation='h',
+                x=1,
+                y=1.1,
+                xanchor='right',
+                yanchor='top'
+            ),
+            margin=dict(l=40, r=40, t=55, b=40),
             height=450,
             width=700,
             autosize=True
@@ -181,6 +198,14 @@ class SpotifyAnalyzer:
             paper_bgcolor='WhiteSmoke',
             template='plotly_white',
             font={'color': "black"},
+            legend=dict(
+                orientation='h',
+                x=1,
+                y=1.1,
+                xanchor='right',
+                yanchor='top'
+            ),
+            margin=dict(l=40, r=40, t=55, b=40),
             height=450,
             width=700,
             autosize=True
