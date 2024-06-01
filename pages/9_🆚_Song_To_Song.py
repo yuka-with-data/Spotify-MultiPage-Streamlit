@@ -116,7 +116,7 @@ class SpotifyAnalyzer:
                 x=key_labels, 
                 y=[1, 1], 
                 mode='markers+text', 
-                marker=dict(color=['#4CAF50', '#FF9800'], size=20),
+                marker=dict(color=['rgba(89, 42, 154, 0.7)', 'rgba(230, 97, 0, 0.7)'], size=20),
                 text=[label1, label2],
                 textposition='top center'
             )
@@ -125,7 +125,14 @@ class SpotifyAnalyzer:
         fig.update_layout(
             xaxis_title='Key',
             yaxis_title='Count',
-            showlegend=False
+            showlegend=False,
+            paper_bgcolor='WhiteSmoke',
+            template='plotly_white',
+            font={'color': "black"},
+            height=450,
+            width=700, 
+            margin=dict(l=50, r=50, t=50, b=50),
+            autosize=True
         )
 
         return fig
@@ -142,7 +149,6 @@ class SpotifyAnalyzer:
         ])
         
         fig.update_layout(
-            title='Tempo Comparison',
             xaxis_title='Attribute',
             yaxis_title='Tempo (BPM)',
             barmode='group',
@@ -169,7 +175,6 @@ class SpotifyAnalyzer:
         ])
         
         fig.update_layout(
-            title='Loudness Comparison',
             xaxis_title='Attribute',
             yaxis_title='Loudness (dB)',
             barmode='group',
