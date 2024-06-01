@@ -302,6 +302,156 @@ class SpotifyAnalyzer:
 
         return fig
     
+    def valence_danceability_interaction(self, track_data1, track_data2, label1, label2) -> go.Figure:
+        # Extract values
+        valence1 = track_data1.get('valence', 0)
+        danceability1 = track_data1.get('danceability', 0)
+        valence2 = track_data2.get('valence', 0)
+        danceability2 = track_data2.get('danceability', 0)
+        
+        # Create a scatter plot
+        fig = go.Figure()
+        
+        fig.add_trace(go.Scatter(
+            x=[valence1], y=[danceability1],
+            mode='markers+text',
+            marker=dict(color='rgba(89, 42, 154, 0.7)', size=12),
+            #text=[label1],
+            textposition='top center',
+            name=label1
+        ))
+        
+        fig.add_trace(go.Scatter(
+            x=[valence2], y=[danceability2],
+            mode='markers+text',
+            marker=dict(color='rgba(230, 97, 0, 0.7)', size=12),
+            #text=[label2],
+            textposition='top center',
+            name=label2
+        ))
+        
+        fig.update_layout(
+            xaxis_title='Valence',
+            yaxis_title='Danceability',
+            paper_bgcolor='WhiteSmoke',
+            template='plotly_white',
+            font={'color': "black"},
+            legend=dict(
+                orientation='h',
+                x=1,
+                y=1.1,
+                xanchor='right',
+                yanchor='top'
+            ),
+            margin=dict(l=40, r=40, t=55, b=40),
+            height=450,
+            width=700,
+            autosize=True
+        )
+        
+        return fig
+    
+
+    def energy_loudness_interaction(self, track_data1, track_data2, label1, label2) -> go.Figure:
+        # Extract energy and loudness values
+        energy1 = track_data1.get('energy', 0)
+        loudness1 = track_data1.get('loudness', 0)
+        energy2 = track_data2.get('energy', 0)
+        loudness2 = track_data2.get('loudness', 0)
+        
+        # Create the scatter plot
+        fig = go.Figure()
+        
+        fig.add_trace(go.Scatter(
+            x=[energy1], y=[loudness1],
+            mode='markers+text',
+            marker=dict(color='rgba(89, 42, 154, 0.7)', size=12),
+            #text=[label1],
+            textposition='top center',
+            name=label1
+        ))
+        
+        fig.add_trace(go.Scatter(
+            x=[energy2], y=[loudness2],
+            mode='markers+text',
+            marker=dict(color='rgba(230, 97, 0, 0.7)', size=12),
+            #text=[label2],
+            textposition='top center',
+            name=label2
+        ))
+        
+        # Update layout
+        fig.update_layout(
+            xaxis_title='Energy',
+            yaxis_title='Loudness (dB)',
+            paper_bgcolor='WhiteSmoke',
+            template='plotly_white',
+            font={'color': "black"},
+            legend=dict(
+                orientation='h',
+                x=1,
+                y=1.1,
+                xanchor='right',
+                yanchor='top'
+            ),
+            margin=dict(l=40, r=40, t=55, b=40),
+            height=450,
+            width=700,
+            autosize=True
+        )
+        
+        return fig
+    
+    def acousticness_instrumentalness_interaction(self, track_data1, track_data2, label1, label2) -> go.Figure:
+        # Extract acousticness and instrumentalness values
+        acousticness1 = track_data1.get('acousticness', 0)
+        instrumentalness1 = track_data1.get('instrumentalness', 0)
+        acousticness2 = track_data2.get('acousticness', 0)
+        instrumentalness2 = track_data2.get('instrumentalness', 0)
+        
+        # Create the scatter plot
+        fig = go.Figure()
+        
+        fig.add_trace(go.Scatter(
+            x=[acousticness1], y=[instrumentalness1],
+            mode='markers+text',
+            marker=dict(color='rgba(89, 42, 154, 0.7)', size=12),
+            #text=[label1],
+            textposition='top center',
+            name=label1
+        ))
+        
+        fig.add_trace(go.Scatter(
+            x=[acousticness2], y=[instrumentalness2],
+            mode='markers+text',
+            marker=dict(color='rgba(230, 97, 0, 0.7)', size=12),
+            #text=[label2],
+            textposition='top center',
+            name=label2
+        ))
+        
+        # Update layout
+        fig.update_layout(
+            xaxis_title='Acousticness',
+            yaxis_title='Instrumentalness',
+            paper_bgcolor='WhiteSmoke',
+            template='plotly_white',
+            font={'color': "black"},
+            legend=dict(
+                orientation='h',
+                x=1,
+                y=1.1,
+                xanchor='right',
+                yanchor='top'
+            ),
+            margin=dict(l=40, r=40, t=55, b=40),
+            height=450,
+            width=700,
+            autosize=True
+        )
+        
+        return fig
+    
     
     def run_analysis(self, artist1:str, track1:str, artist2:str, track2:str):
         # This method is to run all the visualization method
@@ -314,7 +464,7 @@ class SpotifyAnalyzer:
             label2 = f"{artist2} - {track2}"
 
             # Radar Chart
-            st.header("Radar Chart Comparison")
+            st.header("Radar Chart")
             st.text("Track Attribute Comparison (Mean Values)")
             fig = self.radar_chart(track_data1, track_data2, label1, label2)
             st.plotly_chart(fig)
@@ -347,6 +497,24 @@ class SpotifyAnalyzer:
             st.header("Track Popularity Gauge Chart")
             st.text("Track Popularity Comparison")
             fig = self.track_popularity_gauge_chart(track_data1, track_data2, label1, label2)
+            st.plotly_chart(fig)
+
+            # Valence Danceability Interaction
+            st.header("Valence Danceability Interaction")
+            st.text("Valence vs. Danceability Comparison")
+            fig = self.valence_danceability_interaction(track_data1, track_data2, label1, label2)
+            st.plotly_chart(fig)
+
+            # Energy Loudness Interaction
+            st.header("Energy Loudness Interaction")
+            st.text("Energy vs. Loudness Comparison")
+            fig = self.energy_loudness_interaction(track_data1, track_data2, label1, label2)
+            st.plotly_chart(fig)
+
+            # Acousticness Instrumentalness Interaction
+            st.header("Acousticness Instrumentalness Interaction")
+            st.text("Acousticness vs. Instrumentalness Comparison")
+            fig = self.acousticness_instrumentalness_interaction(track_data1, track_data2, label1, label2)
             st.plotly_chart(fig)
     
         else:
