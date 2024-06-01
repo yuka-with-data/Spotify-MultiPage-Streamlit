@@ -130,6 +130,60 @@ class SpotifyAnalyzer:
 
         return fig
     
+    def tempo_bar_chart(self, track_data1, track_data2, label1, label2) -> go.Figure:
+        # Extract tempo values from track data
+        tempo1 = track_data1.get('tempo', 0)
+        tempo2 = track_data2.get('tempo', 0)
+        
+        # Create a bar chart
+        fig = go.Figure(data=[
+            go.Bar(name=label1, x=["Tempo"], y=[tempo1], marker_color='rgba(89, 42, 154, 0.7)'),
+            go.Bar(name=label2, x=["Tempo"], y=[tempo2], marker_color='rgba(230, 97, 0, 0.7)')
+        ])
+        
+        fig.update_layout(
+            title='Tempo Comparison',
+            xaxis_title='Attribute',
+            yaxis_title='Tempo (BPM)',
+            barmode='group',
+            paper_bgcolor='WhiteSmoke',
+            template='plotly_white',
+            font={'color': "black"},
+            height=450,
+            width=700,
+            autosize=True
+        )
+        
+        return fig
+
+    
+    def loudness_bar_chart(self, track_data1, track_data2, label1, label2) -> go.Figure:
+        # Extract loudness values from track data
+        loudness1 = track_data1.get('loudness', 0)
+        loudness2 = track_data2.get('loudness', 0)
+        
+        # Create a bar chart
+        fig = go.Figure(data=[
+            go.Bar(name=label1, x=["Loudness"], y=[loudness1], marker_color='rgba(89, 42, 154, 0.7)'),
+            go.Bar(name=label2, x=["Loudness"], y=[loudness2], marker_color='rgba(230, 97, 0, 0.7)')
+        ])
+        
+        fig.update_layout(
+            title='Loudness Comparison',
+            xaxis_title='Attribute',
+            yaxis_title='Loudness (dB)',
+            barmode='group',
+            paper_bgcolor='WhiteSmoke',
+            template='plotly_white',
+            font={'color': "black"},
+            height=450,
+            width=700,
+            autosize=True
+        )
+        
+        return fig
+
+    
     def track_popularity_gauge_chart(self, track_data1, track_data2, label1, label2) -> go.Figure:
         # Extract popularity scores from track data
         popularity1 = track_data1.get('popularity', 0)
@@ -205,8 +259,20 @@ class SpotifyAnalyzer:
 
             # Key Distribution
             st.header("Key Distribution")
-            st.text("Distribution of Keys For Each Track")
+            st.text("Distribution of Keys Comparison")
             fig = self.key_distribution(track_data1, track_data2, label1, label2)
+            st.plotly_chart(fig)
+
+            # Tempo Bar Chart
+            st.header("Tempo Bar Chart")
+            st.text("Tempo Bar Chart Comparison")
+            fig = self.tempo_bar_chart(track_data1, track_data2, label1, label2)
+            st.plotly_chart(fig)
+
+            # Loudness Bar Chart
+            st.header("Loudness Bar Chart")
+            st.text("Loudness Bar Chart Comparison")
+            fig = self.loudness_bar_chart(track_data1, track_data2, label1, label2)
             st.plotly_chart(fig)
 
             # Track Popularity Gauge Chart
