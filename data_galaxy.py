@@ -497,6 +497,7 @@ def get_spotify_data(_sp, artist:str, track:str) -> Tuple[Optional[Dict[str, flo
         is_explicit = found_track.get('explicit', False)
         popularity = found_track.get('popularity', None)
         track_id = found_track['id']
+        album_release_date = found_track['album']['release_date']
 
         # Extract audio features data from the response
         list_att = ["danceability", 
@@ -517,7 +518,8 @@ def get_spotify_data(_sp, artist:str, track:str) -> Tuple[Optional[Dict[str, flo
                 "popularity": popularity,
                 "id": track_id,
                 'is_explicit': is_explicit,
-                'genres': ', '.join(genres) # Convert list of genres to a comma-seperated string
+                'genres': ', '.join(genres), # Convert list of genres to a comma-seperated string
+                'album_release_date': album_release_date 
                 })
 
         # Return 2 objects: extracted_attributes and access_token
