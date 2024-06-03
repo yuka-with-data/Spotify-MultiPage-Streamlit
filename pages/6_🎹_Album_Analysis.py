@@ -502,13 +502,28 @@ class AlbumAnalyzer:
         
         mean_popularity = calculate_popularity()
 
+        # Define the categorize_popularity function
+        def categorize_popularity(popularity_score):
+            if popularity_score >= 90:
+                return "Very Popular!"
+            elif 70 <= popularity_score < 90:
+                return "Popular!"
+            elif 50 <= popularity_score < 70:
+                return "Moderately Popular"
+            elif 30 <= popularity_score < 50:
+                return "Not Very Popular"
+            else:
+                return "Not Popular"
+        
+        popularity_category = categorize_popularity(mean_popularity)
+
         # Create a gauge chart
         fig = go.Figure()
         fig.add_trace(go.Indicator(
             mode="gauge+number",
             value=mean_popularity,
             domain={'x': [0, 1], 'y': [0, 1]},
-            title={'text': "The Current Popularity"},
+            #title={'text': "The Current Popularity"},
             gauge={
                 'axis': {'range': [0, 100], 'tickwidth':1, 'tickcolor': "darkblue"},
                 'bar': {'color': 'rgba(89, 42, 154, 1)'},
@@ -528,6 +543,16 @@ class AlbumAnalyzer:
             height=450,
             width=700,
             autosize=True
+        )
+
+        # Add a text annotation for the popularity category
+        fig.add_annotation(
+            text=popularity_category,
+            x=0.5,
+            y=0.45,
+            showarrow=False,
+            font=dict(size=20, color="black"),
+            align="center"
         )
 
         return fig
