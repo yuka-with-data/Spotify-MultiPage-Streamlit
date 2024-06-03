@@ -514,7 +514,7 @@ class SpotifyAnalyzer:
             self.display_song_genres(track_data1, track_data2, label1, label2)
 
             # Radar Chart
-            st.header("Radar Chart")
+            st.header("Attribute Radar Chart")
             st.text("Track Attribute Comparison (Mean Values)")
             fig = self.radar_chart(track_data1, track_data2, label1, label2)
             st.plotly_chart(fig, use_container_width=True)
@@ -526,7 +526,7 @@ class SpotifyAnalyzer:
             st.plotly_chart(fig, use_container_width=True)
 
             st.header("Mode Comparison Emoji")
-            st.text("Comparison of Modes")
+            st.text("Comparison of Modes (Major vs Minor)")
             self.mode_comparison_emojis(track_data1, track_data2, label1, label2)
 
             # Duration Bar Chart
