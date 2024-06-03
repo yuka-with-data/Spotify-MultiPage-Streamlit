@@ -38,6 +38,20 @@ class SpotifyAnalyzer:
             print(f"Error retrieving track data: {e}")
             return None, None
         
+    def display_song_genres(self, track_data1, track_data2, label1, label2):
+        for i, (track_data, label) in enumerate(zip([track_data1, track_data2], [label1, label2]), start=1):
+            st.subheader(f"Genres for {label}")
+            artist_genres = track_data['genres']
+            if not artist_genres:
+                st.warning("No genres found for this track.")
+            else:
+                # Split the genres string into individual genres
+                individual_genres = artist_genres.split(',')
+                # Create HTML for genres as badges with the specified background color
+                badges_html = "".join([f"<span style='background-color:rgba(26, 12, 135, 0.9); color:#ffffff; padding:5px; border-radius:5px; margin:2px; display:inline-block;'>{genre.strip()}</span>" for genre in individual_genres])
+                # Display the genres using HTML
+                st.write(f"<div style='display: flex; flex-wrap: wrap; gap: 10px;'>{badges_html}</div>", unsafe_allow_html=True)
+
 
     def radar_chart(self, track_data1, track_data2, label1, label2):
         attributes = ['danceability', 'valence', 'energy', 'acousticness', 'instrumentalness', 'liveness', 'speechiness']
@@ -146,6 +160,21 @@ class SpotifyAnalyzer:
         )
 
         return fig
+    
+    def mode_comparison_emojis(self, track_data1, track_data2, label1, label2):
+        mode1 = track_data1.get('mode', 0)
+        mode2 = track_data2.get('mode', 0)
+        
+        emoji_major = "😊" if mode1 == 1 else "🙁"
+        emoji_minor = "😊" if mode2 == 1 else "🙁"
+
+        st.write(f"### {label1}: ", emoji_major)
+        st.write(f"### {label2}: ", emoji_minor)
+
+        # Add legend
+        st.write("Legend:")
+        st.write("😊- Major mode  🙁- Minor mode")
+
     
     def duration_bar_chart(self, track_data1, track_data2, label1, label2) -> go.Figure:
         # Extract duration values in milliseconds from track data and convert to minutes
@@ -301,6 +330,23 @@ class SpotifyAnalyzer:
         )
 
         return fig
+    
+    def display_explicitness(self, track_data1, track_data2, label1, label2):
+        
+        # Define icons for explicit and non-explicit tracks
+        explicit_icon = "🔞"  # You can use any appropriate explicit icon
+        clean_icon = "🅲"      # You can use any appropriate clean icon
+        
+        # Determine explicitness for each track
+        explicitness1 = "Explicit" if track_data1['is_explicit'] else "Clean"
+        explicitness2 = "Explicit" if track_data2['is_explicit'] else "Clean"
+        
+        # Display explicitness using icons
+        st.write(f"### {label1}: {explicit_icon if explicitness1 == 'Explicit' else clean_icon}")
+        st.write(f"### {label2}: {explicit_icon if explicitness2 == 'Explicit' else clean_icon}")
+
+        st.write("Legend")
+        st.write("🔞: Explicit  🅲: Clean")
     
     def valence_danceability_interaction(self, track_data1, track_data2, label1, label2) -> go.Figure:
         # Extract values
@@ -463,60 +509,72 @@ class SpotifyAnalyzer:
             label1 = f"{artist1} - {track1}"
             label2 = f"{artist2} - {track2}"
 
+            st.header("Genres")
+            st.text("Comparison of Genres")
+            self.display_song_genres(track_data1, track_data2, label1, label2)
+
             # Radar Chart
             st.header("Radar Chart")
             st.text("Track Attribute Comparison (Mean Values)")
             fig = self.radar_chart(track_data1, track_data2, label1, label2)
-            st.plotly_chart(fig)
+            st.plotly_chart(fig, use_container_width=True)
 
             # Key Distribution
             st.header("Key Distribution")
             st.text("Distribution of Keys Comparison")
             fig = self.key_distribution(track_data1, track_data2, label1, label2)
-            st.plotly_chart(fig)
+            st.plotly_chart(fig, use_container_width=True)
+
+            st.header("Mode Comparison Emoji")
+            st.text("Comparison of Modes")
+            self.mode_comparison_emojis(track_data1, track_data2, label1, label2)
 
             # Duration Bar Chart
             st.header("Duration Bar Chart")
             st.text("Duration Bar Chart Comparison")
             fig = self.duration_bar_chart(track_data1, track_data2, label1, label2)
-            st.plotly_chart(fig)
+            st.plotly_chart(fig, use_container_width=True)
 
             # Tempo Bar Chart
             st.header("Tempo Bar Chart")
             st.text("Tempo Bar Chart Comparison")
             fig = self.tempo_bar_chart(track_data1, track_data2, label1, label2)
-            st.plotly_chart(fig)
+            st.plotly_chart(fig, use_container_width=True)
 
             # Loudness Bar Chart
             st.header("Loudness Bar Chart")
             st.text("Loudness Bar Chart Comparison")
             fig = self.loudness_bar_chart(track_data1, track_data2, label1, label2)
-            st.plotly_chart(fig)
+            st.plotly_chart(fig, use_container_width=True)
 
             # Track Popularity Gauge Chart
             st.header("Track Popularity Gauge Chart")
             st.text("Track Popularity Comparison")
             fig = self.track_popularity_gauge_chart(track_data1, track_data2, label1, label2)
-            st.plotly_chart(fig)
+            st.plotly_chart(fig, use_container_width=True)
+
+            st.header("Explicitness Status")
+            st.text("Comparison of Explicitness Status")
+            self.display_explicitness(track_data1, track_data2, label1, label2)
 
             # Valence Danceability Interaction
             st.header("Valence Danceability Interaction")
             st.text("Valence vs. Danceability Comparison")
             fig = self.valence_danceability_interaction(track_data1, track_data2, label1, label2)
-            st.plotly_chart(fig)
+            st.plotly_chart(fig, use_container_width=True)
 
             # Energy Loudness Interaction
             st.header("Energy Loudness Interaction")
             st.text("Energy vs. Loudness Comparison")
             fig = self.energy_loudness_interaction(track_data1, track_data2, label1, label2)
-            st.plotly_chart(fig)
+            st.plotly_chart(fig, use_container_width=True)
 
             # Acousticness Instrumentalness Interaction
             st.header("Acousticness Instrumentalness Interaction")
             st.text("Acousticness vs. Instrumentalness Comparison")
             fig = self.acousticness_instrumentalness_interaction(track_data1, track_data2, label1, label2)
-            st.plotly_chart(fig)
-    
+            st.plotly_chart(fig, use_container_width=True)
+
         else:
             st.error("Error retrieving track data for one or both tracks.")
        
