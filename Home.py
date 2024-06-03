@@ -14,6 +14,7 @@ with st.sidebar:
     st.markdown("""
     🌟 **Now Live:**
     - Artist Analysis
+    - Song-To-Song Comparison
                 
     🚧 **In Development:**
     - Genre Analysis
@@ -37,7 +38,8 @@ st.markdown(
     - **Album Analysis:** Examine entire albums to understand the collective mood and technical attributes. 
     - **Fine-Tuned Recommendation:** Harness advanced controls to tailer music recommendations to your specific preferences. 
     - **Artist Analysis:** Gain deep insights into an artist's discography, popularity, and musical style.
-
+    - **Song-to-Song Comparison:** Compare detailed attributes and popularity between two songs to uncover unique musical elements and trends.
+    
     ## How to Use
     Ready to uncover the secrets of the music industry through data?  
     **👈 Select an analysis from the sidebar** and let the journey begin!
