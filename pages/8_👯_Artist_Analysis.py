@@ -507,6 +507,22 @@ class SpotifyAnalyzer:
         )
 
         return fig
+    
+    def display_top_tracks(self):
+        # Reorder the track by popularity score
+        sorted_tracks = self.df_artist.sort_values(by='popularity', ascending=False)
+        
+        # Remove dupes
+        unique_tracks = sorted_tracks.drop_duplicates(subset='track_name', keep='first')
+        
+        # Select top 10
+        top_tracks = unique_tracks[['track_name', 'popularity']].head(10)
+
+        # Add ranking index 
+        top_tracks.index = range(1, len(top_tracks) + 1)
+        top_tracks.index.name = 'Rank'
+        
+        return st.table(top_tracks)
 
 
     def run_analysis(self) -> None:
@@ -589,6 +605,10 @@ class SpotifyAnalyzer:
             st.text("This gauge chart displays today's popularity score (the average of all track's popularity scores) of the artist.")
             fig = self.artist_popularity_gauge_chart()
             st.plotly_chart(fig, use_container_width=True)
+
+            st.header('Artist Top Tracks')
+            st.text("This table shows the top 10 tracks of the artist.")
+            self.display_top_tracks()
 
             st.subheader('Artist Presence in Billboard Top 100')
             st.text("This chart shows the presence of the artist in the Billboard Top 100 charts.")
