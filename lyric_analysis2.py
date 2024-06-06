@@ -44,6 +44,24 @@ class SentimentAnalysis:
         # Remove special tags like [VERSE], [CHORUS], etc.
         lyrics = re.sub(r'\[.*?\]', '', lyrics)
 
+        # Replace common informal contractions with formal equivalents
+        informal_contractions = {
+            "gonna": "going to",
+            "wanna": "want to",
+            "gotta": "got to",
+            "ain't": "is not",
+            "can't": "cannot",
+            "won't": "will not",
+            "n't": " not",
+            "'re": " are",
+            "'ve": " have",
+            "'ll": " will",
+            "'d": " would",
+            "'m": " am"
+        }
+        for contraction, replacement in informal_contractions.items():
+            lyrics = lyrics.replace(contraction, replacement)
+
         # Remove special characters 
         lyrics = re.sub(r'[^a-zA-Z0-9\s]', '', lyrics)
 
