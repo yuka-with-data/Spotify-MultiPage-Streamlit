@@ -2,6 +2,7 @@ import streamlit as st
 import re
 import nltk
 from nltk.corpus import stopwords
+from nltk.corpus import cmudict
 from collections import defaultdict
 from transformers import pipeline, AutoTokenizer
 import pandas as pd
@@ -14,7 +15,7 @@ st.set_page_config(page_title="Lyric Sentiment Analysis", page_icon="🖋️")
 # Download NLTK data files (you only need to do this once)
 nltk.download('stopwords')
 nltk.download('punkt')
-
+nltk.download('cmudict')
 
 class SentimentAnalysis:
     def __init__(self) -> None:
@@ -31,6 +32,7 @@ class SentimentAnalysis:
             'sadness': '😢',
             'surprise': '😲'
         }
+        self.cmu_dict = nltk.corpus.cmudict.dict()
 
     def preprocess_lyrics(self, lyrics):
         # Convert to lowercase
@@ -42,7 +44,7 @@ class SentimentAnalysis:
         # Remove special tags like [VERSE], [CHORUS], etc.
         lyrics = re.sub(r'\[.*?\]', '', lyrics)
 
-        # Remove special characters and numbers
+        # Remove special characters 
         lyrics = re.sub(r'[^a-zA-Z0-9\s]', '', lyrics)
 
         # Tokenize the lyrics
@@ -163,6 +165,52 @@ class SentimentAnalysis:
             emotions[emotion] /= total_score
 
         return dict(emotions)
+    
+    def visualize_rhymes(self, lyrics):
+        def phonetic_transcription(lyrics):
+            # Preprocess lyrics
+            cleaned_lyrics = self.preprocess_lyrics(lyrics)
+            words = cleaned_lyrics.split()
+
+            # Get phonetic transcriptions
+            phonetic_lyrics = []
+            for word in words:
+                if word in self.cmu_dict:
+                    phonetic_lyrics.append(self.cmu_dict[word][0])
+
+            return phonetic_lyrics
+
+        def analyze_rhymes(phonetic_lyrics):
+            # Analyze rhymes
+            rhymes = {}
+            for phoneme in phonetic_lyrics:
+                last_phoneme = phoneme[-1]
+                if last_phoneme in rhymes:
+                    rhymes[last_phoneme] += 1
+                else:
+                    rhymes[last_phoneme] = 1
+
+            return rhymes
+
+        # Get phonetic transcriptions
+        phonetic_lyrics = phonetic_transcription(lyrics)
+
+        # Analyze rhymes
+        rhymes = analyze_rhymes(phonetic_lyrics)
+
+        # Create DataFrame for visualization
+        rhymes_df = pd.DataFrame(list(rhymes.items()), columns=['Phoneme', 'Frequency'])
+        rhymes_df = rhymes_df.sort_values(by='Frequency', ascending=False).head(20)
+
+        # Plot
+        fig = px.bar(
+            rhymes_df,
+            x='Phoneme',
+            y='Frequency',
+            title='Top 20 Most Frequent Rhyme Phonemes',
+            labels={'Phoneme': 'Phoneme', 'Frequency': 'Frequency'}
+        )
+        return fig
 
     # Run All Analysis
     def run_analysis(self, lyrics):
@@ -185,6 +233,9 @@ class SentimentAnalysis:
             emoji = sa.emotion_to_emoji.get(emotion, '🤷')
             st.write(f"### {emoji} {emotion.capitalize()}: {score:.2f}")
             
+        st.header("Rhyme Analysis")
+        fig = sa.visualize_rhymes(lyrics)
+        st.plotly_chart(fig)
 
 # Main Section
 if "lyrics_input" not in st.session_state:
