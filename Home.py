@@ -59,7 +59,5 @@ st.markdown(
 """
 )
 
-st.image('images/dataGalax.png', use_column_width=True, caption="Explore the rhythm of data.")
-
 st.divider()
 st.caption("🛑Disclaimer: This application is designed for educational and entertainment purposes only. The data used in this app is sourced from public APIs and may not be entirely accurate or up-to-date. Embedded Spotify players are used under the terms of Spotify's embedding policies to enhance user experience by providing direct access to playlists and tracks. The analysis and visualizations provided should not be considered professional advice, and the creators of this app are not responsible for any decisions made based on the information provided. Please note that this app is not affiliated with Spotify or any other third-party services. Use this app responsibly and be aware of the terms and conditions of the Spotify API and the implications of embedded content. Enjoy exploring the data responsibly!")
