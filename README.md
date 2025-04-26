@@ -1,4 +1,6 @@
-# rhythmGalax: A Spotify Data Exploration App
+# [Deprecated] rhythmGalax: A Spotify Data Exploration App
+
+Note: This project is deprecated due to changes in the behavior of the Spotify Web API.
 
 Welcome to rhythmGalax, a cutting-edge application designed to bring Spotify's music data to life through comprehensive analysis and insightful visualizations. Powered by Streamlit, this app caters to music enthusiasts, industry analysts, and data scientists by providing a dynamic platform to explore the musical qualities that define today's hits and trends.
 
