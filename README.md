@@ -52,7 +52,7 @@ rhythmGalax is developed by yuka_with_data, a music data lover. The goal is to m
 
 ## Contact
 
-Have questions, report bugs or want to collaborate? Send a message at [Bluesky](mailto:your_email@example.com).
+Have questions, report bugs or want to collaborate? Send a message at
 
 ## Acknowledgments
 
