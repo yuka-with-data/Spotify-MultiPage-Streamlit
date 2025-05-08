@@ -1,11 +1,11 @@
 import streamlit as st
 
 st.set_page_config(
-    page_title="rhythmGalax",
+    page_title="Music Data Analysis App",
     page_icon="👋",
 )
 
-st.write("# Welcome to rhythmGalax! 👋")
+st.write("# Welcome to Music Data Analysis App 👋")
 
 with st.sidebar:
     st.success("☝️Select an analysis from the sidebar to begin exploring music data.")
@@ -24,7 +24,7 @@ with st.sidebar:
 
 st.markdown(
     """
-    Welcome to **rhythmGalax**, your go-to app for exploring and analyzing music data! 
+    Music Data Analysis App, your go-to app for exploring and analyzing music data 
     Dive into the world of music through data-driven insights and interactive visualizations. 
     Whether you're a music enthusiast or a data analyst, this app offers a variety of analyses tailored to uncover the data stories behind the songs, artists, and trends shaping the music world. 
     Enhance your experience by listening to your chosen tracks or albums directly within the app, as you explore the rich data each piece of music holds.
