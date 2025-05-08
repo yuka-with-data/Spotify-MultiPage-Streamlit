@@ -42,14 +42,5 @@ To explore this app, simply visit the app. Choose an analysis from the sidebar m
 
 Our app does not log personal information or user activity. All analyses are conducted in real-time using publicly available Spotify data.
 
-## Work in Progress: Soothing Music Chatbot
-
-We are thrilled to announce our upcoming project — a Soothing Music Chatbot designed to elevate your music experience to a whole new level of relaxation and personalization. 
-
-## Acknowledgments
-
-- Streamlit, for providing the framework that powers our app.
-- The Spotify Web API, for the rich dataset that fuels our analyses.
-
 ## Disclaimer
 This application is designed for educational and entertainment purposes only. The data used in this app is sourced from public APIs and may not be entirely accurate or up-to-date. Embedded Spotify players are used under the terms of Spotify's embedding policies to enhance user experience by providing direct access to playlists and tracks. The analysis and visualizations provided should not be considered professional advice, and the creators of this app are not responsible for any decisions made based on the information provided. Please note that this app is not affiliated with Spotify or any other third-party services. Use this app responsibly and be aware of the terms and conditions of the Spotify API and the implications of embedded content. Enjoy exploring the data responsibly!
