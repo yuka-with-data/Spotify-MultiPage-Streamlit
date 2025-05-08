@@ -4,6 +4,12 @@ Note: This project is deprecated due to changes in the behavior of the Spotify W
 
 Welcome to Music Data Analysis App, a cutting-edge application designed to bring Spotify's music data to life through comprehensive analysis and insightful visualizations. Powered by Streamlit, this app caters to music enthusiasts, industry analysts, and data scientists by providing a dynamic platform to explore the musical qualities that define today's hits and trends.
 
+
+## Motivation
+Originally inspired by the discovery of talented musicians from non-English-speaking regions, this Spotify app began as an exploration into the potential of these artists to break into global mainstream music charts. My initial project analyzed how well the musical attributes of these artists matched up with the top 50 most streamed songs on Spotify in 2023, aiming to uncover whether these artists could resonate globally given their alignment with current music trends.
+
+From this foundational work, the project has expanded into a multi-page application that offers comprehensive musical analysis. This platform not only tells the evolving data stories of the music scene but also dissects these analyses from various angles. As users engage with the data, they can enjoy listening to the music through an embedded player, enhancing the interactive experience. This expansion aims to deepen the understanding of music trends, celebrate diverse musical talents, and provide rich, actionable insights for music enthusiasts.
+
 ## Features
 
 This Music Data Analysis App comprises five key analysis pages, each offering a unique perspective on Spotify's vast musical landscape:
