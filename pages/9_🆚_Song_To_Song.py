@@ -22,7 +22,7 @@ from typing import Optional, Dict, Tuple, List, Union
 st.set_page_config(page_title="Song-To-Song Comparison", 
                    page_icon="🆚")
 
-from data_galaxy import init_spotify_client, get_spotify_data
+from data_retriever import init_spotify_client, get_spotify_data
 
 # Class
 class SpotifyAnalyzer:

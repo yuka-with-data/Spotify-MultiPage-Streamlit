@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 # Import data_galaxy after Page Config
-from data_galaxy import init_spotify_client
+from data_retriever import init_spotify_client
 
 class TrackRecommendation:
     def __init__(self, sp) -> None:

@@ -13,7 +13,7 @@ st.set_page_config(page_title="Popularity Check",
                    page_icon="🎙️")
 
 # Import data_galaxy after Page Config
-from data_galaxy import init_spotify_client
+from data_retriever import init_spotify_client
 
 class PopularityScore():
     def __init__(self, sp) -> None:

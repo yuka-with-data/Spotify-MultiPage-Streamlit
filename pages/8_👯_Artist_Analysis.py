@@ -20,7 +20,7 @@ st.set_page_config(page_title="Artist Analysis",
                    page_icon="✨")
 
 # Import data_galaxy after Page Config
-from data_galaxy import init_spotify_client, fetch_artist_tracks, retrieve_playlist_data
+from data_retriever import init_spotify_client, fetch_artist_tracks, retrieve_playlist_data
 
 class SpotifyAnalyzer:
     def __init__(self, sp, artist_id: str) -> None:
